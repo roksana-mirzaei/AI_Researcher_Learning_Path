@@ -67,3 +67,8 @@ In short: this is practice for becoming an AI researcher by reproducing and unde
 3. Continue to PyTorch sections for training and inference.
 4. Use the translation section to test EN -> FA examples.
 5. Use the decoder-only section to test next-token generation.
+
+# useful links to learn transaformers:
+https://nlp.seas.harvard.edu/annotated-transformer/
+
+https://cme295.stanford.edu/syllabus/
