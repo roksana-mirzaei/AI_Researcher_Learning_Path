@@ -4,6 +4,8 @@ This repository is my personal lab for becoming an AI researcher through deep, h
 
 Instead of only reading papers, I study by rebuilding their core ideas from scratch, testing them, and writing clear notes about what I learned.
 
+This reposirory is simply exist for learning purpose and to track my learning progress  and keep my notes up to date.
+
 The goal is simple:
 
 - Understand foundational papers at a technical level.
