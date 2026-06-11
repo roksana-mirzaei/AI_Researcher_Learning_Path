@@ -91,3 +91,7 @@ Why this 80/10/10 trick matters:
 - Special tokens: `[CLS]`, `[SEP]`
 - Fine-tune end-to-end with small task head
 - BASE vs LARGE sizes (110M vs 340M params)
+
+# sources to help me understand the implementation of BERT: 
+
+https://www.youtube.com/watch?v=ALrG7VCF8Gc&list=PLqL-7eLmqd9V3faivSAST76YQClS44dSz&index=12

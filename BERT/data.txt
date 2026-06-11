@@ -1,0 +1,15 @@
+Artificial intelligence is a branch of computer science that studies how machines can perform tasks that usually require human intelligence. These tasks include recognizing patterns, understanding language, making predictions, and solving problems.
+
+Machine learning is a major area within artificial intelligence. In machine learning, a system improves its performance by learning from data rather than following only fixed rules. A model is trained on examples and then used to make decisions on new inputs.
+
+Natural language processing focuses on how computers work with human language. It includes tasks such as text classification, translation, summarization, question answering, and named entity recognition. Modern language models often rely on transformer architectures.
+
+The transformer became important because it replaced recurrence with attention mechanisms. Attention allows a model to compare words in a sentence directly, even when they are far apart. This made training more parallel and more effective on many language tasks.
+
+BERT is an encoder-based transformer model introduced by Google in 2018. It was designed to learn bidirectional representations by looking at both the left and right context of a word. During pretraining, BERT uses masked language modeling and next sentence prediction.
+
+Wikipedia is often used as a training source because it covers many topics in a structured style. Articles usually define a subject, describe its history, explain key concepts, and provide related examples. This makes encyclopedic text useful for language modeling experiments.
+
+Deep learning models usually need tokenized text before training begins. A tokenizer splits text into smaller units such as words, subwords, or characters. The resulting tokens are converted into numerical ids that can be processed by neural networks.
+
+A small dataset will not produce a powerful model, but it is enough to test whether a training pipeline works correctly. For learning purposes, a short corpus is useful because it trains quickly and makes debugging easier.
