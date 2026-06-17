@@ -2,7 +2,7 @@
 
 Paper: [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/pdf/1810.04805)
 
-## 1) What BERT is
+## What BERT is
 
 - BERT = **Bidirectional Encoder Representations from Transformers**.
 - Main idea: learn deep **bidirectional** language representations by pretraining a Transformer encoder, then fine-tune for downstream tasks.
@@ -10,19 +10,19 @@ Paper: [BERT: Pre-training of Deep Bidirectional Transformers for Language Under
 
 ![BERT overview](Bert.png)
 
-## 2) Why BERT was important
+## Why BERT was important
 
 - Before BERT, many methods were unidirectional (eitehr left-to-right or right-to-left) or shallowly bidirectional(like ElMO which train once left-to-right and once right-to-left and then concatenates the representations).
 
 
-## 3) Core architecture
+## Core architecture
 
 - Uses only the **Transformer encoder** stack (no decoder).
 - Two main sizes from the paper:
   - **BERT_BASE**: 12 layers, hidden size 768, 12 heads, ~110M params.
   - **BERT_LARGE**: 24 layers, hidden size 1024, 16 heads, ~340M params.
 
-## 4) Input representation (very important)
+## Input representation (very important)
 
 For each token, input embedding =
 
@@ -41,7 +41,7 @@ Example sentence pair format:
 
 ![Input Representations](Input_representation.png)
 
-## 5) Pretraining tasks
+## Pretraining tasks
 
 ### A) Masked Language Modeling (MLM)
 
@@ -62,27 +62,13 @@ Why this 80/10/10 trick matters:
   - **NotNext** (50%): B is a random sentence.
 - Helps tasks that need sentence-pair reasoning (e.g., QA, NLI).
 
-## 6) Pretraining data
-
-- **BooksCorpus** (~800M words)
-- **English Wikipedia** (~2,500M words)
-- Important: use document-level text so model can learn inter-sentence relationships.
-
-
-## 8) Key results to remember
-
-- BERT achieved new SOTA on benchmarks at publication time, including:
-  - GLUE
-  - MultiNLI
-  - SQuAD v1.1 and v2.0
-
-## 9) Limitations / caveats
+## Limitations / caveats
 
 - Encoder-only: great for understanding tasks, not directly autoregressive text generation.
 - Full self-attention has $O(n^2)$ memory/time with sequence length.
 - Original BERT max sequence length is 512 tokens.
 
-## 10) Fast recall checklist
+## Fast recall checklist
 
 - Bidirectional encoder pretraining
 - Two objectives: MLM + NSP
