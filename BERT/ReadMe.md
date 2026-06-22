@@ -1,6 +1,9 @@
 # BERT Quick Summary (Reminder Notes)
 
 Paper: [BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding](https://arxiv.org/pdf/1810.04805)
+Why it matters: Established the pre-train-then-fine-tune paradigm and bidirectional context modelling that shaped an entire generation of NLP.
+
+Gtihub page: https://github.com/google-research/bert
 
 ## What BERT is
 

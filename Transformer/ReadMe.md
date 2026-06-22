@@ -7,6 +7,10 @@ This notebook is my hands-on study project for understanding the Transformer pap
 
 - Attention Is All You Need (Vaswani et al., 2017): https://arxiv.org/abs/1706.03762
 
+Why it matters: The paper that launched the transformer era. Every modern LLM, vision model, and multimodal system traces its lineage here.
+
+Huggingface implementation of Transformer Github Link: https://github.com/huggingface/transformers
+
 ## Transformer Architecture
 
 ![Transformer Architecture](architecture.png)
