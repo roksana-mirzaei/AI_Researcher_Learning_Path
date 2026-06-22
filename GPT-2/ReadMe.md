@@ -132,3 +132,28 @@ BERT always needs labeled data per task. GPT-1 also needs labeled data but less 
 | LayerNorm | Post-LN | Post-LN | **Pre-LN ← key** |
 | Training objective | Masked LM + NSP | Causal LM | Causal LM |
 | Vocab size | 30,000 (WordPiece) | 40,478 (BPE) | 50,257 (BPE) |
+
+
+# GPT series cmparison
+
+| Model   | Release | Architecture                                | Parameters (Public) | Major Innovations                                                           | Advantages                                                        | Limitations                                                              |
+| ------- | ------- | ------------------------------------------- | ------------------- | --------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| GPT-1   | 2018    | Decoder-only Transformer (12 layers)        | 117M                | Unsupervised pretraining + supervised fine-tuning                           | First successful transfer learning for NLP                        | Small knowledge base, weak reasoning, task-specific fine-tuning required |
+| GPT-2   | 2019    | Larger decoder-only Transformer             | 1.5B                | Scaling laws begin to emerge, zero-shot learning                            | Human-like text generation, no fine-tuning needed for some tasks  | Hallucinations, poor instruction following                               |
+| GPT-3   | 2020    | Very large Transformer                      | 175B                | In-context learning, few-shot prompting                                     | Emergent capabilities, prompt-based task adaptation               | Expensive, inconsistent reasoning, hallucinations                        |
+| GPT-3.5 | 2022    | GPT-3 + RLHF alignment                      | Not disclosed       | Reinforcement Learning from Human Feedback (RLHF)                           | ChatGPT, conversational interaction, better instruction following | Still struggles with complex reasoning                                   |
+| GPT-4   | 2023    | Advanced Transformer (details undisclosed)  | Not disclosed       | Multimodal (text + image), improved reasoning                               | Better coding, stronger reasoning, safer responses                | Expensive, slower, still hallucinates                                    |
+| GPT-4o  | 2024    | Unified multimodal architecture             | Not disclosed       | Native text, image, audio, video processing                                 | Real-time voice conversations, lower latency                      | Reasoning weaker than specialized reasoning models                       |
+| GPT-4.1 | 2025    | Optimized GPT-4 family                      | Not disclosed       | Long-context improvements, stronger coding                                  | Better software engineering, larger context windows               | Not a major reasoning leap                                               |
+| GPT-5   | 2025    | Unified reasoning + agent architecture      | Not disclosed       | Integrated planning, tool use, improved reasoning                           | Better agents, stronger multi-step tasks                          | More compute-intensive                                                   |
+| GPT-5.5 | 2026    | Advanced reasoning and agentic architecture | Not disclosed       | Long-horizon reasoning, autonomous tool usage, improved memory and planning | Strongest coding, research, analysis, and agent workflows         | Higher computational cost; frontier-model limitations still exist        |
+
+
+# Useful links:
+library to extract articles: https://github.com/codelucas/newspaper
+
+https://medium.com/@vipul.koti333/from-theory-to-code-step-by-step-implementation-and-code-breakdown-of-gpt-2-model-7bde8d5cecda
+
+
+https://lchenghui.com/llm-from-scratch
+
