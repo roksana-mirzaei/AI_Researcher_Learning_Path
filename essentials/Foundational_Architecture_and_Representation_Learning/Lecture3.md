@@ -187,11 +187,4 @@ Instead of a separate draft model, additional prediction heads are attached so t
 	- https://arxiv.org/abs/2406.09079
 9. Longformer: The Long-Document Transformer (sliding-window + global attention): https://arxiv.org/abs/2004.05150
 10. Big Bird: Transformers for Longer Sequences (sparse/local-global patterns): https://arxiv.org/abs/2007.14062
-
-## Suggested Study Checklist
-
-1. Write pseudocode for top-$P$ sampling and compare with top-$K$.
-2. Derive temperature limits ($T \to 0^+$ and $T \to \infty$) from softmax.
-3. Sketch MoE routing with top-1 and top-2 experts on one toy sentence.
-4. Compute KV cache size for MHA vs GQA under the same model width.
-5. Summarize when to choose greedy, beam, or sampling for product scenarios.
+=
