@@ -26,12 +26,30 @@ For each paper, I follow a repeatable workflow:
 
 ## Repository Structure
 
-```text
+Each thematic folder (essentials, foundation, high, etc.) contains a ReadMe that lists all papers, with subfolders for each paper implementation:
+
+```
+essentials/
+├── ReadMe.md                      # Lists all papers in this category
+├── Foundational_Architecture_and_Representation_Learning/
+│   ├── ReadMe.md                  # Category overview
+│   ├── Transformer/
+│   │   ├── ReadMe.md              # Your notes on the paper
+│   │   └── transformers_from_scratch.ipynb
+│   ├── BERT/
+│   │   ├── ReadMe.md              # Your notes on the paper
+│   │   └── bert_from_scratch.ipynb
+│   └── ...
+├── Large_Language_Models_and_Emergent_Capabilities/
+│   ├── ReadMe.md
+│   └── [paper subfolders with notes + implementation]
+└── ...
+
+foundation/
 ├── ReadMe.md
-└── Name of the paper/
-		├── requirenment.txt
-		├── transformers_from_scratch.ipynb
-        └── ReadMe.md 
+├── Reinforcement_Learning_and_Decision_Making/
+│   └── [paper subfolders with notes + implementation]
+└── ...
 ```
 
 ## Progress Mindset
