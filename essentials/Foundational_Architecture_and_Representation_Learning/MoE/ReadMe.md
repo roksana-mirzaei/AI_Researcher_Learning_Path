@@ -77,7 +77,7 @@ Instead of routing every token through one large feed-forward network (FFN), the
 
 - However, specialization can result in sensitivity to noise and reduced generalization to unseen tasks if not properly regularized.
 
-Limitations Noted
+**Limitations Noted**
 
 - FLAN-MOE models fine-tuned primarily on English instructions underperform on multilingual benchmarks, suggesting over-optimization to English.
 
