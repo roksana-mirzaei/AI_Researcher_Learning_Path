@@ -51,4 +51,13 @@ For each paper below, I added detailed explanations and working implementations 
 9. **[Mixture of Experts Meets Instruction Tuning (MoE)](https://arxiv.org/abs/2305.14819)**
    - Shen et al. (2023) — arXiv
    - Why it matters: Sparse expert routing allows models to scale parameters without proportional compute cost—the architecture behind many frontier models.
+
+---
+
+## Extra Learning Material
+
+- **[Stanford CME295: Natural Language Understanding with Deep Learning](https://cme295.stanford.edu/syllabus/)** — Comprehensive course on deep learning for NLP, covering transformer architectures and modern techniques in detail.
  
+
+
+
