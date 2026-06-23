@@ -1,10 +1,19 @@
 # AI Researcher Learning Path
 
-This repository is my personal learning progress for becoming an AI researcher through deep, hands-on practice.
+This repository is my personal learning progress for becoming an AI researcher through deep, hands-on practice. This is a framework for building deep understanding across key AI papers.
 
 Alongside reading papers, I study by breaking down into smaller pieces, and rebuilding their core ideas from scratch, testing them, and writing clear notes about what I learned. 
 
 Over time, this repository should become a structured knowledge base of key AI ideas and working implementations.
+
+## which papers I am going to study
+the papers i will study in this repository are organised into several categories, that together cover the full landscape of modern AI research:
+- **Foundations:** This will focus more aruound the archotecture and represenattions of the LLMs themself
+- **Capabilities:** Around Reasoning, alignment, and multimodal perception. The frontiers of what models can do.
+- **Generation and Action:**  Generative models, agents and knowledge systems. Where models produce and interact.
+- **Unverstanding and Verification:** Interpretability and RL. How we understand and improve what models learn.
+- **Practice:** Efficiency, science applications, evaluations and data. The engineering and scientific substrace.
+- **Context:** Embodied AI and Social Impact. The physical and ethical dimentions.
 
 ## How I Study Each Paper
 

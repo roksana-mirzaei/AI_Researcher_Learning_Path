@@ -224,3 +224,4 @@ __marimo__/
 # Model checkpoints
 checkpoints/
 *.pt
+*.idea

@@ -7,6 +7,11 @@ github: https://github.com/openai/gpt-2
 
 **Why it matters:** The paper demonstrated that scale plus next-token prediction yields emergent generalist capabilities without task-specific training.
 
+# TL:DR
+two things about this paper stands out
+1. they trained a very large diverse dataset across many domains
+2. they moved LauyerNorm before attention and FFN to avoid vanishing / explodaing diagram problem
+
 
 ## What is the Key Idea of this paper?
 
