@@ -82,3 +82,11 @@ Instead of routing every token through one large feed-forward network (FFN), the
 - FLAN-MOE models fine-tuned primarily on English instructions underperform on multilingual benchmarks, suggesting over-optimization to English.
 
 - Incorporating diverse linguistic data may be needed for improved multilingual capability.
+
+
+
+# extra resources that helped me:
+https://cameronrwolfe.substack.com/p/nano-moe
+
+
+https://huggingface.co/blog/moe
