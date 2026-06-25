@@ -225,3 +225,5 @@ __marimo__/
 checkpoints/
 *.pt
 *.idea
+
+*data/
