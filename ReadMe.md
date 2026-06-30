@@ -1,59 +1,58 @@
 # AI Researcher Learning Path
 
-This repository is my personal learning progress for becoming an AI researcher through deep, hands-on practice. This is a framework for building deep understanding across key AI papers.
+![Implemented Papers](https://img.shields.io/badge/Implemented_Papers-5-blue)
+![Notebooks](https://img.shields.io/badge/Notebooks-5-success)
+![Last Updated](https://img.shields.io/badge/Last_Updated-2026--06--30-orange)
 
-Alongside reading papers, I study by breaking down into smaller pieces, and rebuilding their core ideas from scratch, testing them, and writing clear notes about what I learned. 
+This repository is my personal learning journey to become a stronger AI researcher.
 
-Over time, this repository should become a structured knowledge base of key AI ideas and working implementations.
+I use it to study important AI papers, build the core ideas from scratch, and keep notes on what I learn along the way.
 
-## which papers I am going to study
-the papers i will study in this repository are organised into several categories, that together cover the full landscape of modern AI research:
-- **Foundations:** This will focus more aruound the archotecture and represenattions of the LLMs themself
-- **Capabilities:** Around Reasoning, alignment, and multimodal perception. The frontiers of what models can do.
-- **Generation and Action:**  Generative models, agents and knowledge systems. Where models produce and interact.
-- **Unverstanding and Verification:** Interpretability and RL. How we understand and improve what models learn.
-- **Practice:** Efficiency, science applications, evaluations and data. The engineering and scientific substrace.
-- **Context:** Embodied AI and Social Impact. The physical and ethical dimentions.
+## Table of Contents
 
-## How I Study Each Paper
+- [Learning Tracks](#learning-tracks)
+- [Paper Progress and Metadata](#paper-progress-and-metadata)
+- [Repository Layout](#repository-layout)
 
-For each paper, I follow a repeatable workflow:
+## Learning Tracks
 
-- Read the paper and identify the core contribution.
-- Break the method into small building blocks.
-- Implement each building block from scratch.
-- Write notes on what worked, what was confusing, and what I learned.
+The repository is organized into progressive tracks and domain themes:
 
-## Repository Structure
+- **Essentials:** Core concepts required to reason about modern AI systems.
+- **Foundation:** Fundamental methods for decision-making and learning dynamics.
+- **High:** Advanced topics for production-scale and frontier research.
+- **Recommended:** Adjacent domains that broaden research perspective.
 
-Each thematic folder (essentials, foundation, high, etc.) contains a ReadMe that lists all papers, with subfolders for each paper implementation:
+## Paper Progress and Metadata
 
-```
-essentials/
-├── ReadMe.md                      # Lists all papers in this category
-├── Foundational_Architecture_and_Representation_Learning/
-│   ├── ReadMe.md                  # Category overview
-│   ├── Transformer/
-│   │   ├── ReadMe.md              # Your notes on the paper
-│   │   └── transformers_from_scratch.ipynb
-│   ├── BERT/
-│   │   ├── ReadMe.md              # Your notes on the paper
-│   │   └── bert_from_scratch.ipynb
-│   └── ...
-├── Large_Language_Models_and_Emergent_Capabilities/
-│   ├── ReadMe.md
-│   └── [paper subfolders with notes + implementation]
-└── ...
+| Paper | Year | Venue | Type | Difficulty | Status | Notes | Implementation Link |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Attention Is All You Need | 2017 | NeurIPS | NLP | Intermediate | Done | Transformer from-scratch implementation notebook available. | [Transformer notebook](essentials/Foundational_Architecture_and_Representation_Learning/Transformer/transformers_from_scratch.ipynb) |
+| BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding | 2019 | NAACL | NLP | Intermediate | Done | BERT implementation notebook available. | [BERT notebook](essentials/Foundational_Architecture_and_Representation_Learning/BERT/bert_from_sractch.ipynb) |
+| Language Models are Unsupervised Multitask Learners (GPT-2) | 2019 | OpenAI Technical Report | NLP | Intermediate | Done | GPT-2 experiment notebook available. | [GPT-2 notebook](essentials/Foundational_Architecture_and_Representation_Learning/GPT-2/gpt-2-experiment.ipynb) |
+| Deep Residual Learning for Image Recognition (ResNet) | 2016 | CVPR | CV | Intermediate | Done | ResNet from-scratch notebook available. | [ResNet notebook](essentials/Foundational_Architecture_and_Representation_Learning/ResNet/ResNet_from_scratch.ipynb) |
+| Mixture of Experts Meets Instruction Tuning | 2023 | arXiv | Systems | Advanced | Done | MoE implementation notebook available. | [MoE notebook](essentials/Foundational_Architecture_and_Representation_Learning/MoE/implement_MoE_from_scratch.ipynb) |
 
-foundation/
+
+## Repository Layout
+
+```text
+AI_Researcher_Learning_Path/
 ├── ReadMe.md
-├── Reinforcement_Learning_and_Decision_Making/
-│   └── [paper subfolders with notes + implementation]
-└── ...
+├── essentials/
+│   ├── ReadMe.md
+│   └── Foundational_Architecture_and_Representation_Learning/
+│       ├── ReadMe.md
+│       ├── Transformer/
+│       ├── BERT/
+│       ├── GPT-2/
+│       ├── ResNet/
+│       └── MoE/
+├── foundation/
+│   ├── ReadMe.md
+│   └── Reinforcement_Learning_and_Decision_Making/
+├── high/
+│   └── ReadMe.md
+└── recommended/
+    └── ReadMe.md
 ```
-
-## Progress Mindset
-
-This repository is a living document of learning, not a finished product.
-Messy experiments, failed runs, and rewritten code are part of the process.
-The priority is depth of understanding over speed.
