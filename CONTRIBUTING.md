@@ -3,8 +3,7 @@
 Thanks for taking an interest in the AI Researcher Learning Path! This repo
 tracks my progress working through core AI/ML papers from scratch
 with my mentor — from Transformers and BERT up through diffusion, RLHF, and
-retrieval systems. It's primarily a personal study log, but if you're my
-mentor, a fellow learner, or just poking around, this doc is for you.
+retrieval systems. It's primarily a personal study log, but if you're a fellow learner this doc is for you.
 
 ## Setup
 

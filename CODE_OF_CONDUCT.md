@@ -1,7 +1,7 @@
 # Code of Conduct
 
-This project is a learning space. Everyone interacting here — through issues,
-discussions, or any other contribution — is expected to help keep it that way.
+This project is a learning space. Everyone interacting here is expected to
+help keep it respectful and welcoming.
 
 ## Expected Behavior
 
@@ -15,12 +15,23 @@ discussions, or any other contribution — is expected to help keep it that way.
 - Personal or political attacks unrelated to the project.
 - Publishing others' private information without consent.
 
-## Enforcement
+## Scope
+
+This Code of Conduct applies to all project spaces — issues, pull requests,
+discussions, and commit history — and to anyone participating in them,
+including maintainers.
+
+## Consequences
 
 Maintainers may remove, edit, or reject contributions that don't align with
 this Code of Conduct, and may block anyone whose behavior is inappropriate,
 threatening, or harmful.
 
+## Reporting
+
+If you experience or witness unacceptable behavior, report it by contacting
+the maintainer directly via GitHub ([@roksana-mirzaei](https://github.com/roksana-mirzaei)).
+
 ## Attribution
 
-Adapted from the [Contributor Covenant](https://www.contributor-covenant.org/version/1/4/code-of-conduct.html), version 1.4.
+Adapted using guidance from the [Open Source Guide to Codes of Conduct](https://opensource.guide/code-of-conduct/).
