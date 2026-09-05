@@ -20,7 +20,7 @@ Huggingface implementation of Transformer Github Link: https://github.com/huggin
 
 - transformers_from_scratch.ipynb: Main notebook for study, implementation, and experiments.
 - architecture.png: Transformer architecture visual used in this README.
-- requirenment.txt: Python package list for this folder.
+- requirements.txt: Python package list for this folder.
 
 
 # useful links to learn transaformers:

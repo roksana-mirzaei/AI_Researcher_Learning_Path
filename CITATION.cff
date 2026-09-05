@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you find this repository useful, please cite it as below."
+title: "AI Researcher Learning Path"
+type: software
+authors:
+  - family-names: Mirzaei
+    given-names: Roksana
+    email: roksanamirzaei1999@gmail.com
+repository-code: "https://github.com/roksana-mirzaei/AI_Researcher_Learning_Path"
+license: MIT
+date-released: 2026-09-05

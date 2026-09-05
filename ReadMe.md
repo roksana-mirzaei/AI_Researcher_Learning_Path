@@ -3,6 +3,7 @@
 ![Implemented Papers](https://img.shields.io/badge/Implemented_Papers-6-blue)
 ![Notebooks](https://img.shields.io/badge/Notebooks-6-success)
 ![Last Updated](https://img.shields.io/badge/Last_Updated-2026--07--03-orange)
+![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
 This repository is my personal learning journey to become a stronger AI researcher.
 
@@ -10,9 +11,31 @@ I use it to study important AI papers, build the core ideas from scratch, and ke
 
 ## Table of Contents
 
+- [How to Run](#how-to-run)
 - [Learning Tracks](#learning-tracks)
 - [Paper Progress and Metadata](#paper-progress-and-metadata)
 - [Repository Layout](#repository-layout)
+- [Contributing](#contributing)
+- [License](#license)
+
+## How to Run
+
+Requires Python 3.12 (see `.python-version`).
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+jupyter notebook
+```
+
+This installs the dependencies needed across all notebooks in the repo. If you
+only want to run a single paper's notebook, use the `requirements.txt` inside
+that paper's own folder instead (e.g.
+`essentials/Foundational_Architecture_and_Representation_Learning/Transformer/requirements.txt`).
+
+Datasets used by the CV notebooks (e.g. CIFAR-10) are downloaded by the
+notebooks themselves on first run and are not committed to the repo.
 
 ## Learning Tracks
 
@@ -28,7 +51,7 @@ The repository is organized into progressive tracks and domain themes:
 | Paper | Year | Venue | Type | Difficulty | Status | Notes | Implementation Link |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Attention Is All You Need | 2017 | NeurIPS | NLP | Intermediate | Done | Transformer from-scratch implementation notebook available. | [Transformer notebook](essentials/Foundational_Architecture_and_Representation_Learning/Transformer/transformers_from_scratch.ipynb) |
-| BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding | 2019 | NAACL | NLP | Intermediate | Done | BERT implementation notebook available. | [BERT notebook](essentials/Foundational_Architecture_and_Representation_Learning/BERT/bert_from_sractch.ipynb) |
+| BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding | 2019 | NAACL | NLP | Intermediate | Done | BERT implementation notebook available. | [BERT notebook](essentials/Foundational_Architecture_and_Representation_Learning/BERT/bert_from_scratch.ipynb) |
 | Language Models are Unsupervised Multitask Learners (GPT-2) | 2019 | OpenAI Technical Report | NLP | Intermediate | Done | GPT-2 experiment notebook available. | [GPT-2 notebook](essentials/Foundational_Architecture_and_Representation_Learning/GPT-2/gpt-2-experiment.ipynb) |
 | Deep Residual Learning for Image Recognition (ResNet) | 2016 | CVPR | CV | Intermediate | Done | ResNet from-scratch notebook available. | [ResNet notebook](essentials/Foundational_Architecture_and_Representation_Learning/ResNet/ResNet_from_scratch.ipynb) |
 | Mixture of Experts Meets Instruction Tuning | 2023 | arXiv | Systems | Advanced | Done | MoE implementation notebook available. | [MoE notebook](essentials/Foundational_Architecture_and_Representation_Learning/MoE/implement_MoE_from_scratch.ipynb) |
@@ -64,3 +87,13 @@ AI_Researcher_Learning_Path/
 └── recommended/
     └── ReadMe.md
 ```
+
+## Contributing
+
+This is primarily a personal learning repo, developed with a mentor. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions and conventions, and
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community guidelines.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).

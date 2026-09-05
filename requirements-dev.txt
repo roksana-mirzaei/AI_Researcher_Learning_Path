@@ -1,0 +1,2 @@
+pre-commit==4.6.2
+nbstripout==0.9.1
