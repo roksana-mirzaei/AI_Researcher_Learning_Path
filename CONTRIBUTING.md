@@ -1,8 +1,8 @@
 # Contributing
 
-This repository is a personal learning path, developed together with a mentor.
+This repository is a personal learning path, developed together with my mentor.
 It's not set up to take external pull requests, but the guidelines below keep
-the project consistent for anyone (mentor included) working in it.
+the project consistent for anyone  working in it.
 
 ## Setup
 

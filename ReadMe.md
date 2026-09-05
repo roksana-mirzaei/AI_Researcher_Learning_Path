@@ -90,7 +90,7 @@ AI_Researcher_Learning_Path/
 
 ## Contributing
 
-This is primarily a personal learning repo, developed with a mentor. See
+This is primarily a personal learning repo, developed with my mentor. See
 [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions and conventions, and
 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for community guidelines.
 
