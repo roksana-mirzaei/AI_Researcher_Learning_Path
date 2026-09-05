@@ -27,10 +27,6 @@ Maintainers may remove, edit, or reject contributions that don't align with
 this Code of Conduct, and may block anyone whose behavior is inappropriate,
 threatening, or harmful.
 
-## Reporting
-
-If you experience or witness unacceptable behavior, report it by contacting
-the maintainer directly via GitHub ([@roksana-mirzaei](https://github.com/roksana-mirzaei)).
 
 ## Attribution
 
