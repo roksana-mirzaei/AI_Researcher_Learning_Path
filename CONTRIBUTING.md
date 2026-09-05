@@ -1,8 +1,10 @@
 # Contributing
 
-This repository is a personal learning path, developed together with my mentor.
-It's not set up to take external pull requests, but the guidelines below keep
-the project consistent for anyone  working in it.
+Thanks for taking an interest in the AI Researcher Learning Path! This repo
+tracks my progress working through core AI/ML papers from scratch
+with my mentor — from Transformers and BERT up through diffusion, RLHF, and
+retrieval systems. It's primarily a personal study log, but if you're my
+mentor, a fellow learner, or just poking around, this doc is for you.
 
 ## Setup
 
@@ -14,23 +16,25 @@ pip install -r requirements-dev.txt    # pre-commit, nbstripout
 pre-commit install
 ```
 
-Each paper folder also has its own `requirements.txt` if you only want the
-dependencies for that one notebook.
+Each paper folder under `essentials/`, `foundation/`, `high/`, and
+`recommended/` also has its own `requirements.txt` if you only want to run
+that one notebook.
 
 ## Before committing
 
-- Run `pre-commit install` once per clone. It strips notebook outputs
-  (via `nbstripout`) automatically on commit, so diffs stay readable and the
-  repo doesn't accumulate binary output blobs.
-- If you add a new paper implementation, update the paper table in the root
-  [ReadMe.md](ReadMe.md) and add a `requirements.txt` in the paper's folder if
-  it needs packages beyond the root `requirements.txt`.
-- Keep large datasets and generated artifacts out of git — see `.gitignore`.
-  Data should be downloaded by the notebook, not committed.
+- Run `pre-commit install` once per clone — it strips notebook outputs
+  (`nbstripout`) automatically on commit, keeping diffs readable.
+- Implementing a new paper? Add a row to the paper table in the root
+  [ReadMe.md](ReadMe.md) and drop a `requirements.txt` in its folder if it
+  needs anything beyond the root `requirements.txt`.
+- Keep datasets and generated artifacts out of git (see `.gitignore`) —
+  notebooks should download data themselves, not commit it.
 
 ## Style
 
-- Notebook and folder names: lowercase-with-underscores or PascalCase per the
-  existing convention in that section, no typos where avoidable.
-- Prefer clear naming and inline comments only where the "why" isn't obvious
-  from the code itself.
+- Match the existing naming convention for the section you're in, and avoid
+  typos in folder/file names where you can.
+- Skip comments that just restate what the code does; only comment on the
+  non-obvious "why".
+
+Thanks for reading this far — happy to have you looking through the work!
