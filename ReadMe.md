@@ -46,6 +46,12 @@ The repository is organized into progressive tracks and domain themes:
 - **High:** Advanced topics for production-scale and frontier research.
 - **Recommended:** Adjacent domains that broaden research perspective.
 
+For the mathematical foundations of deep learning (linear algebra, calculus,
+probability, optimization), I work through the theory and then implement it
+directly, using either NumPy or PyTorch, depending on the paper, so each
+notebook builds papers from scratch rather than relying on high-level library
+abstractions.
+
 ## Paper Progress and Metadata
 
 | Paper | Year | Venue | Type | Difficulty | Status | Notes | Implementation Link |
