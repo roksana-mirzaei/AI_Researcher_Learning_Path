@@ -1,8 +1,8 @@
 # AI Researcher Learning Path
 
-![Implemented Papers](https://img.shields.io/badge/Implemented_Papers-6-blue)
-![Notebooks](https://img.shields.io/badge/Notebooks-6-success)
-![Last Updated](https://img.shields.io/badge/Last_Updated-2026--07--03-orange)
+![Implemented Papers](https://img.shields.io/badge/Implemented_Papers-7-blue)
+![Notebooks](https://img.shields.io/badge/Notebooks-8-success)
+![Last Updated](https://img.shields.io/badge/Last_Updated-2026--09--15-orange)
 ![License](https://img.shields.io/badge/License-MIT-lightgrey)
 
 This repository is my personal learning journey to become a stronger AI researcher.
@@ -62,6 +62,7 @@ abstractions.
 | Deep Residual Learning for Image Recognition (ResNet) | 2016 | CVPR | CV | Intermediate | Done | ResNet from-scratch notebook available. | [ResNet notebook](essentials/Foundational_Architecture_and_Representation_Learning/ResNet/ResNet_from_scratch.ipynb) |
 | Mixture of Experts Meets Instruction Tuning | 2023 | arXiv | Systems | Advanced | Done | MoE implementation notebook available. | [MoE notebook](essentials/Foundational_Architecture_and_Representation_Learning/MoE/implement_MoE_from_scratch.ipynb) |
 | An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale (ViT) | 2021 | ICLR | CV | Intermediate | Done | Vision Transformer from-scratch implementation notebook available. | [ViT notebook](essentials/Foundational_Architecture_and_Representation_Learning/ViT/Vision_Transfomer_from_scratch.ipynb) |
+| [Mamba: Linear-Time Sequence Modeling with Selective State Spaces](https://arxiv.org/abs/2312.00752) | 2023 | arXiv | Sequence Modeling | Advanced | Done | From-scratch Mamba implementation, plus a notebook comparing it against Transformers. | [Mamba notebook](essentials/Foundational_Architecture_and_Representation_Learning/Mamba/Mamba_implementation_from_scratch.ipynb), [Mamba vs. Transformers notebook](essentials/Foundational_Architecture_and_Representation_Learning/Mamba/comapre_mamba_with_transformers.ipynb) |
 | [Concrete Problems in AI Safety](https://arxiv.org/abs/1606.06565) | 2016 | arXiv | Safety | Intermediate | To Read | Foundational taxonomy of real-world safety problems (reward hacking, distributional shift, safe exploration). | -- |
 | [Deep Reinforcement Learning from Human Preferences](https://arxiv.org/abs/1706.03741) | 2017 | NeurIPS | Alignment | Intermediate | To Read | Introduced learning reward models from human preference data. | -- |
 | [Direct Preference Optimization (DPO)](https://arxiv.org/abs/2305.18290) | 2023 | NeurIPS | Alignment | Intermediate | To Read | Simplifies RLHF by optimizing policy directly from preferences without a separate reward model. | -- |
