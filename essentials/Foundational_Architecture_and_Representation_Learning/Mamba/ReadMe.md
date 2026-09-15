@@ -337,3 +337,9 @@ No separate feed-forward block, no interleaving of attention and MLP the way a T
 ## Closing Note: Where This Leads in Production
 
 Pure Mamba is used in production (e.g. Mistral's Codestral Mamba), but the more common pattern is **hybrid**: mostly Mamba layers for cheap long-range compression, with a small number of attention layers mixed in for the cases where exact, arbitrary-distance recall actually matters (AI21's Jamba and Nvidia's Nemotron-H line both follow this pattern). That mirrors the tradeoff discussed in Section 6 above almost exactly — it's rarely "one or the other" once you're building something meant to ship.
+
+## References
+Beside Mambas paper and github, I also found these useful:
+https://thegradient.pub/mamba-explained/
+
+https://newsletter.maartengrootendorst.com/p/a-visual-guide-to-mamba-and-state
