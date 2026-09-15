@@ -186,7 +186,7 @@ classDiagram
     }
     class MambaLM {
         Embedding embedding
-        List~ResidualBlock~ layers
+        ResidualBlock[] layers
         RMSNorm norm_f
         Linear lm_head
         forward(tokens) Tensor
