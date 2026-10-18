@@ -1,6 +1,6 @@
 # Foundational Architecture and Representation Learning: From understanding to judgment
 
-Oct 18, 2026 · @Roksana
+Oct 18, 2026 
 
 As I wrap up this section, I wanted a final summary page that answers one question: ok, we learned all the math behind these papers, so what? How does knowing the math help me as a machine learning engineer? What do I carry with me after this exercise, and what vision or perspective should it give me?
 
