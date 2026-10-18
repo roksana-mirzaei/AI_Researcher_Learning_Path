@@ -1,0 +1,1401 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Foundation Papers Atlas</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script>
+window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']]},svg:{fontCache:'global'},startup:{typeset:false}};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
+<style>
+/* Layout: lineage tree on the left, a sticky paper card on the right; stacks on narrow screens */
+:root{
+  --bg:#F3F5F8; --panel:#FFFFFF; --ink:#161A22; --muted:#525A69; --faint:#7F8796; --line:#DCE1E8; --line2:#BEC6D2;
+  --new:#C47504; --newfill:rgba(232,150,22,.15); --accent:#2F5FD0; --flow:#C2410C;
+  --c-cut:#6F7682; --c-enc:#11806A; --c-ed:#6158C9; --c-dec:#C24F27; --c-sci:#2C73BC; --c-alt:#9C640F; --c-non:#5E636B;
+  --f-display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1117; --panel:#161A22; --ink:#E6E9EF; --muted:#A6AEBC; --faint:#7A8392; --line:#272D38; --line2:#3A4352;
+  --new:#F2A93E; --newfill:rgba(242,169,62,.17); --accent:#7EA2FF; --flow:#FB8A4C;
+  --c-cut:#9AA1AD; --c-enc:#3CC09F; --c-ed:#9B94F0; --c-dec:#EF8257; --c-sci:#6AA9EC; --c-alt:#D59A3C; --c-non:#A0A5AD; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1117; --panel:#161A22; --ink:#E6E9EF; --muted:#A6AEBC; --faint:#7A8392; --line:#272D38; --line2:#3A4352;
+  --new:#F2A93E; --newfill:rgba(242,169,62,.17); --accent:#7EA2FF; --flow:#FB8A4C;
+  --c-cut:#9AA1AD; --c-enc:#3CC09F; --c-ed:#9B94F0; --c-dec:#EF8257; --c-sci:#6AA9EC; --c-alt:#D59A3C; --c-non:#A0A5AD; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+h1{font-family:var(--f-display);font-weight:700;font-size:30px;line-height:1.1;margin:0;text-wrap:balance;letter-spacing:-.01em}
+.wrapall{max-width:1500px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.lede{color:var(--muted);max-width:76ch;margin:6px 0 0}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.quals{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px;margin-top:8px}
+.q{font:inherit;text-align:left;cursor:pointer;font-size:13px;line-height:1.45;color:var(--muted);padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg)}
+.q b{color:var(--ink);font-weight:600}
+.q[aria-pressed="true"]{border-color:var(--new);background:var(--newfill)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.frow{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.flab{font-size:12px;color:var(--faint);min-width:110px}
+.fb{font:inherit;font-size:12.5px;padding:4px 10px;border-radius:999px;border:1px solid var(--line2);background:var(--panel);color:var(--muted);cursor:pointer}
+.fb[aria-pressed="true"]{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.main{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-items:start}
+@media (min-width:1150px){.main{grid-template-columns:minmax(0,1fr) minmax(0,1.05fr)}.detail{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px);max-height:calc(100vh - 24px);overflow:auto}}
+#tree{position:relative;display:flex;flex-direction:column;gap:8px}
+.trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:760px){.trio{grid-template-columns:minmax(0,1fr)}}
+.col{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;border-top:3px solid var(--acc)}
+.ct{font-family:var(--f-display);font-size:15px;font-weight:500}
+.cs{font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:2px}
+.dg{font-size:10.5px;color:var(--faint);margin:10px 0 4px;letter-spacing:.05em;text-transform:uppercase}
+.chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font:inherit;font-size:12.5px;padding:3px 8px;border-radius:6px;background:var(--bg);color:var(--ink);border:1px solid var(--line2);border-left:3px solid var(--acc);cursor:pointer;line-height:1.4;position:relative;z-index:2;text-align:left;transition:opacity .15s}
+.chip.dim{opacity:.16}
+.chip.sel{outline:2px solid var(--acc);outline-offset:1px}
+.chip.hl{outline:2px solid var(--flow);outline-offset:1px}
+.tg{font-family:var(--f-mono);font-size:10.5px;color:var(--faint);margin-left:5px}
+.mid{text-align:center;color:var(--faint);font-size:12px}
+#ov{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;overflow:visible}
+.flowlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:4px 16px;font-size:13px;color:var(--muted);margin-top:8px}
+.flowlist .n{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--flow);color:var(--panel);font-size:11px;font-weight:600;margin-right:6px;flex:none}
+.flowlist div{display:flex;align-items:flex-start;line-height:1.45}
+.detail h3{font-family:var(--f-display);font-weight:500;font-size:23px;margin:0;line-height:1.2}
+.meta{font-size:12.5px;color:var(--faint);margin-top:3px}
+.sec{margin-top:18px;padding-top:12px;border-top:1px solid var(--line)}
+.sec>.eyebrow{display:block;margin-bottom:6px}
+.nv{display:inline-block;font-size:12px;padding:2px 9px;border-radius:999px;border:1px solid var(--line2);color:var(--muted);margin:0 5px 5px 0}
+.nv.p{border-color:var(--new);color:var(--ink);background:var(--newfill);font-weight:600}
+.lead{font-size:15px;line-height:1.6;max-width:70ch;margin:0 0 6px}
+.lead .k{color:var(--faint);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;margin-right:6px}
+.steps{margin:0;padding-left:22px;font-size:14px;line-height:1.6;max-width:72ch}
+.steps li{margin-bottom:3px}
+.steps li::marker{color:var(--new);font-weight:600}
+table.cmp{width:100%;border-collapse:collapse;font-size:13.5px}
+table.cmp th{font-weight:600;text-align:left;color:var(--faint);font-size:11px;letter-spacing:.05em;text-transform:uppercase;padding:6px 8px;border-bottom:1px solid var(--line)}
+table.cmp td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+table.cmp td:first-child{width:42%}
+.scroll{overflow-x:auto}
+.math{display:flex;flex-direction:column;gap:12px}
+.mrow{border-left:3px solid var(--new);padding:4px 0 4px 12px}
+.mrow .f{overflow-x:auto;padding:4px 0;color:var(--ink)}
+.mrow .e{font-size:13.5px;color:var(--muted);max-width:70ch}
+.tex-fallback{font-family:var(--f-mono);font-size:13px}
+.links a{color:var(--accent);text-underline-offset:3px}
+.links{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:14px}
+.note{font-size:13.5px;color:var(--muted);line-height:1.55;max-width:72ch}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin-top:6px}
+.sw{display:inline-block;width:11px;height:11px;border-radius:2px;vertical-align:-1px;margin-right:4px}
+.edges{display:flex;flex-direction:column;gap:5px;font-size:13.5px}
+.edges .e{display:flex;gap:8px;align-items:baseline;line-height:1.45}
+.edges .num{font-family:var(--f-mono);font-size:11.5px;color:var(--faint);min-width:36px}
+.linkbtn{font:inherit;background:none;border:none;padding:0;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.st{font-family:var(--f-mono);font-size:10.5px;color:var(--faint);border:1px solid var(--line2);border-radius:4px;padding:0 4px;margin-left:4px}
+.dgcap{font-size:12.5px;color:var(--muted);margin:4px 0 10px;max-width:72ch}
+.excluded{font-size:13px;color:var(--muted);line-height:1.55}
+.diag svg text{font-family:var(--f-body)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrapall">
+  <header>
+    <div class="eyebrow">Transformer lineage · checked against primary sources, October 2026</div>
+    <h1>Foundation Papers Atlas</h1>
+  </header>
+
+  <section class="panel" aria-labelledby="q-h">
+    <div class="eyebrow" id="q-h">Novel in what sense? A paper qualifies for a type when its main novelty passes that test</div>
+    <div class="quals" id="quals"></div>
+  </section>
+
+  <section class="panel" style="display:flex;flex-direction:column;gap:8px">
+    <div class="frow"><span class="flab">Show</span><span id="fn" class="frow"></span></div>
+    <div class="frow"><span class="flab">Where it’s used</span><span id="fd" class="frow"></span></div>
+    <div class="frow"><span class="flab">Idea flows</span><span id="ff" class="frow"></span></div>
+    <div id="flowbar"></div>
+  </section>
+
+  <div class="main">
+    <div id="tree">
+      <svg id="ov" aria-hidden="true"><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker></defs><g id="ovg"></g></svg>
+      <div id="cut"></div>
+      <div class="mid">the 2017 Transformer splits into three halves</div>
+      <div class="trio" id="trunks"></div>
+      <div class="mid">plus branches that customise or challenge attention</div>
+      <div class="trio" id="side"></div>
+      <div class="legend"><span>★ paper in your repo</span><span>Tag = org (I industry, A academia, N non-profit, X collaboration) · primary contribution type</span></div>
+      <div class="panel excluded"><b style="color:var(--ink);font-weight:600">Left out on purpose:</b> no primary source discloses the architecture of Claude (all versions), GPT-4, GPT-4o, o1/o3/o4, GPT-5, GPT-6, Gemini beyond “sparse MoE Transformer”, Grok 2 onward, Sora 2, Veo 3, or OpenAI/Cohere embedding models. Cohere Command A+ says only “sparse MoE, 218B total / 25B active”. Drawing them would mean guessing. gpt-oss is the only OpenAI model whose architecture is documented.</div>
+    </div>
+    <aside class="panel detail" id="det" aria-live="polite"></aside>
+  </div>
+</div>
+<script>
+const R=String.raw;const ax=id=>'https://arxiv.org/abs/'+id;
+const N=[];
+N.push(
+{id:'tf',b:'cut',d:'Language',n:'Transformer',y:'2017',o:'Google',ot:'I',star:1,nv:['Arch','Sys'],
+ pb:'Translation models were RNNs: they read one word at a time, so training could not run in parallel and early words faded by the end of a long sentence.',
+ nw:'Build the whole encoder-decoder from attention. Every word connects to every other word in one step, and all positions are computed at once.',
+ why:'Parallel training matched GPU hardware, and any two words are one step apart, so long-range links are easy to learn.',
+ dg:[{t:'ed',hl:['enc','dec','xattn'],inp:'Source words',pos:'sinusoidal',L:6,encAttn:'8 heads, d_k = 64',ffn:'512 → 2048 → 512',out:'Target words',data:'WMT14 EN-DE / EN-FR',obj:'Predict next target word'},
+     {t:'chain',steps:['MatMul(Q, Kᵀ)|scores','Scale ÷ √d_k|d_k = 64','Mask (optional)|−∞ on future','Softmax|weights sum to 1','MatMul(·, V)|weighted mix'],hl:[1,2,3],title:'Scaled dot-product attention (paper Figure 2, left)'}],
+ ex:['Three scores with d_k = 64: unscaled [16, 0, −8] → softmax ≈ [1, 1e−7, 0]: saturated, almost no gradient.','Divide by √64 = 8 → [2, 0, −1] → softmax ≈ [0.84, 0.11, 0.04]: gradients flow.','Each of the 8 heads does this in its own 64-dimensional space; W^O mixes the 512-dim concatenation.'],
+ kept:'Encoder-decoder shape from earlier seq2seq models, and attention itself (Bahdanau 2014).',
+ ch:[['Removed recurrence entirely','Any two words are one step apart (path length O(1) vs O(n)); training is parallel.'],['Scaled dot-product attention with 1/√d_k','Stops large dot products from saturating the softmax.'],['Multi-head attention (h = 8)','Different heads track different relations at the same time.'],['Sinusoidal positions added to embeddings','Attention ignores order, so position must be put back.'],['Post-LN: LayerNorm(x + Sublayer(x))','Standard at the time; later replaced by Pre-LN for deep stacks (see GPT-2).']],
+ m:[[R`\mathrm{Attention}(Q,K,V)=\mathrm{softmax}\!\left(\frac{QK^\top}{\sqrt{d_k}}\right)V`,'Eq. 1. q·k has variance d_k for unit-variance inputs, so the division keeps softmax out of its flat regions.'],
+    [R`\mathrm{MultiHead}(Q,K,V)=\mathrm{Concat}(\mathrm{head}_1,\dots,\mathrm{head}_h)W^O,\ \ \mathrm{head}_i=\mathrm{Attention}(QW_i^Q,KW_i^K,VW_i^V)`,'h = 8, d_k = d_v = 64, d_model = 512 in the base model.'],
+    [R`\mathrm{FFN}(x)=\max(0,xW_1+b_1)W_2+b_2`,'Eq. 2. d_ff = 2048.'],
+    [R`PE_{(pos,2i)}=\sin\!\big(pos/10000^{2i/d_{model}}\big),\quad PE_{(pos,2i+1)}=\cos\!\big(pos/10000^{2i/d_{model}}\big)`,'Chosen because PE at pos + k is a linear function of PE at pos.'],
+    [R`lrate=d_{model}^{-0.5}\cdot\min\!\big(step^{-0.5},\ step\cdot warmup^{-1.5}\big),\ warmup=4000`,'Eq. 3: warm up, then decay with 1/√step.']],
+ x:'BLEU 28.4 EN-DE. EN-FR is 41.8 in the abstract and Table 2 but 41.0 in Section 6.1. Figure box labels such as “Add & Norm” are from memory.',
+ L:[['Attention Is All You Need',ax('1706.03762')]]},
+{id:'resnet',b:'cut',d:'Vision',n:'ResNet',y:'2015',o:'Microsoft Research',ot:'I',star:1,nv:['Arch'],
+ pb:'A 56-layer plain network had higher training error than a 20-layer one: deeper nets became harder to optimise.',
+ nw:'Each block learns only a correction F(x) and adds the input back: y = F(x) + x.',
+ why:'If the best thing a block can do is nothing, it just pushes F to zero. Signal and gradient always have a direct path.',
+ dg:[{t:'chain',steps:['Input x|','Weight layer|3×3 conv + BN','ReLU|','Weight layer|3×3 conv + BN','⊕ add x|then ReLU'],hl:[4],skip:[0,4,'identity shortcut x']}],
+ ex:['x = [1, 2], the block outputs F(x) = [0.1, −0.1].','y = ReLU(F(x) + x) = ReLU([1.1, 1.9]) = [1.1, 1.9].','The “+x” path carries signal and gradient straight through. The Transformer’s x + Sublayer(x) is this same idea.'],
+ kept:'Conv layers with BatchNorm after each conv; VGG-style stacked 3×3 design.',
+ ch:[['Identity shortcut around every 2–3 layers','Depth stops hurting; 152 layers train well.'],['Bottleneck block 1×1 → 3×3 → 1×1','Cheaper deep blocks for ResNet-50/101/152.']],
+ m:[[R`y=\mathcal{F}(x,\{W_i\})+x,\qquad \mathcal{F}=W_2\,\sigma(W_1x)`,'Eq. 1.'],[R`y=\mathcal{F}(x,\{W_i\})+W_sx`,'Eq. 2, when dimensions change.'],[R`\frac{\partial\mathcal{L}}{\partial x}=\frac{\partial\mathcal{L}}{\partial y}\Big(1+\frac{\partial\mathcal{F}}{\partial x}\Big)`,'Derived: the “1” keeps gradients alive in early layers.']],
+ x:'3.57% top-5 error (ensemble), first in ILSVRC 2015. All checked in the paper.',
+ L:[['Deep Residual Learning for Image Recognition',ax('1512.03385')]]},
+{id:'kaplan',b:'cut',d:'Language',n:'Scaling Laws',y:'2020',o:'OpenAI',ot:'I',star:1,nv:['Math','Eval'],par:'gpt2',
+ pb:'Nobody could predict how good a bigger model would be before paying to train it.',
+ nw:'Test loss falls as a smooth power law in parameters N, data D and compute C, so small runs predict large ones.',
+ why:'Turns training into planning: you can choose model size and data before spending the budget.',
+ dg:[{t:'plot',xr:[6,12],yr:[Math.log10(1.4),Math.log10(4.2)],yt:[1.5,2,2.5,3,4],xl:'non-embedding parameters N (log scale)',yl:'test loss (nats/token)',
+   lines:[{f:v=>Math.pow(8.8e13/v,0.076),c:'var(--new)',lab:'L(N) = (8.8×10¹³ / N)^0.076',lx:300,ly:52}],
+   pts:[[1e7,Math.pow(8.8e13/1e7,0.076),'10M → 3.37'],[1e9,Math.pow(8.8e13/1e9,0.076),'1B → 2.38'],[1e10,Math.pow(8.8e13/1e10,0.076),'10B → 1.99'],[1e11,Math.pow(8.8e13/1e11,0.076),'100B → 1.67']],
+   caption:'A straight line on log-log axes: each 10× in N multiplies loss by 10^−0.076 ≈ 0.84.'}],
+ ex:['L(N = 1B) = (8.8e13 / 1e9)^0.076 ≈ 2.38 nats/token.','L(N = 10B) ≈ 1.99: 10× parameters cut loss by about 16%.','With 10× more compute, Kaplan’s rule spends it as 10^0.73 ≈ 5.4× more parameters but only 10^0.27 ≈ 1.9× more data. Chinchilla later overturned this split.'],
+ kept:'A GPT-2-style decoder trained on WebText2. Nothing about the model changed.',
+ ch:[['Fitted power laws across about 7 orders of magnitude','Lets you forecast the loss of a run before doing it.'],['Combined law L(N, D) for overfitting','Tells you how much data a size-N model needs.'],['Compute-optimal allocation N ∝ C^0.73','Advice: train very large models and stop early. Revised by Chinchilla.']],
+ m:[[R`L(N)=\left(\frac{N_c}{N}\right)^{\alpha_N},\ \ \alpha_N\approx0.076,\ N_c\approx8.8\times10^{13}`,'Eq. 1.1, data not limiting.'],
+    [R`L(D)=\left(\frac{D_c}{D}\right)^{\alpha_D},\ \ \alpha_D\approx0.095,\ D_c\approx5.4\times10^{13}\ \text{tokens}`,'Eq. 1.2, with early stopping.'],
+    [R`L(C_{\min})=\left(\frac{C_c^{\min}}{C_{\min}}\right)^{\alpha_C^{\min}},\ \ \alpha_C^{\min}\approx0.050,\ C_c^{\min}\approx3.1\times10^{8}\ \text{PF-days}`,'Eq. 1.3.'],
+    [R`L(N,D)=\left[\left(\frac{N_c}{N}\right)^{\alpha_N/\alpha_D}+\frac{D_c}{D}\right]^{\alpha_D}`,'Eq. 1.5.'],
+    [R`N\approx 12\,n_{layer}\,d_{model}^2,\qquad C\approx 6N\ \text{FLOPs per token}`,'Eq. 2.1 and the training-compute rule.'],
+    [R`N_{opt}\propto C^{0.73},\quad B\propto C^{0.24},\quad S\propto C^{0.03}`,'Compute-optimal allocation.']],
+ x:'α_C^min is 0.050 in Eq. 1.3 and Table 5, ≈0.054 in Eq. 6.4 and 0.052 in Eq. B.7; this page uses 0.050. The figure label value 2.3×10⁸ is from memory and conflicts with Eq. 1.3’s 3.1×10⁸.',
+ L:[['Scaling Laws for Neural Language Models',ax('2001.08361')]]},
+{id:'chinchilla',b:'cut',d:'Language',n:'Chinchilla',y:'2022',o:'DeepMind',ot:'I',nv:['Math','Train'],par:'kaplan',
+ pb:'Following Kaplan, labs grew model size far faster than training data.',
+ nw:'Re-fit the scaling law with three methods: for a fixed budget, grow parameters and tokens equally (exponents about 0.5 each).',
+ why:'Smaller, better-fed models reach lower loss for the same compute, and are cheaper to serve.',
+ dg:[{t:'plot',xr:[21,25],yr:[9,12.5],yt:[1e9,1e10,1e11,1e12],yf:v=>v>=1e12?'1T':v>=1e11?'100B':v>=1e10?'10B':'1B',xl:'training compute C in FLOPs (log scale)',yl:'compute-optimal parameters N',
+   lines:[{f:c=>1.3e9*Math.pow(c/8.64e19,0.73),c:'var(--faint)',dash:'5 4',lab:'Kaplan: N = 1.3×10⁹·C^0.73',lx:120,ly:44},{f:c=>67e9*Math.pow(c/5.76e23,0.5),c:'var(--new)',lab:'Chinchilla: N ∝ C^0.50',lx:430,ly:180}],
+   pts:[[5.76e23,67e9,'Table 3: 67B at 5.76e23'],[5.76e23,1.3e9*Math.pow(5.76e23/8.64e19,0.73),'Kaplan rule: ≈ 800B',"var(--faint)"]],
+   caption:'Same budget as Gopher: Kaplan’s rule (C in PF-days) points to ≈ 800B parameters; Chinchilla’s Table 3 says 67B on 1.5T tokens. Lines are derived from the published formulas.'}],
+ ex:['Chinchilla (70B params, 1.4T tokens): L̂ = 1.69 + 0.084 + 0.163 ≈ 1.937.','Gopher (280B, 300B tokens): L̂ = 1.69 + 0.052 + 0.251 ≈ 1.993: its data term dominates.','Similar compute (6ND = 5.88e23 vs 5.04e23), but the smaller, longer-trained model wins.'],
+ kept:'The power-law idea and C ≈ 6ND accounting from Kaplan; Gopher’s architecture and stack.',
+ ch:[['Learning-rate schedule matched to each run’s length','Kaplan’s short runs undervalued data.'],['Three independent estimation approaches agree on ≈0.5 / 0.5','Robust conclusion: double the model, double the tokens.'],['Parametric loss with an irreducible term E','Separates what more parameters vs more data can fix.']],
+ m:[[R`\hat L(N,D)=E+\frac{A}{N^{\alpha}}+\frac{B}{D^{\beta}},\ \ E=1.69,\ A=406.4,\ B=410.7,\ \alpha=0.34,\ \beta=0.28`,'Eq. 2, fitted with a Huber loss (δ = 10⁻³) on log loss. Published values.'],
+    [R`N_{opt}=G\left(\tfrac{C}{6}\right)^{a},\ D_{opt}=G^{-1}\left(\tfrac{C}{6}\right)^{b},\ \ a=\tfrac{\beta}{\alpha+\beta},\ b=\tfrac{\alpha}{\alpha+\beta}`,'Eq. 4, minimising L̂ subject to 6ND = C.'],
+    [R`\text{Exponents }(a,b):\ (0.50,0.50),\ (0.49,0.51),\ (0.46,0.54);\ \text{Kaplan }(0.73,0.27)`,'Table 2, Approaches 1–3.']],
+ x:'Plugging the Approach-3 constants into Eq. 4 at 5.76e23 gives ≈32B / 3.0T, not Table 3’s 67B / 1.5T; Table 3 likely comes from Approach 1. “20 tokens per parameter” is arithmetic (1.4T / 70B), not a stated constant. MMLU 67.5% (abstract) vs 67.6% (Sec. 4.2.2).',
+ L:[['Training Compute-Optimal Large Language Models',ax('2203.15556')]]},
+{id:'rope',b:'cut',d:'Language',n:'RoPE',y:'2021',o:'Zhuiyi Technology',ot:'I',nv:['Math','Arch'],par:'tf',
+ pb:'Positions were added to word vectors at the input, mixing “what the word is” with “where it is”.',
+ nw:'Rotate each query and key by an angle proportional to its position, so their dot product depends only on the distance between them.',
+ why:'Relative distance is built into every attention score, and context length can later be stretched (e.g. YaRN).',
+ dg:[{t:'rope'}],
+ ex:['d = 4, so two pairs with θ₁ = 1 and θ₂ = 0.01.','A query at m = 1 with first pair (1, 0) rotates to (0.540, 0.841).','A key at n = 3 rotates by 3 rad; their pair-1 dot product is cos 2, exactly the same as for m = 11, n = 13.'],
+ kept:'The attention formula and the Transformer’s base-10000 geometric frequency schedule.',
+ ch:[['Rotate Q and K after projection instead of adding a position vector at the input','Only the offset n − m enters the score.']],
+ m:[[R`\langle f_q(x_m,m),f_k(x_n,n)\rangle=g(x_m,x_n,m-n)`,'Eq. 11: the goal.'],[R`f_{q,k}(x_m,m)=R^d_{\Theta,m}\,W_{q,k}\,x_m,\qquad \Theta=\{\theta_i=10000^{-2(i-1)/d}\}`,'Eqs. 14–15: block-diagonal rotation over d/2 pairs.'],[R`q_m^\top k_n=x_m^\top W_q\,R^d_{\Theta,n-m}\,W_k\,x_n`,'Eq. 16: only the offset remains.']],
+ x:'All equations checked. The exact layout of the efficient element-wise form (Eq. 34) is from memory.',
+ L:[['RoFormer',ax('2104.09864')]]},
+{id:'flash',b:'cut',d:'Language',n:'FlashAttention',y:'2022',o:'Stanford, U. at Buffalo',ot:'A',star:1,nv:['Sys','Algo'],par:'tf',
+ pb:'Standard attention writes the full N×N score matrix to slow GPU memory (HBM) and reads it back, so long inputs are slow and memory-hungry. The arithmetic is not the bottleneck; moving data is.',
+ nw:'Compute exactly the same attention in tiles that fit in the fast on-chip SRAM, using an online softmax, so the N×N matrix is never written to HBM. Recompute tiles in the backward pass instead of storing them.',
+ why:'Same FLOPs, far fewer slow-memory reads: up to 7.6× faster attention on GPT-2 and memory linear in sequence length.',
+ dg:[{t:'flash'}],
+ ex:['One query row with scores s = [1, 2, 3, 4], split into two blocks.','Block 1 [1, 2]: running max m = 2, running sum ℓ = e⁻¹ + e⁰ = 1.368.','Block 2 [3, 4]: m̃ = 4, ℓ̃ = 1.368. New max 4, so ℓ = e^(2−4)·1.368 + 1.368 = 1.553.','1.553 equals Σ e^(s−4) over the whole row: exact, without ever holding the full row.','Block sizes for M = 25,600 floats of SRAM and d = 64: B_c = 100, B_r = 64.'],
+ kept:'The attention formula and its output, exactly.',
+ ch:[['Tiling + online softmax','N×N matrix never materialised in HBM; memory grows linearly with length.'],['Recompute S and P in the backward pass','Stores only O, m, ℓ: trades cheap arithmetic for expensive memory traffic.'],['IO-complexity analysis with a lower bound','Proves fewer HBM accesses for any SRAM size in range.']],
+ m:[[R`m(x)=\max_i x_i,\quad f(x)=e^{x-m(x)},\quad \ell(x)=\textstyle\sum_i f(x)_i`,'Softmax pieces (Sec. 3.1).'],
+    [R`m=\max(m_1,m_2),\qquad \ell=e^{m_1-m}\ell_1+e^{m_2-m}\ell_2`,'Combining two blocks exactly.'],
+    [R`O_i\leftarrow \mathrm{diag}(\ell^{new})^{-1}\big(\mathrm{diag}(\ell_i)e^{m_i-m^{new}}O_i+e^{\tilde m-m^{new}}\tilde P_{ij}V_j\big)`,'Output update in Algorithm 1 (typeset line from memory; consistent with the checked rules).'],
+    [R`\text{HBM accesses: } \Theta(Nd+N^2)\ \text{standard}\quad\text{vs}\quad \Theta(N^2d^2M^{-1})\ \text{FlashAttention}`,'Theorem 2; Proposition 3 shows no exact method does better for all M in [d, Nd].']],
+ x:'Figure 1: SRAM 19 TB/s (20 MB), HBM 1.5 TB/s (40 GB), CPU DRAM 12.8 GB/s. FlashAttention-2 reorders loops (outer Q, inner K/V) and parallelises over sequence length (~2× faster); FlashAttention-3 targets H100 with async loads and FP8 (1.5–2.0× over FA-2). The arrow colours in Figure 1 are from memory.',
+ L:[['FlashAttention',ax('2205.14135')],['FlashAttention-2',ax('2307.08691')],['FlashAttention-3',ax('2407.08608')]]},
+{id:'mqa',b:'cut',d:'Language',n:'MQA → GQA',y:'2019 / 2023',o:'Google',ot:'I',nv:['Arch','Sys'],par:'tf',
+ pb:'When generating, every step re-reads the stored keys and values (KV cache) of all past tokens for every head. That memory traffic, not compute, limits decoding speed.',
+ nw:'MQA: all query heads share one key and one value head. GQA: query heads are split into G groups, and each group shares one K/V head, a middle ground.',
+ why:'The KV cache shrinks by the number of query heads per K/V head, so decoding is faster with little quality loss (GQA).',
+ dg:[{t:'heads',hl:'gqa'}],
+ ex:['Llama 2 70B shape: 80 layers, 64 query heads, head dim 128, BF16.','MHA cache: 2 × 80 × 64 × 128 = 1,310,720 numbers = 2.5 MiB per token (10 GiB at 4,096 tokens).','GQA with 8 K/V heads: 320 KiB per token (8× smaller). MQA: 40 KiB per token (64× smaller).'],
+ kept:'Multi-head attention; GQA uptrains existing MHA checkpoints.',
+ ch:[['MQA: one shared K and V','Smallest cache, some quality loss.'],['GQA: G groups, mean-pool K/V heads to convert, uptrain 5% of steps','Near-MHA quality at near-MQA speed.']],
+ m:[[R`\text{KV cache per token}=2\cdot L\cdot n_{kv}\cdot d_h\cdot \text{bytes}`,'n_kv = h for MHA, G for GQA, 1 for MQA.'],[R`\text{GQA-1}=\text{MQA},\qquad \text{GQA-}h=\text{MHA}`,'The two endpoints.']],
+ x:'MQA and GQA details are from memory of the papers (not re-checked this pass); the cache arithmetic is derived.',
+ L:[['Fast Transformer Decoding (MQA)',ax('1911.02150')],['GQA',ax('2305.13245')]]},
+{id:'shazeer',b:'cut',d:'Language',n:'Sparsely-gated MoE',y:'2017',o:'Google Brain',ot:'I',nv:['Arch','Sys'],
+ pb:'Model capacity grows with parameters, but in a dense network every parameter runs for every input.',
+ nw:'A gating network picks the top-k of many expert networks for each input; experts with zero gate are not computed at all.',
+ why:'Parameters can grow far faster than compute per example: up to 137B parameters in one MoE layer.',
+ dg:[{t:'moe',fn:'noisy top-k softmax',scores:[1.0,-0.5,2.0,0.3,-1.2,0.8,1.6,-0.1],sel:[2,6],gates:['0.599','0.401'],scoreLabel:'gate logits H(x) (noise set to 0 here)',formula:'y = 0.599·E3(x) + 0.401·E7(x)',note:'Only E3 and E7 run. Noise (StandardNormal · Softplus) is added to logits during training to spread load.',newRouter:1}],
+ ex:['Token “cat” gets gate logits [1.0, −0.5, 2.0, 0.3, −1.2, 0.8, 1.6, −0.1] over 8 experts.','KeepTopK(·, 2) keeps experts 3 (2.0) and 7 (1.6) and sets the rest to −∞.','Softmax over the kept logits: 0.599 and 0.401.','Output y = 0.599·E3(x) + 0.401·E7(x); the other six experts do no work.'],
+ kept:'The mixture-of-experts idea (Jacobs and Jordan, 1991).',
+ ch:[['Sparse noisy top-k gating','Conditional computation at scale.'],['Importance and load balancing losses','Without them a few experts get all the tokens.'],['MoE layer placed between stacked LSTM layers','Before Transformers; GShard later put MoE into Transformer FFNs.']],
+ m:[[R`y=\sum_{i=1}^{n}G(x)_i\,E_i(x)`,'Eq. 1: experts with G = 0 are skipped.'],[R`G(x)=\mathrm{Softmax}\big(\mathrm{KeepTopK}(H(x),k)\big)`,'Eq. 3.'],[R`H(x)_i=(x\cdot W_g)_i+\mathrm{StandardNormal}()\cdot\mathrm{Softplus}\big((x\cdot W_{noise})_i\big)`,'Eq. 4: noisy logits.'],[R`L_{importance}=w\cdot CV\Big(\textstyle\sum_{x}G(x)\Big)^2`,'Eqs. 6–7: penalise uneven total gate weight; w = 0.1 (LM), 0.01 (MT).']],
+ x:'Flat MoEs use k = 4; hierarchical MoEs k = 2 per level. Perplexity improves up to 65,536 experts and degrades at 131,072. The layout of the load-loss equation (Eq. 9) is garbled in extraction.',
+ L:[['Outrageously Large Neural Networks',ax('1701.06538')]]}
+);
+N.push(
+{id:'bert',b:'enc',d:'Language',n:'BERT',y:'2018',o:'Google',ot:'I',star:1,nv:['Train'],par:'tf',
+ pb:'GPT-style pretraining reads left to right, so a word cannot use the words after it to build its meaning. Understanding tasks need both sides.',
+ nw:'Hide 15% of the words and train the encoder to guess them from the words on both sides. Because the answer is hidden, every word can attend in both directions without cheating. Then fine-tune the same network for each task.',
+ why:'One pretrained encoder gives strong results on classification, question answering and tagging with little labelled data.',
+ dg:[{t:'mask',tk:['[CLS]','my','dog','is','[MASK]','[SEP]'],at:4,m:'bi',o:'guesses: “cute”',cap:'The hidden word looks at words on BOTH sides, then guesses itself'},
+     {t:'blk',kind:'enc',norm:'post',L:'12 (BASE) / 24 (LARGE)',inp:'Token + segment + position',attn:'bidirectional, 12 heads',ffn:'GELU, 4×',mask:'full',out:'MLM + NSP heads',data:'BooksCorpus 800M + Wikipedia 2,500M words',obj:'Masked LM (15%) + next-sentence prediction',hl:['obj','attn']}],
+ ex:['Input “[CLS] my dog is cute [SEP] he likes play ##ing [SEP]”; “cute” is chosen for prediction.','80% of the time it becomes [MASK], 10% a random word (“apple”), 10% it stays “cute”.','The output at that position predicts over 30,000 WordPiece tokens; loss counts only chosen positions.','Because chosen words are sometimes random or unchanged, the model cannot trust any visible word, which matches fine-tuning, where [MASK] never appears.'],
+ kept:'The 2017 encoder block, unchanged (Post-LN). BASE was sized to match GPT-1.',
+ ch:[['Masked-word objective (15%: 80/10/10)','Makes bidirectional context possible. Best for understanding tasks.'],['Pretrain once, fine-tune with one small output layer W ∈ R^{K×H}','One model serves many tasks.'],['Next-sentence prediction (50% IsNext / 50% NotNext)','Meant to teach sentence relations; RoBERTa later removed it.'],['[CLS] token + segment embeddings','One vector for the whole input; marks sentence A vs B.']],
+ m:[[R`\mathcal{L}_{MLM}=-\sum_{i\in\mathcal{M}}\log p_\theta\big(x_i\mid x_{\setminus\mathcal{M}}\big)`,'Predict only chosen positions 𝓜 from everything visible, both sides.'],[R`\mathcal{L}_{GPT}=-\sum_t\log p_\theta\big(x_t\mid x_{<t}\big)`,'Compare GPT: earlier words only, so it needs a causal mask.'],[R`h_0=E_{token}+E_{segment}+E_{position}`,'Figure 2: input representation.']],
+ x:'BASE: L = 12, H = 768, A = 12, 110M. LARGE: L = 24, H = 1024, A = 16, 340M. Batch 256 × 512 tokens for 1M steps; length 128 for 90% of steps. BERT takes nothing from ELMo; it contrasts itself with ELMo.',
+ L:[['BERT',ax('1810.04805')]]},
+{id:'roberta',b:'enc',d:'Language',n:'RoBERTa',y:'2019',o:'Meta, U. Washington',ot:'X',nv:['Train','Data'],par:'bert',
+ pb:'BERT’s results depended on training choices nobody had tested carefully.',
+ nw:'Keep BERT-LARGE exactly; change only the recipe: dynamic masking, no next-sentence task, 8K batches, 10× more data, longer training.',
+ why:'BERT was undertrained. Before changing an architecture, check whether it simply needs more and better training.',
+ dg:[{t:'blk',kind:'enc',norm:'post',L:24,inp:'Byte-level BPE (50K)',attn:'bidirectional (unchanged)',ffn:'unchanged',mask:'full',out:'MLM head only',data:'160GB: Books+Wiki 16, CC-News 76, OpenWebText 38, Stories 31',obj:'Masked LM, new mask every pass; no NSP',hl:['data','obj','inp']}],
+ ex:['BERT duplicated its data 10× with 10 fixed masks over 40 epochs, so each mask pattern repeats about 4 times.','RoBERTa draws a fresh 15% mask every time a sequence is seen.','Batch 8K for 500K steps: no fixed pattern recurs over 500K × 8K sequences.'],
+ kept:'BERT-LARGE architecture (L = 24, H = 1024, A = 16, 355M with the larger vocabulary).',
+ ch:[['Removed next-sentence prediction','It did not help.'],['Dynamic masking','More varied puzzles from the same text.'],['8K batch, 160GB data, up to 500K steps','The main gains come from training longer on more data.'],['GPT-2’s 50K byte-level BPE','No unknown tokens.']],
+ m:[[R`\mathcal{L}=-\sum_{i\in\mathcal{M}_e}\log p_\theta\big(x_i\mid x_{\setminus\mathcal{M}_e}\big)`,'BERT’s loss with a mask 𝓜 redrawn each epoch e.']],
+ nomath:'',x:'Adam β₂ = 0.98, ε = 1e−6, peak LR 4e−4 (LARGE) vs BERT’s β₂ = 0.999, LR 1e−4.',
+ L:[['RoBERTa',ax('1907.11692')]]},
+{id:'deberta',b:'enc',d:'Language',n:'DeBERTa',y:'2020',o:'Microsoft',ot:'I',nv:['Arch'],par:'bert',
+ pb:'BERT adds position to the word vector before attention, so attention cannot treat “what the word is” and “how far away it is” separately.',
+ nw:'Keep a content vector and a relative-position vector apart, and compute three separate attention terms: content-to-content, content-to-position and position-to-content.',
+ why:'The model learns meaning and distance independently; it was the first to pass the human baseline on SuperGLUE (89.9 vs 89.8).',
+ dg:[{t:'chain',steps:['Content → content|Qᶜᵢ · Kᶜⱼ','+ content → position|Qᶜᵢ · Kʳ at δ(i, j)','+ position → content|Kᶜⱼ · Qʳ at δ(j, i)','÷ √(3d), softmax|then × Vᶜ','Enhanced mask decoder|absolute position added at the end'],hl:[1,2,4]}],
+ ex:['Query i = 3, key j = 5, with k = 512 relative buckets.','Content→position uses relative row δ(3, 5) = 510; position→content uses row δ(5, 3) = 514.','Every pair at offset −2 reuses row 510 in every layer.','Three summed terms each with variance about d give about 3d, hence √(3d) (our inference; the paper only says it stabilises training).'],
+ kept:'BERT’s masked-LM recipe and encoder.',
+ ch:[['Disentangled attention (3 terms, position-to-position dropped)','Separates meaning and distance.'],['Enhanced mask decoder','Absolute position is still available where predicting the masked word needs it.'],['SiFT adversarial fine-tuning (1.5B model only)','More robust fine-tuning.']],
+ m:[[R`\tilde A_{ij}=Q^c_iK^{c\top}_j+Q^c_iK^{r\top}_{\delta(i,j)}+K^c_jQ^{r\top}_{\delta(j,i)}`,'Eq. 4.'],[R`H_o=\mathrm{softmax}\!\left(\frac{\tilde A}{\sqrt{3d}}\right)V^c`,'Output.'],[R`\delta(i,j)=\begin{cases}0 & i-j\le-k\\ 2k-1 & i-j\ge k\\ i-j+k & \text{otherwise}\end{cases},\ k=512`,'Eq. 3: bucketed relative distance.']],
+ L:[['DeBERTa',ax('2006.03654')]]},
+{id:'modernbert',b:'enc',d:'Language',n:'ModernBERT',y:'2024',o:'Answer.AI, LightOn',ot:'I',nv:['Arch','Data'],par:'bert',
+ pb:'BERT-style encoders still used 2018 parts and a 512-token limit, though they power most retrieval and classification.',
+ nw:'Rebuild an encoder from decoder-era parts: RoPE, GeGLU, pre-norm, no biases, global attention every third layer with 128-token sliding windows in between, trained on 2T tokens at 8,192 context.',
+ why:'Long inputs get cheaper (local layers cost about N × 128), and quality improves on retrieval and code.',
+ dg:[{t:'layers',pat:'GLLGLLGLLGLLGLLGLLGLLG',att:'G',newc:'L',cap:'ModernBERT-base: 22 layers, global attention every third layer',legend:'G = global attention (RoPE θ 160,000) · L = 128-token sliding window (θ 10,000)',note:'Which indices are global (0, 3, …, 21) follows the HF convention, not checked in the paper.'},
+     {t:'mask',tk:['The','old','[MASK]','sat','on','the','mat'],at:2,m:'win',w:2,o:'guesses: “cat”',cap:'In a local layer the hidden word sees only nearby words on both sides'}],
+ ex:['In an 8,192-token document, token 5,000 in a local layer sees roughly tokens 4,936–5,064.','The same token in a global layer sees all 8,192.','Local cost ≈ 8,192 × 128 scores per layer instead of 8,192².'],
+ kept:'Encoder with masked-word training.',
+ ch:[['RoPE instead of learned positions','8,192-token context.'],['Alternating local/global attention','Much cheaper on long inputs.'],['GeGLU, pre-norm, no biases, unpadding','Stability and speed borrowed from LLMs.'],['30% masking instead of 15%','15% “has since been shown to be sub-optimal.”'],['2T tokens including code','Better at code search.']],
+ m:[[R`\mathrm{GeGLU}(x)=\big(\mathrm{GELU}(xW)\odot xV\big)W_2`,'Gated feed-forward.']],
+ x:'Base 22 layers / 768 / 149M; large 28 layers / 1,024 / 395M. Reading “128-token window” as ±64 is our interpretation.',
+ L:[['ModernBERT',ax('2412.13663')]]},
+{id:'sbert',b:'enc',d:'Search and RAG',n:'Sentence-BERT → E5',y:'2019 / 2022',o:'UKP (TU Darmstadt), Microsoft',ot:'X',nv:['Train','Algo'],par:'bert',
+ pb:'To compare two sentences, BERT must read them together. Finding the most similar pair among 10,000 sentences takes about 65 hours.',
+ nw:'Train two weight-shared BERTs so each sentence becomes one vector; similar sentences end up close, and comparison is a cosine. E5 scales this with contrastive training on 270M filtered web pairs.',
+ why:'Encode every document once, then search by vector similarity: about 5 seconds instead of 65 hours. This is the retrieval step of RAG.',
+ dg:[{t:'chain',rows:[['Sentence A|“how do I reset my password?”','BERT|shared weights','Mean pooling|→ u'],['Sentence B|help-centre passage','BERT|same weights','Mean pooling|→ v']],hl:[2,5],note:'Training: softmax on (u, v, |u−v|) for NLI (SBERT) or InfoNCE with τ = 0.01 over 32,768 in-batch negatives (E5). Inference: cosine(u, v).'}],
+ ex:['10,000 sentences need 10,000 forward passes plus about 50M cosines, instead of about 50M cross-encoder passes.','E5: each query has 1 positive and 32,767 in-batch negatives; a cosine gap of 0.1 becomes a logit gap of 10 at τ = 0.01.'],
+ kept:'BERT / RoBERTa encoder.',
+ ch:[['Siamese encoding into fixed vectors','Index once, search fast.'],['Contrastive loss (E5: InfoNCE on 270M consistency-filtered pairs)','First unsupervised model to beat BM25 on BEIR.']],
+ m:[[R`o=\mathrm{softmax}\big(W_t\,[u;\,v;\,|u-v|]\big)`,'SBERT classification objective.'],[R`\mathcal{L}=-\log\frac{e^{\cos(q,p^+)/\tau}}{e^{\cos(q,p^+)/\tau}+\sum_i e^{\cos(q,p_i^-)/\tau}},\ \tau=0.01`,'E5’s InfoNCE.']],
+ x:'SBERT: SNLI 570K + MultiNLI 430K pairs, 1 epoch; average STS Spearman 74.89. E5’s consistency-filter rule (keep if the positive ranks top-2) is from memory.',
+ L:[['Sentence-BERT',ax('1908.10084')],['E5',ax('2212.03533')]]},
+{id:'bert4rec',b:'enc',d:'Search and RAG',n:'BERT4Rec',y:'2019',o:'Alibaba',ot:'I',nv:['Algo'],par:'bert',
+ pb:'Sequential recommenders read a user’s history only left to right.',
+ nw:'Treat a user’s item history like a sentence: hide some items and guess them from both sides.',
+ why:'Shows BERT’s fill-in-the-blank trick works for any sequence, not just text.',
+ dg:[{t:'mask',tk:['phone','case','[mask]','charger','cable'],at:2,m:'bi',o:'guesses: screen protector',cap:'The hidden item uses purchases before AND after it'}],
+ ex:['Training: [v1, [mask], v3, [mask], v5] predicts v2 and v4 from both sides.','Test: append [mask] at the end, [v1 … v5, [mask]], and score the next item.'],
+ kept:'BERT’s Cloze objective and GELU; NSP and segment embeddings removed.',
+ ch:[['Item IDs instead of words','Bidirectional context for recommendation.']],
+ m:[[R`P(v)=\mathrm{softmax}\big(\mathrm{GELU}(h_t^LW^P+b^P)E^\top+b^O\big)`,'Eq. 7: output shares the item embedding E.']],
+ x:'Mask proportion 0.2–0.6 by dataset; L = 2, h = 2, d = 64.',L:[['BERT4Rec',ax('1904.06690')]]},
+{id:'vit',b:'enc',d:'Vision',n:'ViT',y:'2020',o:'Google',ot:'I',star:1,nv:['Arch','Data'],par:'tf',
+ pb:'Vision used CNNs. Attention over every pixel is far too expensive (a 224² image has 50,176 pixels).',
+ nw:'Cut the image into 16×16 patches, flatten and linearly project each patch, add position embeddings and a [class] token, and feed them to an unchanged Transformer encoder.',
+ why:'196 tokens instead of 50,176 pixels makes attention affordable. With enough pretraining data it beats CNNs.',
+ dg:[{t:'patch',mode:'vit',cls:1,cap:'Image → 16×16 patches → linear projection + position → [class] + patch tokens',tokcap:'197 tokens × 768 (ViT-B/16 at 224²)',end:'Standard encoder × 12',endsub:'[class] output → MLP head'}],
+ ex:['ViT-B/16 at 224²: 196 patches of 16 × 16 × 3 = 768 values each.','Add a [class] token → 197 × 768 → 12 encoder blocks → [class] output → label.','At 384 px: 576 patches, so the 14 × 14 position grid is interpolated to 24 × 24.'],
+ kept:'The standard Transformer encoder (pre-norm) and BERT’s [class] token.',
+ ch:[['Patches as tokens','Only the input representation is new.'],['Pretraining on JFT-300M / ImageNet-21k','Without CNN biases it needs much more data; use pretrained checkpoints for small datasets.']],
+ m:[[R`z_0=[x_{class};\,x_p^1E;\,\dots;\,x_p^NE]+E_{pos},\quad N=\frac{HW}{P^2}`,'Eq. 1.'],[R`z'_\ell=\mathrm{MSA}(\mathrm{LN}(z_{\ell-1}))+z_{\ell-1},\quad z_\ell=\mathrm{MLP}(\mathrm{LN}(z'_\ell))+z'_\ell`,'Eqs. 2–3: pre-norm blocks.']],
+ x:'Base 86M, Large 307M, Huge 632M. “Only MLP layers are local and translationally equivariant.”',L:[['An Image is Worth 16x16 Words',ax('2010.11929')]]},
+{id:'swin',b:'enc',d:'Vision',n:'Swin',y:'2021',o:'Microsoft Research Asia',ot:'I',nv:['Arch'],par:'vit',
+ pb:'ViT’s all-to-all attention grows with the square of the image size, too costly for detection and segmentation at high resolution.',
+ nw:'Attend only inside 7×7 windows, and shift the windows by half a window in every other block so information crosses window borders. Merge patches between stages to build a pyramid.',
+ why:'Cost becomes linear in image size and features come at several scales, like a CNN.',
+ dg:[{t:'patch',mode:'swin',cap:'Regular windows (green) in block l; shifted window (amber, dashed) in block l + 1',tokcap:'attention only inside each window',end:'Patch merging',endsub:'2×2 neighbours → 2C channels'}],
+ ex:['Swin-T stage 1: 56 × 56 = 3,136 tokens = 64 windows of 49.','Quadratic attention term drops from 2·3136²·96 ≈ 1.89×10⁹ to 2·49·3136·96 ≈ 2.95×10⁷: 64× less.','A shift of (3, 3) makes each new window span up to 4 old ones.'],
+ kept:'ViT patch tokens and blocks.',
+ ch:[['Window attention (M = 7)','Linear cost in image size.'],['Shifted windows via cyclic shift + mask','Cross-window connections at no extra cost.'],['Patch merging into 4 stages','Multi-scale features for detection.'],['Relative position bias B in each window','Better than absolute positions here.']],
+ m:[[R`\Omega(\mathrm{MSA})=4hwC^2+2(hw)^2C,\qquad \Omega(\text{W-MSA})=4hwC^2+2M^2hwC`,'Eqs. 1–2.'],[R`\mathrm{Attention}(Q,K,V)=\mathrm{SoftMax}\!\left(\frac{QK^\top}{\sqrt d}+B\right)V`,'Eq. 4, B from a (2M−1)×(2M−1) table.']],
+ x:'87.3 top-1 on ImageNet-1K (22K pretraining); 58.7 box AP on COCO. Swin-B’s exact config is from memory.',L:[['Swin Transformer',ax('2103.14030')]]},
+{id:'mae',b:'enc',d:'Vision',n:'MAE',y:'2021',o:'Meta',ot:'I',nv:['Train'],par:'vit',
+ pb:'Vision Transformers needed huge labelled datasets.',
+ nw:'Hide 75% of the patches. The encoder sees only the visible 25%; a light decoder gets mask tokens and redraws the missing pixels.',
+ why:'Self-supervised pretraining without labels, and the encoder only processes a quarter of the tokens (2.8–4.1× faster).',
+ dg:[{t:'patch',mode:'mae',cap:'75% of patches removed (grey). Only visible patches enter the encoder.',tokcap:'49 visible tokens (ViT-L/16)',end:'+147 mask tokens → light decoder',endsub:'8 blocks, width 512 → pixels'}],
+ ex:['ViT-L/16: 196 patches → keep 49 at random.','Encoder runs on 49 tokens: about 4× fewer tokens and roughly 16× fewer attention FLOPs.','Add 147 shared mask tokens, decode, and compute MSE only on the 147 hidden patches.','After pretraining the decoder is thrown away.'],
+ kept:'ViT patching and encoder; BERT’s idea of a loss only on hidden positions.',
+ ch:[['Encoder never sees mask tokens','Big compute saving.'],['Very high mask ratio (75%)','Images are redundant; low ratios are too easy.']],
+ m:[[R`\mathcal{L}=\frac{1}{|\Omega|}\sum_{i\in\Omega}\big\|x_i-\hat x_i\big\|_2^2`,'MSE over masked patches Ω only.']],
+ x:'ViT-H: 87.8% on ImageNet-1K at 448 px using ImageNet-1K only.',L:[['Masked Autoencoders',ax('2111.06377')]]},
+{id:'dino',b:'enc',d:'Vision',n:'DINO → DINOv2 → DINOv3',y:'2021–25',o:'Meta',ot:'I',nv:['Train','Data'],par:'vit',
+ pb:'General-purpose image features needed labels or captions.',
+ nw:'Self-distillation: a student network matches the output of a teacher that is a slow moving average of the student, on different crops of the same image. Centring and sharpening the teacher prevent collapse. v2 adds a masked-patch loss and curated data; v3 adds Gram anchoring at 7B.',
+ why:'Features learned with no labels work frozen for classification, segmentation and depth.',
+ dg:[{t:'chain',steps:['Image → crops|2 global (224²) + local (96²)','Student|sees all crops','Teacher = EMA of student|global crops only','Centre + sharpen|τ_t 0.04→0.07','Cross-entropy|student ↔ teacher'],hl:[2,3],note:'DINOv2 adds iBOT masked-patch loss + KoLeo; DINOv3 adds a Gram loss tying patch-similarity matrices to an early teacher.'}],
+ ex:['2 global + 8 local crops. The teacher gives softmax((g_t − c) / 0.04) over 65,536 prototypes.','The student (τ = 0.1) is trained on 2 × 9 = 18 cross-entropy pairs.','Then θ_t ← 0.996·θ_t + 0.004·θ_s. Centring stops one prototype dominating; sharpening stops a uniform output.'],
+ kept:'ViT backbone.',
+ ch:[['Self-distillation with an EMA teacher (DINO)','No labels needed.'],['iBOT patch loss, Sinkhorn-Knopp centring, KoLeo, LVD-142M data (v2)','Strong frozen features.'],['Gram anchoring, 7B ViT, 1.7B images (v3)','Dense features stop degrading in long training.']],
+ m:[[R`\min_{\theta_s}H\big(P_t(x),P_s(x')\big),\ \ H(a,b)=-a\log b,\ \ P=\mathrm{softmax}(g/\tau)`,'DINO Eq. 2–3.'],[R`\theta_t\leftarrow\lambda\theta_t+(1-\lambda)\theta_s,\ \ \lambda:0.996\to1;\qquad c\leftarrow mc+(1-m)\,\mathrm{mean}(g_{\theta_t})`,'EMA teacher and centring (m = 0.9).'],[R`\mathcal{L}_{Gram}=\big\|X_SX_S^\top-X_GX_G^\top\big\|_F^2`,'DINOv3 Eq. 2.']],
+ L:[['DINO',ax('2104.14294')],['DINOv2',ax('2304.07193')],['DINOv3',ax('2508.10104')]]},
+{id:'sam',b:'enc',d:'Vision',n:'SAM → SAM 2 → SAM 3',y:'2023–25',o:'Meta',ot:'I',nv:['Data','Arch'],par:'mae',
+ pb:'Segmentation models only knew the classes they were trained on.',
+ nw:'A heavy image encoder runs once; a light decoder turns any prompt (click, box, mask; text in SAM 3) into masks in about 50 ms. Trained on 1.1B masks made with the model in the loop.',
+ why:'Segment anything you point at, without retraining, and re-prompt interactively.',
+ dg:[{t:'chain',rows:[['Image 1024²|','MAE ViT-H/16 encoder|runs once','64×64×256 embedding|cached'],['Click / box / mask|','Prompt encoder|sparse + dense tokens','2-layer mask decoder|→ 3 masks + IoU scores']],hl:[4,5]}],
+ ex:['One click on a shirt becomes one sparse prompt token.','The 2-layer decoder outputs 3 masks (shirt / person / pocket) with predicted IoU, because a click is ambiguous.','Each new click reruns only the ~50 ms decoder; the image embedding is reused.'],
+ kept:'MAE-pretrained ViT-H/16; CLIP text encoder for text prompts.',
+ ch:[['Promptable segmentation with 3 ambiguity-aware outputs','Only the best-of-3 loss is backpropagated.'],['SA-1B data engine (1.1B masks, 11M images)','Data was the bottleneck.'],['SAM 2: memory attention over past frames','Video tracking.'],['SAM 3: concept prompts (noun phrases), presence head','Finds every instance of a concept.']],
+ m:[[R`\mathcal{L}=20\cdot\mathcal{L}_{focal}+1\cdot\mathcal{L}_{dice}\ \ (\text{min over the 3 masks})`,'Focal : dice = 20 : 1.']],
+ x:'SAM 3’s DETR-style detector and backbone name are from memory; abstract checked only.',L:[['Segment Anything',ax('2304.02643')],['SAM 2',ax('2408.00714')],['SAM 3',ax('2511.16719')]]},
+{id:'clip',b:'enc',d:'Multimodal',n:'CLIP',y:'2021',o:'OpenAI',ot:'I',nv:['Train','Data'],par:'vit',
+ pb:'Image classifiers only recognised a fixed list of labels.',
+ nw:'Train an image encoder and a text encoder together on 400M image–caption pairs so matching pairs score highest in an N×N similarity matrix.',
+ why:'Classify with any words you write (zero-shot), and these image encoders became the “eyes” of later multimodal LLMs.',
+ dg:[{t:'contrast',mode:'clip',cap:'One batch: the diagonal (matching pairs) is pushed up in both directions'}],
+ ex:['A batch of 3 pairs (dog, car, pizza) gives a 3×3 matrix of cosine similarities × e^t.','Cross-entropy over each row (image → texts) and each column (text → images) rewards the diagonal.','At N = 32,768 that is about 1.07 × 10⁹ logits per step.','Zero-shot: embed “a photo of a {label}” for every label and pick the closest.'],
+ kept:'ResNet or ViT image encoder, Transformer text encoder, InfoNCE-style loss.',
+ ch:[['Contrastive loss on 400M web pairs','Zero-shot ImageNet 76.2% vs 11.5% before.']],
+ m:[[R`\text{logits}=(I_e\,T_e^\top)\cdot e^{t},\quad \mathcal{L}=\tfrac12\big(\mathrm{CE}(\text{logits},\text{diag})+\mathrm{CE}(\text{logits}^\top,\text{diag})\big)`,'Figure 3 pseudocode; logit scale clipped at 100, τ initialised to 0.07.']],
+ L:[['CLIP',ax('2103.00020')]]},
+{id:'siglip',b:'enc',d:'Multimodal',n:'SigLIP',y:'2023',o:'Google',ot:'I',nv:['Train','Sys'],par:'clip',
+ pb:'CLIP’s softmax needs the whole batch for every row and column, so huge batches need expensive all-gathers.',
+ nw:'Treat every image–text pair as its own yes/no question with a sigmoid, with a learnable temperature t and bias b.',
+ why:'No global normalisation, so each device computes its own block; memory per device drops from |B|² to b².',
+ dg:[{t:'contrast',mode:'sig',cap:'Every cell is an independent binary decision'}],
+ ex:['At initialisation t = 10, b = −10.','A negative with cosine ≈ 0 has logit −10, σ ≈ 4.5×10⁻⁵: almost no loss.','A positive with cosine 0.3 has logit −7, σ ≈ 9×10⁻⁴: a large loss, so it is pushed up.'],
+ kept:'CLIP/ALIGN dual encoder.',
+ ch:[['Pairwise sigmoid loss with learnable bias','Works at any batch size; saturates around 32K.']],
+ m:[[R`\text{logits}=t\cdot(z_{img}z_{txt}^\top)+b,\quad \text{labels}=2I-\mathbf{1},\quad \mathcal{L}=-\tfrac1n\textstyle\sum\log\sigma(\text{labels}\odot\text{logits})`,'Algorithm 1. Initial t = 10, b = −10.']],
+ x:'The printed equation shows +b in the exponent; the pseudocode (logit = t·cos + b) is the version used here.',L:[['SigLIP',ax('2303.15343')]]},
+{id:'dit',b:'enc',d:'Image and video gen',n:'DiT',y:'2022',o:'UC Berkeley, NYU',ot:'A',nv:['Arch'],par:'vit',
+ pb:'Diffusion image generators used a convolutional U-Net to predict noise.',
+ nw:'Replace the U-Net with ViT-style Transformer blocks over patches of the noisy latent. Condition each block with adaLN-Zero: the timestep and class set the normalisation scale, shift and a gate that starts at zero.',
+ why:'Image quality improves predictably with compute (Gflops), like LLMs. FID 2.27 on ImageNet 256².',
+ dg:[{t:'patch',mode:'dit',cap:'Noisy 32×32×4 latent → 2×2 patches → 256 tokens',tokcap:'256 tokens × 1152 (DiT-XL/2)',end:'28 DiT blocks (adaLN-Zero)',endsub:'→ predicted noise ε and Σ'},
+     {t:'chain',steps:['Timestep t + class c|summed embeddings','MLP|regresses γ, β, α','LayerNorm × (1+γ) + β|inside each block','Attention / MLP output × α|α starts at 0','+ residual|block starts as identity'],hl:[1,2,3]}],
+ ex:['A 256² image → VAE → 32 × 32 × 4 latent → patches of 2 → 256 tokens of width 1152.','Every one of the 28 blocks starts as the identity because the gate α is zero-initialised.','The output reshapes to 32 × 32 × (4 + 4): predicted noise and covariance.'],
+ kept:'Latent diffusion with the SD VAE; ADM diffusion settings; ViT patchify and configs.',
+ ch:[['Transformer backbone instead of U-Net','Scales with Gflops.'],['adaLN-Zero conditioning (best of 4 tested)','Stable training, no extra tokens.']],
+ m:[[R`x_t=\sqrt{\bar\alpha_t}\,x_0+\sqrt{1-\bar\alpha_t}\,\epsilon,\qquad \mathcal{L}_{simple}=\mathbb{E}\big\|\epsilon-\epsilon_\theta(x_t,t)\big\|^2`,'Forward process (standard form) and noise-prediction loss.']],
+ x:'DiT-XL/2: 28 layers, width 1152, 16 heads. FID-50K 2.27 with guidance 1.5. The six modulation vectors per block are from memory.',L:[['Scalable Diffusion Models with Transformers',ax('2212.09748')]]},
+{id:'sd3',b:'enc',d:'Image and video gen',n:'Stable Diffusion 3',y:'2024',o:'Stability AI',ot:'I',nv:['Arch','Train'],par:'dit',
+ pb:'Text guided images only through one-way cross-attention, and diffusion sampling needed many steps.',
+ nw:'MM-DiT: text and image tokens keep separate weights but share one joint attention. Train with rectified flow (straight path from data to noise) and a logit-normal timestep schedule.',
+ why:'Better prompt following and typography, and straighter paths that need fewer sampling steps. Scaled to 8B.',
+ dg:[{t:'two'}],
+ ex:['A 1024² image → 128×128 latent → 2×2 patches → 4,096 image tokens; plus 154 text tokens = 4,250 tokens in joint attention.','Training: draw u ~ N(0, 1), t = sigmoid(u), shift toward noise with α = 3 at 1024², regress ε − x₀.','Sampling: Euler steps from t = 1 (noise) to t = 0 (data): x ← x − Δt · v.'],
+ kept:'DiT with adaLN modulation; LDM latent space (upgraded to 16 channels); CLIP + T5-XXL text encoders.',
+ ch:[['Two streams, one joint attention','Text and image influence each other both ways.'],['Rectified flow + logit-normal t','Best of 61 formulations tested (rank 1.54).'],['QK RMSNorm','Stable mixed-precision training at scale.']],
+ m:[[R`z_t=(1-t)x_0+t\epsilon,\quad v=\epsilon-x_0,\quad \mathcal{L}=\mathbb{E}\big\|v_\Theta(z_t,t)-(\epsilon-x_0)\big\|^2`,'Eq. 13: t = 0 is data, t = 1 is noise (the opposite of π0’s convention).'],[R`t_m=\frac{\sqrt{m/n}\;t_n}{1+(\sqrt{m/n}-1)\,t_n},\quad \sqrt{m/n}=3.0\ \text{at }1024^2`,'Resolution-dependent shift.']],
+ x:'Text-encoder dropout is 46.3% in Sec. 5.3.3 but 46.4% in App. B.3. 8B model at depth 38.',L:[['Scaling Rectified Flow Transformers (SD3)',ax('2403.03206')]]},
+{id:'flux',b:'enc',d:'Image and video gen',n:'FLUX.1 → FLUX.2',y:'2024–25',o:'Black Forest Labs',ot:'I',nv:['Arch','Prod'],par:'sd3',
+ pb:'SD3’s two-stream blocks are expensive throughout the whole network.',
+ nw:'Start with double-stream (MM-DiT) blocks, then concatenate text and image into one sequence for 38 cheaper single-stream blocks; 3D RoPE over (t, h, w). FLUX.2 conditions on a 24B Mistral-3 vision-language model.',
+ why:'Cheaper deep layers, image editing via context-image tokens (Kontext), and an LLM-grade understanding of prompts (FLUX.2).',
+ dg:[{t:'chain',steps:['Text + image latents|16-channel latents','Double-stream blocks|SD3-style','Concatenate|one sequence','38 single-stream blocks|attention ∥ MLP fused','Velocity|on image tokens'],hl:[2,3]}],
+ ex:['“Make the car red”: photo latents at RoPE time index 1, noisy target at index 0, plus text tokens, all in one sequence.','The model predicts velocity only for the target tokens; the index offset acts as a “virtual time step”.'],
+ kept:'SD3’s double-stream blocks and rectified-flow objective; RoPE.',
+ ch:[['Single-stream fused blocks','Halve modulation parameters, cheaper layers.'],['3D RoPE (t, h, w)','Positions for images and context images.'],['FLUX.2: Mistral-3 24B VLM conditioner, new VAE','Better prompt understanding, up to 10 reference images, 4MP.']],
+ m:[[R`z_t=(1-t)x+t\epsilon`,'Same rectified flow as SD3, logit-normal t with resolution-dependent µ.']],
+ x:'There is no standalone FLUX.1 paper; its architecture comes from the Kontext report. The often-quoted 19 double-stream blocks and 12B base size are not confirmed in a primary source. FLUX.2 [dev] is 32B open weights.',
+ L:[['FLUX.1 Kontext',ax('2506.15742')],['FLUX.2 announcement','https://bfl.ai/blog/flux-2']]},
+{id:'sora',b:'enc',d:'Image and video gen',n:'Sora (outline only)',y:'2024',o:'OpenAI',ot:'I',nv:['Arch','Data'],par:'dit',status:'internals undisclosed',
+ pb:'Video generators worked on short clips at one fixed size.',
+ nw:'Compress video into a latent, cut it into spacetime patches that act as tokens, and denoise them with a diffusion transformer under text conditioning.',
+ why:'One model handles different durations, resolutions and aspect ratios.',
+ dg:[{t:'chain',steps:['Video|','Compression network|latent in time and space','Spacetime patches|= tokens','Diffusion transformer|text-conditioned','Decoder|→ pixels'],hl:[2]}],
+ ex:['A vertical 1080 × 1920 request is handled by laying out noise patches in that aspect ratio, denoising under a GPT-expanded caption, then decoding.'],
+ kept:'DiT, ViT patches, latent diffusion, DALL·E 3 re-captioning.',
+ ch:[['Spacetime patches at native size','Variable length and shape.']],
+ nomath:'No equations are disclosed. The report says “Model and implementation details are not included.” Sora 2 is excluded entirely.',
+ L:[['Video generation models as world simulators','https://openai.com/index/video-generation-models-as-world-simulators/']]},
+{id:'esm',b:'enc',d:'Science',n:'ESM-2 / ESMFold',y:'2022',o:'Meta',ot:'I',nv:['Data','Arch'],par:'bert',
+ pb:'Protein structure prediction needed slow searches for related sequences (MSAs).',
+ nw:'Train a BERT-style masked language model on protein sequences up to 15B parameters; structure information emerges inside it. ESMFold folds a single sequence from its embeddings, no MSA.',
+ why:'About 6× faster than one AlphaFold 2 model, and fast enough to fold 617M metagenomic proteins.',
+ dg:[{t:'chain',steps:['Amino-acid sequence|single, no MSA','ESM-2 (3B)|masked protein LM','Folding trunk|48 blocks, seq + pair','Structure module|8 IPA blocks','3D structure|+ pLDDT'],hl:[1,2]}],
+ ex:['120 residues → ESM-2 embeddings (120 × 2560) and attention maps.','→ sequence state 120 × 1024 and pair state 120 × 120 × 128 → 48 folding blocks → 8 structure blocks → 3D frames.','Speed: 14.2 s for 384 residues on a V100.'],
+ kept:'BERT’s masked objective; AlphaFold 2’s losses and equivariant structure module.',
+ ch:[['Scale a protein MLM to 15B','Perplexity 10.45 (8M) → 6.37 (15B).'],['MSA-free folding','Fast single-sequence prediction.']],
+ m:[[R`\mathcal{L}=-\sum_{i\in\mathcal{M}}\log p\big(a_i\mid a_{\setminus\mathcal{M}}\big)`,'BERT’s loss over amino acids.']],
+ x:'The 15% masking rate is from memory. The paper says three recycling steps; the released config has max_recycles 4.',L:[['ESM-2 / ESMFold (bioRxiv)','https://www.biorxiv.org/content/10.1101/2022.07.20.500902v3'],['Science version','https://www.science.org/doi/10.1126/science.ade2574']]},
+{id:'aurora',b:'enc',d:'Science',n:'Aurora',y:'2024',o:'Microsoft',ot:'I',nv:['Data','Arch'],par:'swin',
+ pb:'Each Earth-system forecast (weather, air quality, waves) needed its own physics model.',
+ nw:'One 1.3B foundation model: Perceiver encoders compress many variables and pressure levels into 3 latent levels, a 3D Swin U-Net processes them, and a Perceiver decoder maps back; then fine-tune per task.',
+ why:'Matches or beats operational air-quality forecasts (CAMS) on 74% of targets at roughly 50,000× the speed.',
+ dg:[{t:'chain',steps:['Many variables and levels|patchified','3D Perceiver encoder|→ 3 latent levels','3D Swin U-Net|48 layers, window (2,12,6)','Perceiver decoder|back to variables','Forecast|6 h ahead, rolled out'],hl:[1,2]}],
+ ex:['Pretrain on over a million hours of data to predict 6 hours ahead, then roll out recursively.','Fine-tune with LoRA on attention layers for each downstream task.'],
+ kept:'Swin windowed attention, Perceiver encoders, LoRA.',
+ ch:[['Flexible encoder for heterogeneous variables','One model for many Earth-system tasks.']],
+ nomath:'Training loss is a weighted MAE over variables (Eq. 1); no new core formula.',
+ x:'The often-quoted “5,000× faster than IFS” was not found in arXiv v3; v3 reports ~50,000× vs CAMS for air quality.',L:[['Aurora',ax('2405.13063')]]}
+);
+
+N.push(
+{id:'t5',b:'ed',d:'Language',n:'T5',y:'2019',o:'Google',ot:'I',nv:['Train','Eval','Data'],par:'tf',
+ pb:'Every NLP task had its own output format and head, so methods were hard to compare.',
+ nw:'Cast every task as text in, text out, and run one huge controlled study of objectives, architectures and data. Pretrain by dropping tokens and asking the decoder to output only what was dropped, marked by sentinel tokens.',
+ why:'One model and one loss for every task, plus a clear record of which choices actually matter.',
+ dg:[{t:'chain',rows:[['Original|“Thank you for inviting me to your party last week.”','Drop ~15% of tokens|runs collapse to one sentinel'],['Encoder input|“Thank you <X> me to your party <Y> week.”','Decoder target|“<X> for inviting <Y> last <Z>”']],hl:[1,3],bh:72},
+     {t:'ed',hl:['obj'],inp:'“translate English to German: …”',pos:'relative bias (32 buckets)',out:'“Das ist gut.”',data:'C4 (~750GB Common Crawl)',obj:'Span corruption'}],
+ ex:['Every task is a prefixed string: “translate English to German: That is good.” → “Das ist gut.”; regression targets are written as strings.','Pretraining example (the paper’s own): input “Thank you <X> me to your party <Y> week.”, target “<X> for inviting <Y> last <Z>”.','Position: offset −7 falls in a small bucket; −200 shares the last bucket with every offset beyond 128.'],
+ kept:'The original encoder-decoder (with pre-norm and rescale-only LayerNorm).',
+ ch:[['Text-to-text framing','One model, one loss.'],['Sentinel span corruption','The baseline corrupts ~15% of tokens one at a time; mean span length 3 was tested later and adopted.'],['Scalar relative position bias, shared across layers','Generalises to other lengths.'],['C4 dataset and systematic ablations','Shows which choices matter.']],
+ m:[[R`\mathrm{softmax}\!\Big(\frac{QK^\top}{\sqrt d}+b_{\mathrm{bucket}(i-j)}\Big)V`,'One learned scalar per bucket per head; 32 buckets, logarithmic up to offset 128.']],
+ x:'Largest model 11B; vocabulary 32,000. The common claim that the baseline uses spans of mean length 3 is wrong; that was an ablation.',L:[['T5',ax('1910.10683')]]},
+{id:'bart',b:'ed',d:'Language',n:'BART',y:'2019',o:'Meta',ot:'I',nv:['Train'],par:'tf',
+ pb:'BERT understands but cannot generate; GPT generates but cannot see both sides of its input.',
+ nw:'Corrupt a document in several ways, read it with a bidirectional encoder, and have an autoregressive decoder write the original back in full.',
+ why:'Strong at generation tasks such as summarisation while keeping bidirectional understanding.',
+ dg:[{t:'chain',steps:['Original|“A B C . D E .”','Text infilling|spans → one [MASK]','Sentence permutation|“D [MASK] E . A [MASK] .”','Bidirectional encoder|','AR decoder|→ “A B C . D E .”'],hl:[1,2]}],
+ ex:['“A B C . D E .” → infilling: “A [MASK] . D [MASK] E .” (span lengths ~ Poisson(λ = 3)).','→ permutation: “D [MASK] E . A [MASK] .”','The decoder must output the full original, including how many tokens each [MASK] hid.'],
+ kept:'Transformer seq2seq; GPT’s GeLU.',
+ ch:[['Text infilling: one [MASK] for a whole span','Model must also predict span length.'],['Final recipe: infilling (30% of tokens) + sentence permutation','Best mix in ablations.']],
+ m:[[R`\mathcal{L}=-\log p_\theta\big(x\mid \mathrm{corrupt}(x)\big)`,'Reconstruction loss (phrasing from memory).']],
+ L:[['BART',ax('1910.13461')]]},
+{id:'t5gemma',b:'ed',d:'Language',n:'T5Gemma',y:'2025',o:'Google',ot:'I',nv:['Train'],par:'t5',
+ pb:'Encoder-decoders fell behind because the big pretraining runs went into decoder-only models.',
+ nw:'Copy a pretrained decoder-only Gemma 2 into both halves of an encoder-decoder (encoder made bidirectional, decoder gains cross-attention), then continue pretraining with UL2 or PrefixLM.',
+ why:'Reuses expensive pretraining; unbalanced sizes such as a 9B encoder with a 2B decoder read well and generate fast.',
+ dg:[{t:'chain',steps:['Gemma 2 weights|decoder-only','Copy → encoder|attention made bidirectional','Copy → decoder|+ cross-attention','Continue pretraining|UL2 or PrefixLM'],hl:[1,2,3]}],
+ ex:['9B-9B beats Gemma 2 9B by more than 9 points on GSM8K and 4 on DROP.','2B-2B instruction-tuned: GSM8K 58.0% → 70.7%.'],
+ kept:'T5-style encoder-decoder layout; Gemma 2 weights.',
+ ch:[['“Model adaptation” from decoder-only weights','No pretraining from scratch.'],['Unbalanced encoder/decoder sizes','Quality of a big reader, latency of a small writer.']],
+ nomath:'No new formula; the contribution is the adaptation recipe. That cross-attention is initialised from self-attention is from memory.',
+ L:[['T5Gemma blog','https://developers.googleblog.com/en/t5gemma/'],['T5Gemma paper',ax('2504.06225')]]},
+{id:'whisper',b:'ed',d:'Speech',n:'Whisper',y:'2022',o:'OpenAI',ot:'I',nv:['Data','Train'],par:'tf',
+ pb:'Speech recognisers trained on clean, curated data broke on accents, noise and new domains.',
+ nw:'A standard encoder-decoder trained on 680,000 hours of weakly labelled web audio, with special tokens in the decoder that select language, task (transcribe or translate) and timestamps.',
+ why:'Robust on real-world audio, and one set of weights does many speech tasks.',
+ dg:[{t:'ed',hl:['data','obj'],inp:'80-ch log-Mel, 30 s',pos:'sinusoidal',encAttn:'after 2 conv layers (stride 2)',out:'text + timestamps',data:'680,000 h weakly labelled web audio',obj:'Multitask token format'},
+     {t:'chain',steps:['<|startoftranscript|>|','<|fr|>|language (99)','<|translate|>|or <|transcribe|>','text with timestamps|20 ms steps','<|endoftranscript|>|'],hl:[1,2]}],
+ ex:['French audio + <|startoftranscript|><|fr|><|translate|> → English text with timestamps.','Swap in <|transcribe|> → French text, same weights.','30 s of audio = 3,000 frames; the stride-2 conv halves that to 1,500 encoder positions.'],
+ kept:'Transformer encoder-decoder; GPT-2’s byte-level BPE.',
+ ch:[['680K hours of weak supervision','Zero-shot robustness.'],['Task tokens in the decoder','Language ID, transcription, translation, timestamps in one model.']],
+ m:[[R`\mathcal{L}=-\sum_t\log p\big(y_t\mid y_{<t},\ \mathrm{Enc}(\text{audio})\big)`,'Standard sequence-to-sequence loss.']],
+ x:'680,000 h = 117,000 h multilingual + 125,000 h X→en translation + ≈438,000 h English (our subtraction). Sizes 39M–1,550M.',L:[['Whisper',ax('2212.04356')]]},
+{id:'detr',b:'ed',d:'Vision',n:'DETR → RT-DETR',y:'2020 / 2023',o:'Meta, Baidu',ot:'I',nv:['Arch','Algo'],par:'tf',
+ pb:'Object detectors needed hand-designed anchor boxes and non-maximum suppression (NMS) to remove duplicates.',
+ nw:'Treat detection as predicting a set: 100 learned “object queries” in the decoder each claim at most one object, and the Hungarian algorithm matches predictions to real objects one-to-one during training.',
+ why:'No anchors and no NMS. RT-DETR makes it real-time (53.1 AP at 108 FPS) with a hybrid encoder.',
+ dg:[{t:'chain',steps:['Image|','ResNet-50|→ 2048 ch at 1/32','Encoder × 6|+ positions','Decoder × 6|100 object queries','FFN heads|box + class (or ∅)','Hungarian match|one-to-one'],hl:[3,5]}],
+ ex:['2 real objects, 100 predictions: build a 100 × 2 cost matrix of −p̂(class) + 5·L1 + 2·GIoU.','Hungarian matching picks, say, prediction #17 for the cat and #63 for the dog.','The other 98 are trained toward “no object” (∅) at weight 1/10, so duplicates are punished and no NMS is needed.'],
+ kept:'ResNet backbone, Transformer encoder-decoder, Hungarian algorithm, GIoU loss.',
+ ch:[['Set prediction with learned object queries','Removes anchors and NMS.'],['RT-DETR: one attention layer on the top feature map + CNN fusion, top-300 query selection','Real-time speed.']],
+ m:[[R`\hat\sigma=\arg\min_{\sigma}\sum_i\mathcal{L}_{match}\big(y_i,\hat y_{\sigma(i)}\big),\quad \mathcal{L}_{match}=-\mathbb{1}_{c_i\ne\varnothing}\hat p_{\sigma(i)}(c_i)+\mathbb{1}_{c_i\ne\varnothing}\mathcal{L}_{box}`,'Eq. 1: matching uses the probability p̂.'],[R`\mathcal{L}_H=\sum_i\big[-\log\hat p_{\hat\sigma(i)}(c_i)+\mathbb{1}_{c_i\ne\varnothing}\mathcal{L}_{box}\big],\quad \mathcal{L}_{box}=2\,\mathcal{L}_{giou}+5\,\|b-\hat b\|_1`,'Eq. 2: the loss uses −log p̂; ∅ down-weighted by 10.']],
+ L:[['DETR',ax('2005.12872')],['RT-DETR',ax('2304.08069')]]},
+{id:'alphacode',b:'ed',d:'Code',n:'AlphaCode',y:'2022',o:'DeepMind',ot:'I',nv:['Algo','Data'],par:'tf',
+ pb:'Code models could not solve competitive-programming problems that need real reasoning.',
+ nw:'Sample up to about a million programs per problem, filter them on the example tests, cluster the survivors by their behaviour on generated inputs, and submit at most 10.',
+ why:'Search at inference time beats a single attempt: average ranking in the top 54.3% of Codeforces contestants.',
+ dg:[{t:'chain',steps:['Problem text|','Sample ~1M programs|encoder-decoder, MQA','Filter on example tests|removes ~99%','Cluster by outputs|on generated inputs','≤ 10 submissions|'],hl:[1,2,3]}],
+ ex:['~1M samples → ~10K pass the example tests → clustered by outputs → submit one from each of the 10 largest clusters.'],
+ kept:'Encoder-decoder Transformer with multi-query attention.',
+ ch:[['Massive sampling + filtering + clustering','Turns compute into accuracy.'],['CodeContests dataset; asymmetric encoder (1536 tokens) / decoder (768)','Fit long problem statements.']],
+ m:[[R`n@k=\%\ \text{of problems solved with }k\text{ samples and }n\text{ submissions}`,'Headline metric 10@k.']],
+ L:[['AlphaCode',ax('2203.07814')]]},
+{id:'imagen',b:'ed',d:'Image and video gen',n:'Imagen',y:'2022',o:'Google',ot:'I',nv:['Eval','Algo'],par:'t5',
+ pb:'Text-to-image models used small or image-text-trained text encoders and often misread prompts.',
+ nw:'Encode the prompt with a large frozen T5-XXL language model, then generate with a cascade of diffusion models (64² → 256² → 1024²).',
+ why:'Scaling the frozen text encoder improved results more than scaling the image model. FID 7.27 zero-shot on COCO.',
+ dg:[{t:'chain',steps:['Prompt|“a corgi on a skateboard”','Frozen T5-XXL|4.6B, text only','64² diffusion U-Net|2B','Super-res 256²|600M','Super-res 1024²|400M'],hl:[1]}],
+ ex:['Ablation: going from T5-Small to T5-XXL moves the FID-vs-CLIP curve more than growing the U-Net from 300M to 2B.','Raters preferred T5-XXL over CLIP encoders in all 11 DrawBench categories.'],
+ kept:'T5 encoder, classifier-free guidance, cascaded diffusion, U-Net denoisers.',
+ ch:[['Frozen large language encoder','Text understanding comes from text-only pretraining.'],['Dynamic thresholding','Allows high guidance without saturated images.']],
+ m:[[R`\tilde\epsilon=w\,\epsilon_\theta(z_t,c)+(1-w)\,\epsilon_\theta(z_t)`,'Classifier-free guidance (standard form).']],
+ L:[['Imagen',ax('2205.11487')]]},
+{id:'chronos',b:'ed',d:'Time series',n:'Chronos',y:'2024',o:'Amazon',ot:'I',nv:['Algo'],par:'t5',
+ pb:'Each forecasting problem needed its own trained model.',
+ nw:'Scale a series by its mean absolute value, cut the range into uniform bins, and train an unmodified language model (T5) on the bin tokens. Sample several futures for a probabilistic forecast.',
+ why:'Zero-shot forecasting with an off-the-shelf architecture.',
+ dg:[{t:'chain',steps:['Series|[10, 12, 0, 14]','Mean scale|s = 9 → [1.11, 1.33, 0, 1.56]','Quantise|uniform bins on [−15, 15]','T5 (only embeddings changed)|cross-entropy','Sample → dequantise × s|forecast'],hl:[1,2]}],
+ ex:['[10, 12, 0, 14] → s = mean|x| = 9 → [1.11, 1.33, 0, 1.56].','Bins of width ≈ 30 / 4093 ≈ 0.0073 → token IDs.','Sampled tokens map to bin centres, multiplied by 9.'],
+ kept:'T5 (or GPT-2) architecture.',
+ ch:[['Value tokenisation','Any series becomes language.'],['TSMixup + KernelSynth synthetic data','More training diversity.']],
+ m:[[R`s=\frac1C\sum_{i=1}^{C}|x_i|,\qquad \tilde x_i=\frac{x_i}{s}`,'Mean scaling; bins uniform over [−15, 15].']],
+ x:'4096 is the vocabulary size including PAD and EOS, not the number of bins (≈4094 bins).',L:[['Chronos',ax('2403.07815')]]},
+{id:'gshard',b:'ed',d:'Language',n:'GShard',y:'2020',o:'Google',ot:'I',nv:['Sys','Arch'],par:'shazeer',
+ pb:'MoE worked between LSTM layers but had not been scaled inside Transformers across thousands of chips.',
+ nw:'Replace every other Transformer FFN with a top-2 MoE layer (gates renormalised over the two), cap each expert’s load, and shard experts across devices.',
+ why:'600B-parameter translation model trained on 2,048 TPU v3 cores in 4 days.',
+ dg:[{t:'moe',fn:'softmax over all, keep top-2, renormalise',scores:[0.133,0.030,0.361,0.066,0.015,0.109,0.242,0.044],sel:[2,6],gates:['0.599','0.401'],scoreLabel:'softmax gate g over 8 experts',formula:'y = 0.599·E3(x) + 0.401·E7(x)',note:'The 2nd expert is kept with probability ∝ g₂ (here 2·0.401 ≈ 0.80); tokens over capacity skip via the residual.',newRouter:1}],
+ ex:['Gate softmax for “cat” = [0.133, 0.030, 0.361, 0.066, 0.015, 0.109, 0.242, 0.044].','Top-2: E3 (0.361) and E7 (0.242) → renormalise: 0.599 and 0.401.','Keep E7 if 2·0.401 = 0.80 > U(0, 1), so about 80% of the time.'],
+ kept:'Shazeer’s sparsely-gated MoE.',
+ ch:[['MoE in every other Transformer FFN (encoder and decoder)','Became the standard placement.'],['Expert capacity 2N/(G·E) with overflow through the residual','Bounded compute per expert.'],['Single differentiable auxiliary balance loss','Simpler balancing.']],
+ m:[[R`g_1\leftarrow\frac{g_1}{g_1+g_2},\ \ g_2\leftarrow\frac{g_2}{g_1+g_2},\qquad \ell_{aux}=\frac1E\sum_e\frac{c_e}{S}\,m_e`,'Algorithm 1 and the balance loss.']],
+ L:[['GShard',ax('2006.16668')]]},
+{id:'switch',b:'ed',d:'Language',n:'Switch Transformer',y:'2021',o:'Google',ot:'I',nv:['Arch','Sys'],par:'gshard',
+ pb:'Top-2 routing doubles expert compute and communication, and MoE training was unstable.',
+ nw:'Route each token to exactly one expert (k = 1), keep the gate value as a multiplier, set a capacity factor, and use a simple balance loss α·N·Σ fᵢPᵢ.',
+ why:'Simpler, faster MoE that scaled to 1.6T parameters (Switch-C) on a T5 base.',
+ dg:[{t:'moe',fn:'softmax, top-1 (no renorm)',scores:[0.133,0.030,0.361,0.066,0.015,0.109,0.242,0.044],sel:[2],gates:['0.361'],scoreLabel:'router probabilities pᵢ(x)',formula:'y = 0.361·E3(x)',note:'Capacity = 1024 tokens / 8 experts × 1.25 = 160; a 161st token sent to E3 skips through the residual.',newRouter:1}],
+ ex:['Router probabilities for “cat”: E3 = 0.361 is the largest, so only E3 runs: y = 0.361·E3(x).','The gate is kept so the router still gets a gradient.','Perfect balance (fᵢ = Pᵢ = 1/8): loss = 0.01 · 8 · (8 · 1/64) = 0.01, the minimum.'],
+ kept:'Shazeer’s router, GShard’s capacity and every-other-layer placement, T5 encoder-decoder.',
+ ch:[['k = 1 routing','Half the expert compute of top-2.'],['Capacity factor, selective float32 router, 10× smaller init, expert dropout 0.4','Stable training at trillion scale.']],
+ m:[[R`p_i(x)=\frac{e^{h(x)_i}}{\sum_j e^{h(x)_j}},\quad y=\sum_{i\in\mathcal{T}}p_i(x)E_i(x)`,'Eqs. 1–2 (𝒯 = the single chosen expert).'],[R`\text{capacity}=\frac{\text{tokens per batch}}{\text{experts}}\times\text{capacity factor}`,'Eq. 3.'],[R`\mathcal{L}_{aux}=\alpha\cdot N\cdot\sum_{i=1}^{N}f_i\,P_i,\quad \alpha=10^{-2}`,'Eqs. 4–6: f = fraction of tokens, P = mean router probability.']],
+ x:'Switch-C is 1.6T in the text but 1,571B in Table 9.',L:[['Switch Transformers',ax('2101.03961')]]},
+{id:'flanmoe',b:'ed',d:'Language',n:'FLAN-MoE',y:'2023',o:'Google',ot:'I',star:1,nv:['Train','Eval'],par:'switch',
+ pb:'MoE models fine-tuned on a single task overfit and lost to dense models of equal compute.',
+ nw:'Instruction-tune MoE models on the FLAN mixture of many tasks before (or instead of) task fine-tuning. No new router: existing Switch, GShard, expert-choice and ST-MoE routers.',
+ why:'Instruction tuning helps MoE more than dense models, so MoE wins at equal FLOPs.',
+ dg:[{t:'chain',steps:['MoE model|Switch / GShard / EC / ST','Instruction tuning|FLAN task mixture','Optional task fine-tune|','Evaluate|zero/few-shot'],hl:[1]}],
+ ex:['Without instruction tuning: MoE underperforms dense at equal compute.','With FLAN instruction tuning: MoE beats dense; freezing the gate helps slightly, freezing experts hurts.'],
+ kept:'Existing MoE architectures (every other FFN is MoE) and their balance and z-losses.',
+ ch:[['Instruction tuning as the fix for MoE overfitting','Recipe and evidence, not architecture.']],
+ m:[[R`y=\sum_{i\in\mathrm{Top}k(g(x))}\mathrm{softmax}(g(x))_i\,E_i(x)`,'Standard top-k routing; nothing new here.']],
+ x:'Correct arXiv ID is 2305.14705 (2305.14819 is an unrelated graph-network paper). FLAN-ST-32B is “32B” in compute terms but 259B total parameters.',L:[['Mixture-of-Experts Meets Instruction Tuning',ax('2305.14705')]]}
+);
+N.push(
+{id:'gpt1',b:'dec',d:'Language',n:'GPT-1',y:'2018',o:'OpenAI',ot:'I',nv:['Train'],par:'tf',
+ pb:'Each NLP task needed its own architecture and labelled data.',
+ nw:'Pretrain a 12-layer Transformer decoder by predicting the next word on books, then fine-tune with one linear layer, rewriting each task’s input as one token sequence.',
+ why:'General language knowledge from unlabelled text transfers to many tasks.',
+ dg:[{t:'blk',kind:'dec',norm:'post',L:12,inp:'Token + learned position',attn:'masked, 12 heads',ffn:'GELU, 3072',out:'next word / task head',data:'BooksCorpus',obj:'Next word, then fine-tune (L2 + 0.5·L1)',hl:['obj']},
+     {t:'chain',steps:['<s>|start','Premise|“A man is sleeping”','$|delimiter','Hypothesis|“A person rests”','<e> → softmax(W_y)|entail / neutral / contradict'],hl:[2,4],title:'Task input transformation (Figure 1, right)'}],
+ ex:['“<s> A man is sleeping $ A person rests <e>” goes through the decoder.','The state at <e> feeds softmax(·W_y) over {entail, neutral, contradict}.','Loss = task loss + 0.5 × language-model loss. Only W_y and the special-token embeddings are new.'],
+ kept:'Transformer decoder (Post-LN), GELU, BPE.',
+ ch:[['Generative pretraining + task input transformations','One architecture for all tasks.']],
+ m:[[R`L_1(\mathcal{U})=\sum_i\log P\big(u_i\mid u_{i-k},\dots,u_{i-1};\Theta\big)`,'Eq. 1.'],[R`L_3=L_2+\lambda L_1,\ \ \lambda=0.5`,'Eq. 5: keep the LM loss during fine-tuning.']],
+ L:[['GPT-1 (PDF)','https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf']]},
+{id:'gpt2',b:'dec',d:'Language',n:'GPT-2',y:'2019',o:'OpenAI',ot:'I',star:1,nv:['Data','Train','Arch'],par:'gpt1',
+ pb:'Fine-tuning per task still needed labelled data, and deep Post-LN stacks were hard to train.',
+ nw:'Train a bigger decoder (up to 48 layers) on WebText and do tasks zero-shot by phrasing them as text. Move LayerNorm to the input of each sub-block (Pre-LN), add a final LayerNorm, and scale residual weights by 1/√N at init.',
+ why:'Pre-LN keeps the residual path a clean identity, so gradients reach early layers directly and 48 layers train stably. It matters most beyond about 12–24 layers.',
+ dg:[{t:'blk',kind:'dec',norm:'pre',L:'up to 48',inp:'Byte-level BPE',attn:'masked, 1024 context',ffn:'GELU, 4×',out:'next token',data:'WebText (40GB, 8M docs)',obj:'Next token; tasks zero-shot',hl:['norm','data']},
+     {t:'mask',tk:['The','cat','sat','on','the'],at:4,m:'left',o:'predicts: “mat”',cap:'Causal: the last word sees only earlier words, then predicts the next'}],
+ ex:['Post-LN (GPT-1): x ← LN(x + Sublayer(x)) puts LayerNorm on the residual path itself.','Pre-LN (GPT-2): x ← x + Sublayer(LN(x)); the residual path has nothing on it.','With N = 96 residual layers (2 per block, our interpretation), residual weights start scaled by 1/√96 ≈ 0.102 so the stream’s variance does not grow with depth.','Zero-shot summary: “<article> TL;DR:” and let it continue.'],
+ kept:'GPT-1’s decoder.',
+ ch:[['Pre-LN + a final LayerNorm (borrowed from pre-activation ResNets)','Stable deep training; now in nearly every LLM.'],['Residual init scaled by 1/√N','Stops the residual stream growing with depth.'],['WebText + byte-level BPE (50,257)','Diverse data gives zero-shot ability; no unknown tokens.'],['Context 512 → 1024; sizes 117M–1.5B','Scale.']],
+ m:[[R`\text{Post-LN: } x\leftarrow\mathrm{LN}\big(x+F(x)\big)\qquad \text{Pre-LN: } x\leftarrow x+F\big(\mathrm{LN}(x)\big)`,'Sec. 2.3; GPT-2 has no architecture figure.'],[R`W_{\text{residual}}\leftarrow W_{\text{residual}}/\sqrt{N}`,'Residual-layer weights scaled at init, N = number of residual layers.'],[R`p(x)=\prod_t p(x_t\mid x_{<t})`,'Next-token factorisation; tasks as p(output | input, task).']],
+ L:[['GPT-2 (PDF)','https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf']]},
+{id:'gpt3',b:'dec',d:'Language',n:'GPT-3',y:'2020',o:'OpenAI',ot:'I',nv:['Eval','Data'],par:'gpt2',
+ pb:'Even GPT-2 needed fine-tuning for most tasks.',
+ nw:'Scale the GPT-2 design to 175B parameters (alternating dense and locally banded sparse attention) on 300B tokens, and show tasks can be learned from examples placed in the prompt.',
+ why:'In-context learning: tasks from a few examples, no weight updates.',
+ dg:[{t:'chain',steps:['Task description|“Translate English to French:”','Example|“sea otter => loutre de mer”','Query|“cheese =>”','One forward pass|no gradient step','Output|“fromage”'],hl:[1,3]}],
+ ex:['Prompt: “Translate English to French:\\n sea otter => loutre de mer\\n cheese =>”.','One forward pass decodes “fromage”; the task lives in the context, no weights change.','Compute: 6 × 175B × 300B ≈ 3.15 × 10²³ FLOPs (derived).'],
+ kept:'GPT-2 architecture, init, pre-normalisation and tokeniser; banded sparse attention from the Sparse Transformer.',
+ ch:[['175B parameters: 96 layers, d_model 12288, 96 heads','Few-shot ability emerges with scale.'],['Data mix: Common Crawl 60%, WebText2 22%, Books 16%, Wikipedia 3%','Quality-weighted sampling.']],
+ m:[[R`C\approx 6ND=6\times1.75\times10^{11}\times3\times10^{11}\approx3.15\times10^{23}\ \text{FLOPs}`,'Derived; the paper’s total of 3.14e23 is from memory.']],
+ L:[['Language Models are Few-Shot Learners',ax('2005.14165')]]},
+{id:'instructgpt',b:'dec',d:'Language',n:'InstructGPT (RLHF)',y:'2022',o:'OpenAI',ot:'I',nv:['Train'],par:'gpt3',
+ pb:'GPT-3 continued text but did not reliably follow instructions or stay helpful.',
+ nw:'Three steps: fine-tune on human demonstrations (SFT), train a reward model on human rankings, then optimise the policy with PPO against the reward model while a KL penalty keeps it close to SFT.',
+ why:'People preferred a 1.3B InstructGPT over the 175B GPT-3. This recipe underlies chat assistants.',
+ dg:[{t:'chain',steps:['1. SFT|prompts + labeller demos','2. Reward model|rank outputs A–D','3. PPO|policy vs RM + KL to SFT'],hl:[1,2],lab:['','']}],
+ ex:['A labeller ranks D > C > A > B, giving 6 comparison pairs.','With rewards {1.0, 0.5, 0, −0.5}: pair (D, B) adds −log σ(1.5) ≈ 0.20 to the loss; (A, B) adds 0.47.','In PPO, drifting by log-ratio 5 at β = 0.02 costs 0.1 reward.'],
+ kept:'GPT-3 base models; the comparison → reward model → KL-penalised RL recipe from earlier work; PPO.',
+ ch:[['RLHF on broad API instructions','Helpful, instruction-following behaviour.'],['All K-choose-2 pairs from one prompt as one batch element','Efficient reward-model training.'],['PPO-ptx: mix in pretraining gradients','Limits regressions on public NLP tasks.']],
+ m:[[R`\mathrm{loss}(\theta)=-\tfrac{1}{\binom K2}\,\mathbb{E}\big[\log\sigma\big(r_\theta(x,y_w)-r_\theta(x,y_l)\big)\big],\ K\in[4,9]`,'Eq. 1: reward model.'],[R`\mathbb{E}\Big[r_\theta(x,y)-\beta\log\frac{\pi^{RL}_\phi(y|x)}{\pi^{SFT}(y|x)}\Big]+\gamma\,\mathbb{E}_{x\sim D_{pre}}\big[\log\pi^{RL}_\phi(x)\big]`,'Eq. 2: PPO-ptx objective.']],
+ x:'β = 0.02 and γ = 27.8 are from memory (Appendix C not reached).',L:[['InstructGPT',ax('2203.02155')]]},
+{id:'palm',b:'dec',d:'Language',n:'PaLM',y:'2022',o:'Google',ot:'I',nv:['Sys'],par:'gpt3',
+ pb:'Training a 540B dense model efficiently needed faster blocks and cheaper decoding.',
+ nw:'Assemble existing parts at 540B: parallel attention + MLP from one LayerNorm, SwiGLU, multi-query attention, RoPE, no biases, trained with Pathways on 6,144 TPU v4 chips.',
+ why:'Parallel layers are about 15% faster at scale; MQA shrinks the decoding cache 48× at this shape.',
+ dg:[{t:'blk',kind:'dec',norm:'par',L:118,inp:'256K SentencePiece',attn:'multi-query, RoPE',ffn:'SwiGLU, 4×',data:'780B tokens',obj:'Next token',hl:['norm','attn']}],
+ ex:['At PaLM-540B shape, MHA would cache about 2.90M numbers per token; MQA caches 60,416.','That is 48× smaller (≈5.5 MiB vs 118 KiB per token).'],
+ kept:'Decoder-only LM; SwiGLU (Shazeer 2020), parallel layers (GPT-J), MQA, RoPE.',
+ ch:[['Parallel formulation y = x + MLP(LN x) + Attn(LN x)','~15% faster; no loss at 62B.'],['Pathways scaling','540B dense training.']],
+ m:[[R`y=x+\mathrm{MLP}(\mathrm{LN}(x))+\mathrm{Attention}(\mathrm{LN}(x))`,'Parallel block.'],[R`\mathcal{L}_z=10^{-4}\log^2 Z`,'Auxiliary z-loss for softmax stability.']],
+ x:'Details from memory of the paper (not re-checked this pass).',L:[['PaLM',ax('2204.02311')]]},
+{id:'llama',b:'dec',d:'Language',n:'LLaMA 1 → Llama 3',y:'2023–24',o:'Meta',ot:'I',nv:['Data','Prod'],par:'gpt3',
+ pb:'Strong LLMs were closed and trained on private data.',
+ nw:'Smaller models trained much longer on public data only, using the best-known parts: pre-norm RMSNorm, SwiGLU, RoPE; Llama 2 adds GQA (34B/70B), Llama 3 uses GQA at all sizes with a 128K vocabulary. Released openly.',
+ why:'Cheap-to-run models that match larger ones; the open release started an ecosystem.',
+ dg:[{t:'blk',kind:'dec',norm:'pre',L:'32–126',inp:'BPE (32K → 128K)',pos:'RoPE',attn:'RMSNorm, GQA (8 KV) from Llama 2',ffn:'SwiGLU',data:'1.0–1.4T public tokens (LLaMA 1) → 15.6T (Llama 3)',obj:'Next token',hl:['data']}],
+ ex:['Llama 3 405B: 126 layers, 8 KV heads, head dim 128 → 2 × 126 × 8 × 128 = 258,048 numbers ≈ 504 KiB per token.','At 128K context that is about 63 GiB of KV cache per sequence.'],
+ kept:'Every component was borrowed: pre-normalisation (GPT-3), RMSNorm, SwiGLU (PaLM), RoPE.',
+ ch:[['Train small models far past the compute-optimal point','Inference is cheap; matters when serving dominates cost.'],['Public data only + open weights','Reproducible, widely adopted.'],['Llama 2: GQA, 4K context, RLHF with two reward models','Faster decoding and chat models.'],['Llama 3: GQA everywhere, RoPE θ 500,000, 128K context','Long context.']],
+ m:[[R`\mathrm{RMSNorm}(x)=\frac{x}{\sqrt{\frac1d\sum_i x_i^2+\epsilon}}\odot g`,'LayerNorm without the mean.'],[R`\mathrm{SwiGLU}(x)=\big(\mathrm{Swish}(xW)\odot xV\big)W_2`,'Gated FFN at (2/3)·4d.']],
+ x:'Details from memory of the papers (not re-checked this pass). Llama 3.1 stayed dense at 405B for training stability. Llama 2 34B was never released.',L:[['LLaMA',ax('2302.13971')],['Llama 2',ax('2307.09288')],['Llama 3',ax('2407.21783')]]},
+{id:'mistral',b:'dec',d:'Language',n:'Mistral 7B',y:'2023',o:'Mistral AI',ot:'I',nv:['Arch','Sys'],par:'llama',
+ pb:'Attention memory and cost grow with every past token.',
+ nw:'Sliding-window attention: each layer looks back only W = 4,096 tokens, stored in a rolling buffer at slot i mod W. Information still travels further because each layer sees the previous layer’s window.',
+ why:'Fixed cache size per layer and 2× speed at 16K; after 32 layers the reach is about 131K tokens.',
+ dg:[{t:'mask',tk:['The','cat','sat','on','the','mat'],at:5,m:'cwin',w:3,o:'reach grows: W × layers',cap:'Window W = 3 (as in the paper’s Figure 1): “mat” sees only the last 3 tokens in this layer'}],
+ ex:['Per-token KV: 2 × 32 layers × 8 KV heads × 128 = 128 KiB.','At 32K tokens: 4 GiB without a window vs 512 MiB in the rolling buffer (8×).','Token 5,000 writes to slot 5000 mod 4096 = 904.'],
+ kept:'LLaMA-style block with GQA (8 KV heads).',
+ ch:[['Sliding-window attention (W = 4096)','Bounded per-layer cost.'],['Rolling-buffer cache + chunked prefill','Fixed memory during generation.']],
+ m:[[R`M_{ij}=\begin{cases}0 & 0\le i-j<W\\ -\infty & \text{otherwise}\end{cases},\qquad \text{reach after }k\text{ layers}=W\cdot k`,'Causal sliding window.']],
+ x:'Details from memory of the paper (not re-checked this pass). Later Mistral releases dropped sliding windows.',L:[['Mistral 7B',ax('2310.06825')]]},
+{id:'mixtral',b:'dec',d:'Language',n:'Mixtral 8×7B',y:'2024',o:'Mistral AI',ot:'I',nv:['Arch','Prod'],par:'mistral',
+ pb:'Open models had to choose between quality (big) and speed (small).',
+ nw:'Every FFN becomes 8 SwiGLU experts; a router sends each token to 2 of them and mixes their outputs with a softmax over the two logits.',
+ why:'47B parameters of knowledge for about 13B parameters of compute per token, open weights.',
+ dg:[{t:'moe',fn:'softmax over top-2 logits',scores:[1.0,-0.5,2.0,0.3,-1.2,0.8,1.6,-0.1],sel:[2,6],gates:['0.599','0.401'],scoreLabel:'router logits x·W_g',formula:'y = 0.599·SwiGLU₃(x) + 0.401·SwiGLU₇(x)',note:'MoE in every layer (GShard used every other). The paper describes no load-balancing loss.',newRouter:0}],
+ ex:['Logits for “cat”: top-2 are E3 (2.0) and E7 (1.6).','Softmax over just those two: e^2 / (e^2 + e^1.6) = 0.599 and 0.401.','Same weights as GShard’s renormalised top-2.'],
+ kept:'GShard-style top-2 routing; Mistral 7B attention and SwiGLU experts.',
+ ch:[['MoE in every layer, open weights','Became the template for open MoE.']],
+ m:[[R`y=\sum_{i=0}^{n-1}\mathrm{Softmax}\big(\mathrm{Top2}(x\cdot W_g)\big)_i\cdot\mathrm{SwiGLU}_i(x)`,'Router and output.']],
+ x:'dim 4096, 32 layers, 32 heads / 8 KV, context 32,768. 47B total / 13B active.',L:[['Mixtral of Experts',ax('2401.04088')]]},
+{id:'gemma3',b:'dec',d:'Language',n:'Gemma 3',y:'2025',o:'Google DeepMind',ot:'I',nv:['Arch','Sys'],par:'llama',
+ pb:'At 128K context, the KV cache of global-attention layers dominates memory.',
+ nw:'Repeat [5 local sliding-window layers (span 1,024) → 1 global layer]. Replace soft-capping with QK-norm; RoPE base 10K locally and 1M globally.',
+ why:'KV-cache overhead drops from about 60% (global only) to under 15%.',
+ dg:[{t:'layers',pat:'LLLLLGLLLLLGLLLLLGLLLLLG',att:'G',newc:'L',cap:'Repeating unit: 5 local (window 1,024) then 1 global',legend:'L = sliding window 1,024 (RoPE base 10K) · G = global (RoPE base 1M)',note:'Gemma 2 used 1:1 with window 4,096.'}],
+ ex:['At 128K, a local layer caches 1,024 tokens: 1/128 of a global layer.','Average per layer ≈ (5 × 1,024 + 131,072) / 6, about 17% of an all-global stack.'],
+ kept:'Gemma 2’s GQA, RMSNorm pre- and post-norm, local/global interleave.',
+ ch:[['5:1 ratio with a 1,024 window','Much smaller cache.'],['QK-norm instead of soft-capping','Stable logits.'],['Distillation from 256 sampled teacher logits per token','Strong small models.']],
+ m:[[R`\text{KV memory}\propto\sum_{\ell}\min(n,\,w_\ell)`,'Local layers store w tokens, global layers all n.']],
+ x:'Vocabulary 262K in text, 256K in Table 1.',L:[['Gemma 3 Technical Report',ax('2503.19786')]]},
+{id:'dsmoe',b:'dec',d:'Language',n:'DeepSeekMoE',y:'2024',o:'DeepSeek',ot:'I',nv:['Arch'],par:'gshard',
+ pb:'With few large experts, each expert must learn many unrelated things, and every expert relearns common knowledge.',
+ nw:'Split experts into many smaller ones (fine-grained) and activate more of them, and add shared experts that every token always uses.',
+ why:'Far more combinations (top-8 of 64 = 4.4 billion vs top-2 of 16 = 120) and less redundancy.',
+ dg:[{t:'moe',fn:'softmax over all, top-k, no renorm',scores:[0.133,0.030,0.361,0.066,0.015,0.109,0.242,0.044],sel:[2,6],gates:['0.361','0.242'],scoreLabel:'softmax affinity s = Softmax(uᵀeᵢ)',formula:'h = u + Shared(u) + 0.361·E3(u) + 0.242·E7(u)',note:'Gates are not renormalised. The shared expert always runs.',shared:1,newShared:1,newRouter:0}],
+ ex:['Same “cat” scores: top-2 affinities 0.361 (E3) and 0.242 (E7) are used as-is.','Output = input + shared expert + 0.361·E3 + 0.242·E7.','DeepSeekMoE 16B: 2 shared + 64 routed (quarter-size) experts, 6 active, 16.4B total / 2.8B active.'],
+ kept:'Top-K softmax MoE and the f·P balance loss from GShard / Switch.',
+ ch:[['Fine-grained expert segmentation','More flexible combinations.'],['Shared-expert isolation','Common knowledge lives in always-on experts.'],['Device-level balance loss','Even load across GPUs.']],
+ m:[[R`h_t=\sum_{i\le K_s}\mathrm{FFN}_i(u_t)+\sum_{i\in\text{routed}}g_{i,t}\,\mathrm{FFN}_i(u_t)+u_t`,'Shared + routed experts.'],[R`g_{i,t}=s_{i,t}\ \text{if}\ s_{i,t}\in\mathrm{TopK},\ \text{else }0;\quad s_{i,t}=\mathrm{Softmax}_i(u_t^\top e_i)`,'Eqs. 4–5: no renormalisation.']],
+ L:[['DeepSeekMoE',ax('2401.06066')]]},
+{id:'dsv2',b:'dec',d:'Language',n:'DeepSeek-V2 (MLA)',y:'2024',o:'DeepSeek',ot:'I',nv:['Arch','Sys'],par:'dsmoe',
+ pb:'Even GQA keeps a full key and value per KV head per token; at long context the cache is huge.',
+ nw:'Multi-head Latent Attention: compress each token into one small latent vector c^KV and cache only that (plus one small shared RoPE key). Per-head keys and values are rebuilt by up-projection; RoPE goes on a separate small path so the up-projections can be folded into the query and output weights.',
+ why:'A cache equal to GQA with only 2.25 groups, yet quality rated stronger than MHA.',
+ dg:[{t:'mla'}],
+ ex:['DeepSeek-V3 shape: latent 512 + RoPE key 64 = 576 numbers per token per layer.','× 61 layers = 35,136 numbers ≈ 68.6 KiB per token.','Equivalent MHA (K 192 + V 128 per head × 128 heads × 61 layers) ≈ 4.77 MiB per token: about 71× more.'],
+ kept:'RoPE (moved onto a decoupled path) and DeepSeekMoE FFNs.',
+ ch:[['Low-rank joint KV compression','Tiny cache.'],['Decoupled RoPE path','RoPE would otherwise block absorbing W^UK into W^Q.'],['Weight absorption at inference','No need to rebuild K, V explicitly.']],
+ m:[[R`c_t^{KV}=W^{DKV}h_t,\quad k_t^C=W^{UK}c_t^{KV},\quad v_t^C=W^{UV}c_t^{KV}`,'Eqs. 9–11: only c^KV is cached.'],[R`k_t^R=\mathrm{RoPE}(W^{KR}h_t),\quad q_{t,i}=[q^C_{t,i};\,q^R_{t,i}],\quad k_{t,i}=[k^C_{t,i};\,k^R_t]`,'Eqs. 14–17: shared RoPE key.'],[R`o_{t,i}=\sum_j\mathrm{Softmax}_j\!\Big(\frac{q_{t,i}^\top k_{j,i}}{\sqrt{d_h+d_h^R}}\Big)v^C_{j,i}`,'Eq. 18.'],[R`\text{cache per token}=(d_c+d_h^R)\,l\approx\tfrac92 d_h\,l`,'Table 1: MHA 2n_h d_h l, GQA 2n_g d_h l, MQA 2d_h l.']],
+ L:[['DeepSeek-V2',ax('2405.04434')]]},
+{id:'dsv3',b:'dec',d:'Language',n:'DeepSeek-V3',y:'2024',o:'DeepSeek',ot:'I',nv:['Sys','Arch','Train'],par:'dsv2',
+ pb:'Auxiliary balance losses fight the main loss, and frontier training is expensive.',
+ nw:'Sigmoid expert scores with a per-expert bias that is added only when choosing experts (not to the gate value), nudged ±γ each step to balance load. Plus multi-token prediction and FP8 training.',
+ why:'Balanced experts without hurting the main loss; 671B parameters trained for 2.788M H800 GPU-hours.',
+ dg:[{t:'moe',fn:'sigmoid + bias (select only)',scores:[0.731,0.378,0.881,0.574,0.232,0.690,0.832,0.475],sel:[5,6],gates:['0.453','0.547'],scoreLabel:'sigmoid score s (bias added only for selection)',formula:'h = u + Shared(u) + 2.5·(0.453·E6(u) + 0.547·E7(u))',note:'E3 has the highest score but bias b₃ = −0.15 (overloaded) drops it; b₆ = +0.15 lifts E6. Real config: top-8 of 256.',shared:1,newRouter:1}],
+ ex:['Sigmoid scores s for “cat”: E3 0.881, E7 0.832, E1 0.731, E6 0.690 …','Biases from load balancing: b₃ = −0.15, b₆ = +0.15 → selection scores E6 0.840, E7 0.832, E3 0.731 → pick E6, E7.','Gates use the unbiased scores, normalised: 0.690 / 1.522 = 0.453 and 0.832 / 1.522 = 0.547; scaled by 2.5 (config).'],
+ kept:'MLA and DeepSeekMoE from V2; loss-free balancing from Wang et al. 2024.',
+ ch:[['Sigmoid affinities + bias-only balancing (γ = 0.001)','No auxiliary-loss interference.'],['Multi-token prediction','Denser training signal.'],['FP8 mixed precision, node-limited routing (≤ 4 nodes)','Cheaper training.']],
+ m:[[R`s_{i,t}=\mathrm{Sigmoid}(u_t^\top e_i),\qquad \text{select }\mathrm{TopK}(s_{i,t}+b_i,\,K_r)`,'Eqs. 15–16: bias only for selection.'],[R`g_{i,t}=\frac{s_{i,t}}{\sum_{j\in\text{sel}}s_{j,t}},\qquad h'_t=u_t+\sum\mathrm{FFN}^{(s)}(u_t)+\sum g_{i,t}\mathrm{FFN}^{(r)}_i(u_t)`,'Eqs. 12–14.'],[R`\mathcal{L}_{Bal}=\alpha\sum f_iP_i,\ \ \alpha=0.0001`,'Small complementary sequence-wise loss.']],
+ x:'671B total / 37B active; 61 layers (first 3 dense); 1 shared + 256 routed, 8 active; 14.8T tokens. The 2.5 scaling factor is from the official config, not the paper.',L:[['DeepSeek-V3',ax('2412.19437')]]},
+{id:'r1',b:'dec',d:'Language',n:'DeepSeek-R1',y:'2025',o:'DeepSeek',ot:'I',nv:['Train'],par:'dsv3',
+ pb:'Reasoning ability seemed to require human-written step-by-step examples.',
+ nw:'Reinforcement learning with GRPO on rule-checked rewards (correct answer + format). For each prompt, sample a group of answers and use each answer’s reward relative to the group as its advantage; no value network. R1-Zero does this straight on the base model.',
+ why:'Long chains of reasoning emerge from RL alone. The architecture is exactly DeepSeek-V3.',
+ dg:[{t:'chain',steps:['Prompt q|','Sample G answers|G = 16','Rule rewards|accuracy + format','Group-normalise|A = (r − mean) / std','Clipped update|+ KL to reference'],hl:[1,3,4]}],
+ ex:['G = 4 answers with rewards [1, 0, 0, 1] → mean 0.5, std 0.5.','Advantages A = [+1, −1, −1, +1]: correct answers pushed up, wrong ones down.','If all four rewards are equal, std = 0 and the group gives no signal.'],
+ kept:'DeepSeek-V3-Base model; GRPO from DeepSeekMath.',
+ ch:[['Pure-RL reasoning (R1-Zero), then cold-start + multi-stage training (R1)','No reward model needed for math/code.']],
+ m:[[R`J(\theta)=\mathbb{E}\Big[\tfrac1G\sum_i\Big(\min\big(\rho_iA_i,\ \mathrm{clip}(\rho_i,1-\varepsilon,1+\varepsilon)A_i\big)-\beta D_{KL}(\pi_\theta\|\pi_{ref})\Big)\Big]`,'Eq. 1, ρᵢ = π_θ(oᵢ|q) / π_old(oᵢ|q).'],[R`A_i=\frac{r_i-\mathrm{mean}(r_1..r_G)}{\mathrm{std}(r_1..r_G)}`,'Eq. 3.'],[R`D_{KL}=\frac{\pi_{ref}}{\pi_\theta}-\log\frac{\pi_{ref}}{\pi_\theta}-1`,'Eq. 2 (k3 estimator).']],
+ x:'R1-Zero: G = 16, β = 0.001, LR 3e−6. The extracted text says “clip ratio ε to 10”, which is unresolved and not printed here.',L:[['DeepSeek-R1',ax('2501.12948')]]},
+{id:'v32',b:'dec',d:'Language',n:'DeepSeek-V3.2 (DSA)',y:'2025',o:'DeepSeek',ot:'I',nv:['Arch','Sys'],par:'dsv3',
+ pb:'Even with MLA, each new token attends to every past token: at 128K that is 131,072 scores per query.',
+ nw:'DeepSeek Sparse Attention: a cheap FP8 “lightning indexer” scores every past token, and full MLA attention runs only on the top 2,048.',
+ why:'Main attention does 64× fewer scores at 128K; the indexer is trained to imitate dense attention via a KL loss.',
+ dg:[{t:'mask',tk:['t1','t2','t3','t4','t5','t6','t7','now'],at:7,m:'sparse',pick:[1,4,6],o:'attends only to top-k',cap:'Indexer scores all past tokens; attention runs on the top-k (k = 2,048 in the paper)'}],
+ ex:['At L = 128K: main attention scores 2,048 instead of 131,072 keys per query (64× fewer).','The indexer still scans all keys, but with tiny FP8 heads.','Training: dense warm-up of the indexer on 2.1B tokens, then sparse training on 943.7B tokens.'],
+ kept:'MLA, MoE and the V3.1-Terminus checkpoint.',
+ ch:[['Lightning indexer + top-k sparse MLA','Long context gets much cheaper.']],
+ m:[[R`I_{t,s}=\sum_j w^I_{t,j}\,\mathrm{ReLU}\big(q^I_{t,j}\cdot k^I_s\big)`,'Eq. 1: index score.'],[R`u_t=\mathrm{Attn}\big(h_t,\{c_s\mid I_{t,s}\in\mathrm{Top}\text{-}k(I_{t,:})\}\big),\ k=2048`,'Eq. 2.'],[R`\mathcal{L}_I=\sum_t D_{KL}\big(p_{t,:}\,\|\,\mathrm{Softmax}(I_{t,:})\big)`,'Indexer distillation from dense attention.']],
+ L:[['DeepSeek-V3.2',ax('2512.02556')]]},
+{id:'kimi',b:'dec',d:'Language',n:'Kimi K2',y:'2025',o:'Moonshot AI',ot:'I',nv:['Train','Algo'],par:'dsv3',
+ pb:'Trillion-parameter training with the Muon optimiser crashed when attention logits grew without bound.',
+ nw:'MuonClip: Muon plus QK-Clip, which after each step rescales a head’s query/key weights whenever its largest logit exceeds τ = 100. Architecture: a sparser DeepSeek-V3 (384 experts, 64 heads).',
+ why:'15.5T tokens of pretraining with zero loss spikes.',
+ dg:[{t:'chain',steps:['Head h: max logit|S_max = 200','γ = min(1, τ/S_max)|τ = 100 → γ = 0.5','Scale W_qc, W_kc by √γ|× 0.707','Scale W_qr by γ|× 0.5; shared k_R untouched','Logits ≈ 100|other heads unchanged'],hl:[1,2,3]}],
+ ex:['A head’s largest attention logit reaches 200.','γ = 100 / 200 = 0.5; content query and key weights are scaled by √0.5 = 0.707 each, the RoPE query weights by 0.5.','The head’s logits halve to about 100. It happens after the optimiser step, and other heads are unaffected.'],
+ kept:'DeepSeek-V3 architecture (MLA, DeepSeekMoE, sigmoid router); Muon optimiser.',
+ ch:[['QK-Clip inside Muon','Stable trillion-scale training.'],['384 experts (8 active), 64 heads, 1 dense layer','Sparser and cheaper at long context.']],
+ m:[[R`\gamma_h=\min\Big(1,\frac{\tau}{S^h_{max}}\Big),\quad S^h_{max}=\tfrac{1}{\sqrt d}\max_{i,j}Q^h_iK^{h\top}_j,\quad \tau=100`,'QK-Clip.'],[R`O_t=\mathrm{NewtonSchulz}(M_t)\cdot\sqrt{\max(n,m)}\cdot0.2,\quad W_t=W_{t-1}-\eta(O_t+\lambda W_{t-1})`,'Muon update, λ = 0.1.']],
+ x:'1.04T total / 32.6B active; 61 layers. Sigmoid noaux_tc router and scaling factor 2.827 come from the released config.',L:[['Kimi K2',ax('2507.20534')]]},
+{id:'qwen3',b:'dec',d:'Language',n:'Qwen3',y:'2025',o:'Alibaba',ot:'I',nv:['Train','Arch'],par:'llama',
+ pb:'Reasoning and fast chat needed separate models, and large-scale training suffered from growing attention logits.',
+ nw:'One model with thinking and non-thinking modes (with a thinking budget); QK-Norm on queries and keys; MoE models with 128 experts, 8 active, no shared expert.',
+ why:'Pay for reasoning only when needed; QK-Norm bounds logits in the forward pass.',
+ dg:[{t:'blk',kind:'dec',norm:'pre',L:'48 (30B-A3B) / 94 (235B)',inp:'BPE',pos:'RoPE',attn:'GQA + QK-Norm',ffn:'MoE: 8 of 128, no shared',obj:'Next token + 4-stage post-training',data:'~36T tokens, 119 languages',hl:['attn','ffn','obj']}],
+ ex:['QK-Norm: q ← RMSNorm(q), k ← RMSNorm(k) per head before RoPE, so logits stay bounded.','Kimi K2’s QK-Clip does the same job after each optimiser step instead.','“/think” gives a reasoning trace; “/no_think” emits an empty <think></think>.'],
+ kept:'GQA, SwiGLU, RoPE, pre-norm (Qwen2.5); fine-grained experts (DeepSeekMoE).',
+ ch:[['QK-Norm, QKV bias removed','Stable training.'],['No shared experts (unlike Qwen2.5-MoE)','Simpler routing.'],['Unified thinking / non-thinking','One deployment.']],
+ m:[[R`\mathrm{softmax}\!\Big(\frac{\mathrm{RMSNorm}(q)\,\mathrm{RMSNorm}(k)^\top}{\sqrt d}\Big)`,'QK-Norm.']],
+ x:'MoE facts checked; most other details (36T tokens, post-training stages) from memory. The router function is not stated in the report.',L:[['Qwen3 Technical Report',ax('2505.09388')]]},
+{id:'glm',b:'dec',d:'Language',n:'GLM-4.5 → GLM-5',y:'2025–26',o:'Zhipu AI (Z.ai)',ot:'I',nv:['Arch','Sys'],par:'dsv3',
+ pb:'Long-context agentic tasks need cheap attention and a large MoE.',
+ nw:'GLM-4.5: a narrower, deeper DeepSeek-style MoE (355B / 32B). GLM-5: 744B / 40B with MLA and DeepSeek Sparse Attention, plus asynchronous agent RL.',
+ why:'Long context at lower cost with an open frontier-scale model.',
+ dg:[{t:'blk',kind:'dec',norm:'pre',L:'80 (paper) / 78 (config)',attn:'MLA + DSA top-k',ffn:'MoE: 8 of 256 + 1 shared',data:'≈28.5T tokens (unverified)',obj:'Next token + MTP + async RL',mask:'sparse',hl:['attn']}],
+ ex:['GLM-5 config: 256 routed experts, 8 active, 1 shared, sigmoid router with bias balancing (DeepSeek style).','Each query attends to a selected subset of past tokens via DSA.'],
+ kept:'DeepSeek-V3’s loss-free routing, sigmoid gates, MTP; MLA and DSA.',
+ ch:[['DSA on a 744B MoE (GLM-5)','Cheaper long context.'],['Asynchronous agent RL infrastructure','Agentic post-training.']],
+ nomath:'Uses DeepSeek’s MLA and DSA equations (see those papers).',
+ x:'744B in §2.1 vs 750B in §5; 80 layers in the paper vs 78 in the config.',L:[['GLM-4.5',ax('2508.06471')],['GLM-5',ax('2602.15763')]]},
+{id:'llama4',b:'dec',d:'Language',n:'Llama 4',y:'2025',o:'Meta',ot:'I',nv:['Arch'],par:'llama',
+ pb:'Dense Llama models were text-first and costly to scale.',
+ nw:'Meta’s first MoE: each token goes to a shared expert plus one routed expert, chosen with a sigmoid on the top-1 logit that scales the expert’s input. Attention interleaves chunked local RoPE layers with global layers that use no positional encoding (iRoPE). Natively multimodal (early fusion).',
+ why:'17B active parameters for 109B (Scout) or 400B (Maverick) total; 10M-token context for Scout.',
+ dg:[{t:'moe',fn:'top-1, sigmoid, scales input',scores:[1.0,-0.5,2.0,0.3,-1.2,0.8,1.6,-0.1],sel:[2],gates:['0.881'],scoreLabel:'router logits (sigmoid applied to the top-1)',formula:'y = Shared(x) + E3(0.881·x)',note:'0.881 = sigmoid(2.0) multiplies the expert’s INPUT, not its output. No normalisation.',shared:1,newRouter:1},
+     {t:'mask',tk:['…','8190','8191','8192','8193','8194','8200'],at:6,m:'chunk',w:4,cap:'Chunked local layer: position 8,200 sees only its chunk (8,192 onward); global NoPE layers see everything'}],
+ ex:['Router: top-1 logit 2.0 → sigmoid 0.881 → output = Shared(x) + E3(0.881·x), which is not 0.881·E3(x).','Attention: at position 8,200 a chunked layer (chunk 8,192) sees only tokens 8,192–8,200, whereas a 4,096 sliding window would see 4,105–8,200.','Long-range information flows only through the global layers without positional encoding.'],
+ kept:'LLaMA block; shared + routed experts (DeepSeekMoE style) and top-1 routing (Switch style), though Meta cites neither.',
+ ch:[['Alternating dense and MoE layers','Capacity at fixed compute.'],['iRoPE: chunked RoPE + global NoPE layers, attention-temperature scaling','Very long context.'],['Early-fusion multimodality','Native image understanding.']],
+ nomath:'No technical paper. Router behaviour comes from Hugging Face’s modeling_llama4.py; chunk size 8,192 and “every 4th layer NoPE” come from code/config (gated, not re-checked).',
+ L:[['Meta Llama 4 blog','https://ai.meta.com/blog/llama-4-multimodal-intelligence/'],['modeling_llama4.py','https://github.com/huggingface/transformers/blob/main/src/transformers/models/llama4/modeling_llama4.py']]},
+{id:'gptoss',b:'dec',d:'Language',n:'gpt-oss',y:'2025',o:'OpenAI',ot:'I',nv:['Prod','Arch'],par:'gpt3',
+ pb:'OpenAI had released no open-weight model since GPT-2.',
+ nw:'Open-weight MoE decoder: every layer routes to the top 4 of 128 experts (softmax over the selected 4); attention alternates 128-token banded and fully dense layers, with GQA (64 query / 8 KV heads) and a learned “sink” term per head.',
+ why:'116.8B total / 5.1B active parameters; the 120b model fits on one 80GB GPU with MXFP4 expert weights.',
+ dg:[{t:'moe',fn:'softmax over top-4 logits',scores:[1.0,-0.5,2.0,0.3,-1.2,0.8,1.6,-0.1],sel:[2,6,0,5],gates:['0.427','0.287','0.157','0.129'],scoreLabel:'router logits',formula:'y = 0.427·E3 + 0.287·E7 + 0.157·E1 + 0.129·E6',note:'Experts are clamped SwiGLU: x_glu·σ(1.702·x_glu)·(x_linear + 1).'},
+     {t:'mask',tk:['…','the','old','cat','sat','on','the'],at:6,m:'cwin',w:3,cap:'Banded layers see only a recent window (128 tokens); every other layer is fully dense'}],
+ ex:['Router: top-4 logits for “cat” are 2.0, 1.6, 1.0, 0.8 → softmax over these four → 0.427, 0.287, 0.157, 0.129.','KV cache for 120b in BF16 at 131,072 tokens: 18 dense layers ≈ 4.5 GiB; the 18 banded layers ≈ 4.5 MiB. Banding roughly halves the cache.','A sink lets attention weights sum to less than 1: a head can attend to “nothing”.'],
+ kept:'GPT-2/3 design; banded/dense alternation (GPT-3); GQA; Mixtral-style top-k softmax.',
+ ch:[['Learned attention sinks','Stable attention with long contexts.'],['MXFP4 MoE weights (~4.25 bits/param)','Single-GPU deployment.'],['o200k_harmony tokenizer','Chat format.']],
+ m:[[R`p_j=\frac{e^{s_j}}{e^{b_h}+\sum_k e^{s_k}}`,'Sink: a learned per-head bias in the softmax denominator.'],[R`y=\sum_{i\in\mathrm{Top4}}\mathrm{softmax}\big(\mathrm{Top4}(xW_g)\big)_i\,E_i(x)`,'Router.']],
+ x:'120b: 36 layers, residual width 2880, 128 experts; 20b: 24 layers, 32 experts. Context 131,072 via YaRN.',L:[['gpt-oss model card',ax('2508.10925')]]},
+{id:'phi',b:'dec',d:'Language',n:'Phi-1 → Phi-4',y:'2023–24',o:'Microsoft',ot:'I',nv:['Data'],par:'gpt3',
+ pb:'Small models were assumed to be weak; quality seemed to need scale.',
+ nw:'Train small standard decoders on “textbook-quality” filtered and synthetic data (Phi-1: under 7B tokens; Phi-4: ~400B synthetic tokens in a ~10T mix).',
+ why:'Data quality can substitute for scale: Phi-1 (1.3B) scored 50.6% on HumanEval.',
+ dg:[{t:'chain',steps:['Web + code data|','Filter for textbook quality|','+ GPT-generated textbooks|synthetic','Standard small decoder|','Strong small model|'],hl:[1,2]}],
+ ex:['Phi-1: ~6B filtered tokens + <1B synthetic textbooks + ~180M exercises, 8 A100s for ~4 days.','Phi-4 mix: synthetic 40%, web 15%, web rewrites 15%, code 20%, acquired 10%.'],
+ kept:'Standard decoder (Phi-4 closely follows phi-3-medium).',
+ ch:[['Synthetic, textbook-like data','Small models punch above their size.'],['Pivotal Token Search DPO (Phi-4)','Targets the tokens that decide correctness.']],
+ nomath:'No new formula; the novelty is data. Details from memory of the papers.',L:[['Textbooks Are All You Need',ax('2306.11644')],['Phi-4',ax('2412.08905')]]},
+{id:'olmo',b:'dec',d:'Language',n:'OLMo 3',y:'2025',o:'Ai2',ot:'N',nv:['Prod','Data','Eval'],par:'llama',
+ pb:'“Open” models released weights but not the data, code or intermediate checkpoints.',
+ nw:'Release the whole “model flow”: every training stage, checkpoint and dataset (Dolma 3, ~9.3T tokens; 5.9T used in pretraining), for dense 7B and 32B models.',
+ why:'Anyone can study or retrain the model from scratch.',
+ dg:[{t:'chain',steps:['Dolma 3 pretrain|5.9T tokens','Dolmino midtrain|100B','Longmino|~50B, to ~65K context','Post-train|Think / Instruct / RL-Zero','All released|data, code, checkpoints'],hl:[0,4]}],
+ ex:['Think: SFT → DPO → RL with verifiable rewards; Instruct: SFT → DPO → RL; RL-Zero: RL straight on the base model.'],
+ kept:'OLMo 2’s architecture (post-norm RMSNorm, QK-norm).',
+ ch:[['Full openness of data and process','Reproducible research.']],
+ nomath:'No new formula. The 3:1 sliding-window pattern is from memory.',L:[['Ai2: OLMo 3','https://allenai.org/blog/olmo3']]},
+{id:'falcon',b:'dec',d:'Language',n:'Falcon / RefinedWeb',y:'2023',o:'TII',ot:'N',nv:['Data'],par:'gpt3',
+ pb:'Top models were thought to need curated sources such as books and papers.',
+ nw:'RefinedWeb: filter and deduplicate Common Crawl so aggressively (removing almost 90%) that web data alone matches curated corpora.',
+ why:'About 5T clean tokens from the web; Falcon-180B trained on 3.5T.',
+ dg:[{t:'chain',steps:['Common Crawl|','Extract + language ID|trafilatura, fastText','Quality filters|document and line','Fuzzy + exact dedup|MinHash, suffix array','RefinedWeb|~5T tokens'],hl:[2,3]}],
+ ex:['Almost 90% of the crawl is removed; 600B tokens were released publicly.'],
+ kept:'Decoder with multi-query / multigroup attention and parallel attention + MLP.',
+ ch:[['Web-only data at scale','Matches or beats Pile-trained models.']],
+ nomath:'No new formula. Architecture details belong to arXiv 2311.16867, not the RefinedWeb paper. From memory, not re-checked.',L:[['RefinedWeb',ax('2306.01116')],['The Falcon Series',ax('2311.16867')]]}
+);
+
+N.push(
+{id:'flamingo',b:'dec',d:'Multimodal',n:'Flamingo',y:'2022',o:'DeepMind',ot:'I',nv:['Arch'],par:'chinchilla',
+ pb:'Language models could not see images, and retraining them from scratch for vision is expensive.',
+ nw:'Keep a vision encoder and a language model frozen. A Perceiver Resampler turns any image into 64 visual tokens, and new gated cross-attention layers, inserted between frozen LM layers, let text look at them. Each gate is tanh(α) with α starting at 0.',
+ why:'At the start the model is exactly the frozen LM, so vision is added without damaging language ability; few-shot visual tasks work.',
+ dg:[{t:'chain',rows:[['Images|interleaved with text','Frozen NFNet-F6|vision encoder','Perceiver Resampler|→ 64 visual tokens'],['Text tokens|','GATED XATTN-DENSE|tanh(α) gate, α₀ = 0','Frozen LM layer|Chinchilla']],hl:[2,4]}],
+ ex:['“<image A> A cat. <image B> A” → tokens after <image B> attend only to image B’s 64 tokens (per-image masking).','At step 0, tanh(0) = 0, so the output equals frozen Chinchilla’s.','Gated layers sit before every 4th (9B) or 7th (80B) frozen LM layer.'],
+ kept:'Frozen contrastive NFNet-F6 and frozen Chinchilla LMs (1.4B / 7B / 70B).',
+ ch:[['Perceiver Resampler','Any number of image features → fixed 64 tokens.'],['Gated cross-attention initialised closed','Safe addition of a new modality.'],['M3W interleaved web data','Learns from image-text documents.']],
+ m:[[R`y=x+\tanh(\alpha_{xattn})\cdot\mathrm{XAttn}(q=x,\ kv=\text{visual}),\quad y\leftarrow y+\tanh(\alpha_{dense})\cdot\mathrm{FFW}(y)`,'Gate pseudocode reconstructed from Figure 4 (structure checked, exact code from memory).']],
+ L:[['Flamingo',ax('2204.14198')]]},
+{id:'llava',b:'dec',d:'Multimodal',n:'LLaVA',y:'2023',o:'U. Wisconsin, Microsoft',ot:'X',nv:['Data','Arch'],par:'flamingo',
+ pb:'Visual chat models needed complex bridging modules and lots of human-written data.',
+ nw:'Project CLIP image features with one linear layer into the LLM’s word-embedding space and place them in the input sequence; train on 158K GPT-4-generated visual instructions.',
+ why:'The simplest bridge works, and it became the standard recipe for open vision-language models.',
+ dg:[{t:'chain',steps:['Image|','CLIP ViT-L/14|frozen','Linear W|H_v = W·Z_v','[visual tokens] + question|one sequence','Vicuna LLM|→ answer'],hl:[2,3]}],
+ ex:['Image features Z_v become “visual word” embeddings H_v placed before the question tokens (not cross-attention).','Stage 1 trains only W on 595K captioned images; stage 2 trains W and the LLM on 158K instructions.','ScienceQA: 90.92%, 92.53% with a GPT-4 judge.'],
+ kept:'CLIP ViT-L/14 and Vicuna.',
+ ch:[['One linear projector','Minimal bridge.'],['GPT-4-generated multimodal instruction data','Cheap training data.']],
+ m:[[R`H_v=W\cdot Z_v`,'Eq. 1.'],[R`p(X_a\mid X_v,X_{instruct})=\prod_i p_\theta\big(x_i\mid X_v,X_{instruct,<i},X_{a,<i}\big)`,'Eq. 3: loss on answer tokens only.']],
+ L:[['Visual Instruction Tuning',ax('2304.08485')]]},
+{id:'codex',b:'dec',d:'Code',n:'Codex + HumanEval',y:'2021',o:'OpenAI',ot:'I',nv:['Eval','Data'],par:'gpt3',
+ pb:'There was no reliable way to measure whether generated code actually works.',
+ nw:'Fine-tune GPT on 159GB of GitHub Python, and introduce HumanEval (164 problems with unit tests) plus an unbiased pass@k estimator.',
+ why:'Functional correctness became the standard way to evaluate code models.',
+ dg:[{t:'chain',steps:['Problem + docstring|HumanEval','Sample n = 200 programs|','Run unit tests|c pass','pass@k estimator|unbiased'],hl:[0,3]}],
+ ex:['(n, c, k) = (200, 10, 10): unbiased 0.4085 vs naive 1 − (1 − p̂)^k = 0.4013.','(10, 2, 5): unbiased 0.7778 vs naive 0.6723 — the naive estimate is biased low.','Codex-12B: 28.81% pass@1 and 72.31% pass@100 (Table 1).'],
+ kept:'GPT-3-family architecture and initialisation.',
+ ch:[['Code fine-tuning','Code assistants.'],['HumanEval + pass@k','Measures whether code runs correctly.']],
+ m:[[R`\text{pass@}k=\mathbb{E}\left[1-\frac{\binom{n-c}{k}}{\binom{n}{k}}\right]`,'Eq. 1, with n = 200 samples.']],
+ x:'pass@100 is 72.31% in Table 1 but 70.2% in the abstract.',L:[['Evaluating LLMs Trained on Code',ax('2107.03374')]]},
+{id:'rt2',b:'dec',d:'Robotics',n:'RT-2',y:'2023',o:'Google DeepMind',ot:'I',nv:['Algo'],par:'llava',
+ pb:'Robot policies were trained only on robot data, so they could not use web knowledge.',
+ nw:'Write robot actions as text: each action dimension is split into 256 bins and emitted as tokens by a vision-language model co-fine-tuned on web and robot data.',
+ why:'The robot inherits web knowledge, e.g. “pick up the extinct animal” → the toy dinosaur.',
+ dg:[{t:'chain',steps:['Camera image + instruction|','VLM|PaLI-X or PaLM-E','Action tokens|terminate Δx Δy Δz Δrx Δry Δrz grip','De-tokenise|256 bins per dim','Robot|1–5 Hz'],hl:[2,3]}],
+ ex:['Normalised Δx = 0.5 → bin floor(0.75 × 256) = 192; Δx = 0 → bin 128.','An action is 8 integers (terminate + 6-DoF + gripper); the paper’s own example string shows only 7.'],
+ kept:'PaLI-X / PaLM-E backbones; RT-1’s robot data and action space.',
+ ch:[['Actions as tokens','Same model outputs language and actions.'],['Co-fine-tuning with web data','Keeps semantic knowledge.']],
+ m:[[R`\text{token}_d=\Big\lfloor 256\cdot\frac{a_d-a_{\min}}{a_{\max}-a_{\min}}\Big\rfloor`,'Per-dimension discretisation (written from the description).']],
+ L:[['RT-2',ax('2307.15818')]]},
+{id:'openvla',b:'dec',d:'Robotics',n:'OpenVLA',y:'2024',o:'Stanford, UC Berkeley, TRI',ot:'X',nv:['Prod','Data'],par:'rt2',
+ pb:'Vision-language-action models were closed and huge (RT-2-X 55B).',
+ nw:'An open 7B VLA: SigLIP + DINOv2 features → MLP projector → Llama 2 7B, which outputs 7 action tokens using bins between the 1st and 99th percentiles; trained on ~970K robot episodes.',
+ why:'Beats RT-2-X by 16.5% absolute over 29 tasks with 7× fewer parameters; LoRA fine-tuning works.',
+ dg:[{t:'chain',steps:['Image 224 px|','SigLIP + DINOv2|concatenated','2-layer MLP projector|','Llama 2 7B|“What should the robot do to …?”','7 action tokens|quantile bins'],hl:[1,4]}],
+ ex:['256 bins span the 1st–99th percentile of each action dimension, so outliers do not waste bins.','LoRA rank 32 reaches 68.2% vs 69.7% for full fine-tuning while training 1.4% of parameters.'],
+ kept:'Prismatic-7B backbone; RT-2’s actions-as-tokens.',
+ ch:[['Open weights + quantile binning','Reproducible robot foundation model.']],
+ nomath:'Same action tokenisation idea as RT-2, with quantile instead of min-max bins.',L:[['OpenVLA',ax('2406.09246')]]},
+{id:'pi0',b:'dec',d:'Robotics',n:'π0',y:'2024',o:'Physical Intelligence',ot:'I',nv:['Arch','Algo'],par:'openvla',
+ pb:'Action tokens are discrete and step-by-step, too coarse for fast, dexterous control.',
+ nw:'Inside one transformer, a ~300M “action expert” (separate weights) generates a chunk of 50 continuous actions with flow matching, attending to a PaliGemma VLM prefix of images, language and robot state.',
+ why:'Smooth, high-frequency control (up to 50 Hz) across many robots, e.g. folding laundry.',
+ dg:[{t:'chain',steps:['Images + language|PaliGemma weights','Robot state qₜ|own block','Noisy action chunk Aᵗ|50 × 18, action-expert weights','10 Euler steps|A ← A + 0.1·v','Execute 25 actions|then re-plan'],hl:[2,3],note:'Blockwise-causal attention: each block sees itself and earlier blocks only; the prefix K/V is cached across the 10 steps.'}],
+ ex:['Start from noise ε ∈ R^{50×18} at τ = 0.','10 times: the action expert predicts velocity v and A ← A + 0.1·v (τ goes 0 → 1).','Run the first 25 actions on a 50 Hz robot, then re-plan.'],
+ kept:'PaliGemma 3B VLM backbone; conditional flow matching.',
+ ch:[['Flow-matching action expert','Continuous action chunks.'],['Blockwise-causal masking','Cache the image/language/state prefix.']],
+ m:[[R`A^\tau_t=\tau A_t+(1-\tau)\epsilon,\qquad \mathcal{L}^\tau(\theta)=\mathbb{E}\big\|v_\theta(A^\tau_t,o_t)-(A_t-\epsilon)\big\|^2`,'τ = 0 is noise, τ = 1 is data; the target is A − ε (not ε − A).'],[R`A^{\tau+\delta}=A^\tau+\delta\,v_\theta(A^\tau,o),\quad \delta=0.1`,'Forward Euler, 10 steps.'],[R`p(\tau)=\mathrm{Beta}\big(\tfrac{s-\tau}{s};1.5,1\big),\ s=0.999`,'Emphasises noisier timesteps.']],
+ x:'Opposite time convention from SD3 (where t = 0 is data); merging them would reverse arrows.',L:[['π0',ax('2410.24164')]]},
+{id:'hstu',b:'dec',d:'Search and RAG',n:'HSTU',y:'2024',o:'Meta',ot:'I',nv:['Arch','Sys'],par:'gpt3',
+ pb:'Recommendation models relied on hand-built features and stopped improving with more compute.',
+ nw:'Treat a user’s actions as a sequence and predict the next one, with a new block that uses SiLU instead of softmax in attention (pointwise) and fuses attention and FFN.',
+ why:'Keeps the strength of engagement signals (softmax normalises it away); scales like LLMs to 1.5T parameters; +12.4% online.',
+ dg:[{t:'chain',steps:['X|user-action tokens','f₁ + SiLU|split into U, V, Q, K','SiLU(QKᵀ + rab)·V|no softmax','Norm ⊙ U|gate','f₂|output'],hl:[2,3]}],
+ ex:['With unnormalised SiLU scores, two strongly engaged items can contribute more total weight than one, so intensity survives.','Softmax would force weights to sum to 1; the paper reports up to a 44.7% gap on synthetic data.'],
+ kept:'Causal sequential-recommender skeleton (SASRec / Transformer).',
+ ch:[['Pointwise SiLU attention','Engagement intensity preserved.'],['One fused block; Stochastic Length; M-FALCON','5.3–15.2× faster than FlashAttention-2 Transformers at 8192.']],
+ m:[[R`U,V,Q,K=\mathrm{Split}(\phi_1(f_1(X))),\quad A(X)V(X)=\phi_2\big(QK^\top+\mathrm{rab}^{p,t}\big)V,\quad Y=f_2\big(\mathrm{Norm}(AV)\odot U\big)`,'Eqs. 1–3, φ = SiLU.']],
+ L:[['Actions Speak Louder than Words (HSTU)',ax('2402.17152')]]},
+{id:'timesfm',b:'dec',d:'Time series',n:'TimesFM',y:'2024',o:'Google',ot:'I',nv:['Algo','Data'],par:'gpt3',
+ pb:'Forecasting needed a separate model per dataset.',
+ nw:'A decoder-only model over patches: 32-point input patches, but each position predicts the next 128 points. Random prefix masking trains every context length.',
+ why:'Zero-shot forecasting with fewer decoding steps.',
+ dg:[{t:'chain',steps:['Series|context up to 512','32-point patches|+ mask','Residual MLP + PE|','Causal layers|20 × d 1280','Next 128 points|per position'],hl:[1,4]}],
+ ex:['256-point context, 256-step horizon: step 1 predicts points 257–384, step 2 predicts 385–512.','That is 2 decoding steps instead of 8 with 32-point outputs (the paper’s own example).'],
+ kept:'Decoder-only causal attention from LLMs; patching (PatchTST).',
+ ch:[['Output patches longer than input patches','Fewer autoregressive steps.']],
+ m:[[R`\mathcal{L}=\frac1N\sum_j\mathrm{MSE}\big(\hat y_{pj+1:pj+h},\ y_{pj+1:pj+h}\big),\ \ p=32,\ h=128`,'Eq. 5 (form).']],
+ x:'The headline corpus is ~100B points, but Table 1’s Wiki count alone is ≈374B.',L:[['TimesFM',ax('2310.10688')]]},
+{id:'dt',b:'dec',d:'Robotics',n:'Decision Transformer',y:'2021',o:'UC Berkeley, Google, Meta',ot:'X',nv:['Algo'],par:'gpt3',
+ pb:'Offline reinforcement learning needed value functions and unstable policy-gradient training.',
+ nw:'Write a trajectory as tokens (return-to-go, state, action, …) and train a GPT to predict actions. At test time, ask for a high return and it acts to achieve it.',
+ why:'RL becomes supervised sequence modelling.',
+ dg:[{t:'chain',steps:['R̂₁ s₁ a₁|','R̂₂ s₂ a₂|','…|context K = 20–50 steps','Causal transformer|','aₜ from the sₜ token|'],hl:[0,4]}],
+ ex:['Hopper with target return 3,600: after reward r₁ = 3.2, R̂₂ = 3,596.8.','Conditioning on 1,800 instead yields lower-return behaviour from the same weights.'],
+ kept:'GPT causal transformer.',
+ ch:[['Return-to-go conditioning','No value function.']],
+ m:[[R`\hat R_t=\sum_{t'=t}^{T}r_{t'},\qquad \tau=(\hat R_1,s_1,a_1,\hat R_2,s_2,a_2,\dots)`,'Trajectory as tokens.']],
+ L:[['Decision Transformer',ax('2106.01345')]]}
+);
+N.push(
+{id:'af2',b:'sci',d:'Science',n:'AlphaFold 2',y:'2021',o:'DeepMind',ot:'I',nv:['Arch','Algo'],
+ pb:'Finding a protein’s 3D shape took months of lab work; prediction methods were far from experimental accuracy.',
+ nw:'The Evoformer updates an MSA representation and a residue-pair representation together; triangle updates enforce geometric consistency (edges i–k and k–j inform i–j). A structure module with invariant point attention outputs 3D coordinates, with recycling.',
+ why:'Median backbone accuracy 0.96 Å at CASP14 vs 2.8 Å for the next best.',
+ dg:[{t:'chain',steps:['Sequence + MSA|','MSA rep. + pair rep.|N_res × N_res × c_z','48 Evoformer blocks|triangle updates + attention','Structure module|invariant point attention','3D structure|recycle 3×'],hl:[2,3]}],
+ ex:['If edges i–k and j–k both say “about 5 Å”, the outgoing triangle update for (i, j) sums their products over k and pushes z_ij toward “close” — like a triangle inequality.'],
+ kept:'MSA and coevolution inputs, distance prediction (earlier work including AlphaFold 1).',
+ ch:[['Evoformer with triangle updates and triangle attention','Consistent pairwise geometry.'],['Invariant Point Attention + FAPE loss','End-to-end 3D coordinates.']],
+ m:[[R`z_{ij}\leftarrow z_{ij}+g_{ij}\odot\mathrm{Linear}\Big(\mathrm{LN}\Big(\sum_k a_{ik}\odot b_{jk}\Big)\Big)`,'Outgoing triangle multiplicative update (supplement; from memory).']],
+ x:'Main text checked via PubMed Central; supplement details (exact update forms, 8 structure-module layers) from memory.',L:[['AlphaFold 2 (Nature)','https://www.nature.com/articles/s41586-021-03819-2']]},
+{id:'af3',b:'sci',d:'Science',n:'AlphaFold 3',y:'2024',o:'Google DeepMind, Isomorphic Labs',ot:'I',nv:['Arch'],par:'af2',
+ pb:'AlphaFold 2 handled proteins only, with a hand-designed structure module.',
+ nw:'A lighter Pairformer trunk (no MSA representation carried through) plus a generative diffusion module that denoises raw coordinates of every atom, for proteins, nucleic acids, ligands and ions together.',
+ why:'One model for whole biomolecular complexes; beats docking tools such as Vina on PoseBusters.',
+ dg:[{t:'chain',steps:['Inputs|polymer residues + atoms','MSA module|4 blocks','Pairformer × 48|pair 128 + single 384','Diffusion module|all-atom coordinates','Structure + confidence|'],hl:[2,3]}],
+ ex:['The pair map conditions a denoiser that starts from noised coordinates for every atom.','High noise levels shape the global fold; low noise levels shape local chemistry.'],
+ kept:'AF2’s pair and triangle machinery (“largely unchanged”).',
+ ch:[['Pairformer instead of Evoformer','Simpler trunk.'],['Diffusion over raw atoms, no frames or equivariance','Any molecule type.'],['Cross-distillation from AlphaFold-Multimer','Fewer hallucinations.']],
+ m:[[R`\mathcal{L}=\mathbb{E}\big\|x_0-D_\theta(x_t,t)\big\|^2`,'Denoising objective (form; EDM-style details from memory).']],
+ L:[['AlphaFold 3 (Nature)','https://www.nature.com/articles/s41586-024-07487-w']]},
+{id:'tabpfn',b:'sci',d:'Tabular',n:'TabPFN',y:'2022',o:'U. Freiburg',ot:'A',nv:['Algo','Math'],
+ pb:'Every new table needed its own model trained and tuned from scratch.',
+ nw:'Pretrain a transformer once on millions of synthetic datasets drawn from a prior. On a real table, put all labelled rows and test rows in one input; it predicts test labels in one forward pass, approximating Bayesian inference.',
+ why:'Predictions in under a second on small tables, no training on the real data.',
+ dg:[{t:'chain',rows:[['Prior (SCMs, BNNs)|offline','Synthetic datasets|18,000 × 512','Train q_θ once|'],['Real table|train rows + test rows','One forward pass|test rows attend to train rows','Posterior predictive|for test rows']],hl:[2,4]}],
+ ex:['300 labelled rows + 50 unlabelled rows = 350 tokens → one pass → 50 class distributions, with no gradient steps on the real data.'],
+ kept:'Prior-fitted networks (Müller et al. 2022).',
+ ch:[['A tabular prior and a ready-trained classifier','Fast, strong on small data.']],
+ m:[[R`p(y\mid x,D)\propto\int p(y\mid x,\phi)\,p(D\mid\phi)\,p(\phi)\,d\phi`,'Eq. 1: the posterior predictive.'],[R`\mathcal{L}_{PFN}=\mathbb{E}\big[-\log q_\theta(y_{test}\mid x_{test},D_{train})\big]`,'Eq. 2: minimising it approximates the Bayesian predictive (Jaokar’s Dimension 4).']],
+ x:'Limits in the 2022 paper: 1,000 samples, 100 features, 10 classes. TabPFN v2 (Nature 2025) not checked here.',L:[['TabPFN',ax('2207.01848')]]}
+);
+N.push(
+{id:'linattn',b:'alt',d:'Language',n:'Linear attention',y:'2020',o:'Idiap, EPFL',ot:'A',nv:['Math','Arch'],par:'tf',
+ pb:'Softmax attention costs O(N²), and its cache grows with every token.',
+ nw:'Replace softmax with a feature map φ, then reorder the product: causal attention becomes an RNN with a fixed d×d state.',
+ why:'Constant memory per step at inference; up to ~4,000× faster autoregressive image generation in the paper.',
+ dg:[{t:'state',rule:'Sₜ = Sₜ₋₁ + φ(kₜ) vₜᵀ',read:'φ(qₜ)ᵀ Sₜ / norm',ssz:'d_k × d_v',note:'No forgetting: everything is added forever. Later models add decay and erase terms.'}],
+ ex:['With d_k = d_v = 128, the state holds 16,384 numbers per head at any context length.','A softmax head stores 256 numbers per token (K and V), so it passes the state’s size at 64 tokens.'],
+ kept:'Attention as a kernel (Tsai et al. 2019).',
+ ch:[['φ(x) = elu(x) + 1 and associativity','Recurrent form with O(N d²) cost.']],
+ m:[[R`V'_i=\frac{\phi(Q_i)^\top\sum_j\phi(K_j)V_j^\top}{\phi(Q_i)^\top\sum_j\phi(K_j)}`,'Linearised attention.'],[R`S_i=S_{i-1}+\phi(K_i)V_i^\top,\quad z_i=z_{i-1}+\phi(K_i)`,'Recurrent form.']],
+ x:'Equations from memory of the paper (MiniMax-01’s restatement checked).',L:[['Transformers are RNNs',ax('2006.16236')]]},
+{id:'mamba',b:'alt',d:'Language',n:'Mamba',y:'2023',o:'Carnegie Mellon, Princeton',ot:'A',star:1,nv:['Arch','Sys','Math'],
+ pb:'Attention is quadratic; earlier state-space models (S4) were linear-time but used the same dynamics for every token, so they could not choose what to remember.',
+ nw:'Make the step size Δ and the B and C matrices functions of the current input (“selection”), so the model decides per token what to write into or keep in its fixed-size state. A hardware-aware scan keeps the expanded state in fast SRAM.',
+ why:'Linear time, constant memory at inference, and 5× generation throughput vs Transformers; strong on long sequences.',
+ dg:[{t:'state',proj:['Δ, B, C = f(xₜ)','selection: input-dependent'],newProj:1,rule:'hₜ = Āₜ hₜ₋₁ + B̄ₜ xₜ',read:'yₜ = Cₜ hₜ',ssz:'E·D × N (N = 16)',note:'Large Δ resets the state (focus on now); small Δ keeps it (remember the past).'},
+     {t:'chain',steps:['Input x|D channels','Linear → 2 branches|width E·D, E = 2','Conv1d (k=4) → SiLU → selective SSM|main branch','× SiLU gate|other branch','Linear → D|+ residual'],hl:[2]}],
+ ex:['Materialising the state at L = 2,048, ED = 4,096, N = 16 would take ~134M numbers (~268 MB) per layer; the fused scan never writes it to HBM (16× less traffic).','Inference state for a Mamba-2.8B-like model is about 12.5 MB at any context length (layer counts illustrative).','With N = 1, A = −1, B = 1, the update reduces to a classic gated RNN: hₜ = (1 − gₜ)hₜ₋₁ + gₜxₜ.'],
+ kept:'S4’s state-space equations and discretisation; the H3 block merged with a gated MLP; parallel scan.',
+ ch:[['Input-dependent Δ, B, C','Content-aware memory; loses S4’s convolution trick.'],['Fused, hardware-aware selective scan','Up to 3× faster on A100.'],['One homogeneous block, no separate MLP','Simpler stack.']],
+ m:[[R`\bar A=\exp(\Delta A),\qquad \bar B=(\Delta A)^{-1}\big(\exp(\Delta A)-I\big)\cdot\Delta B`,'Eq. 4 (zero-order hold).'],[R`h_t=\bar A_t h_{t-1}+\bar B_t x_t,\qquad y_t=C_t h_t`,'Recurrence.'],[R`B=\mathrm{Linear}_N(x),\ \ C=\mathrm{Linear}_N(x),\ \ \Delta=\mathrm{softplus}\big(\mathrm{Param}+\mathrm{Broadcast}_D(\mathrm{Linear}_1(x))\big)`,'Algorithm 2: selection.']],
+ x:'Block layout (Figure 3) and default N = 16 are from memory; Eq. 4, Algorithm 2 and speed claims checked.',L:[['Mamba',ax('2312.00752')]]},
+{id:'mamba2',b:'alt',d:'Language',n:'Mamba-2 (SSD)',y:'2024',o:'Princeton, CMU',ot:'A',nv:['Math','Sys'],par:'mamba',
+ pb:'Mamba’s scan did not use matrix-multiply hardware well, limiting state size.',
+ nw:'Restrict A to a scalar times identity; then the selective SSM is exactly masked linear attention (state-space duality), computable in chunks with matmuls.',
+ why:'2–8× faster than Mamba-1’s scan and allows much larger states (N = 64–256).',
+ dg:[{t:'state',rule:'Sₜ = aₜ Sₜ₋₁ + Bₜ xₜᵀ',read:'yₜ = Cₜᵀ Sₜ',ssz:'N × P per head',note:'With C → Q, B → K, X → V this is linear attention with a data-dependent decay aₜ.'}],
+ ex:['Nemotron-H uses Mamba-2 with head dim 64, expansion 2, conv 4, 8 groups and state 128 (8B) or 256 (56B).'],
+ kept:'Mamba’s selective SSM; linear attention.',
+ ch:[['Scalar-identity A','Duality with attention.'],['Chunkwise algorithm','Uses tensor cores.']],
+ m:[[R`h_t=a_t h_{t-1}+B_t x_t,\quad y_t=C_t^\top h_t,\quad a_t=e^{\Delta_tA}`,'Recurrent form.'],[R`Y=(L\circ CB^\top)X`,'Dual (attention-like) form with a 1-semiseparable mask L.']],
+ x:'From memory of the paper (not re-checked this pass).',L:[['Transformers are SSMs (Mamba-2)',ax('2405.21060')]]},
+{id:'rwkv',b:'alt',d:'Language',n:'RWKV / RetNet',y:'2023',o:'RWKV community, Microsoft',ot:'X',nv:['Arch'],par:'linattn',
+ pb:'RNNs are cheap to run but slow to train; Transformers are the reverse.',
+ nw:'Recurrent layers with a parallel training form. RetNet: a fixed decay γ per head, computable in parallel, recurrent or chunkwise form. RWKV: a time-decayed weighted average with token shift.',
+ why:'Constant memory decoding (RetNet: ~8.4× faster decoding, ~70% memory saved at 6.7B / 8K).',
+ dg:[{t:'state',rule:'Sₙ = γ Sₙ₋₁ + Kₙᵀ Vₙ (RetNet)',read:'oₙ = Qₙ Sₙ',ssz:'fixed per head',note:'γ = 1 − 2^(−5−h): each head forgets at its own fixed rate; nothing depends on the input.'}],
+ ex:['RetNet head with γ = 0.96875: a token 100 steps back is weighted ≈ 0.042.','A head with γ = 1 − 2⁻¹² weights it ≈ 0.976: heads work at different time scales.'],
+ kept:'Linear attention; xPos/RoPE-style rotation (RetNet); AFT (RWKV).',
+ ch:[['Fixed multi-scale decay (RetNet)','Three equivalent compute forms.'],['Token shift + WKV (RWKV)','Very small O(d) state.']],
+ m:[[R`\mathrm{Retention}(X)=(QK^\top\odot D)V,\quad D_{nm}=\gamma^{n-m}\ (n\ge m)`,'Parallel form.'],[R`S_n=\gamma S_{n-1}+K_n^\top V_n,\quad o_n=Q_nS_n`,'Recurrent form.']],
+ x:'From memory of the papers (not re-checked this pass).',L:[['RetNet',ax('2307.08621')],['RWKV',ax('2305.13048')]]},
+{id:'jamba',b:'alt',d:'Language',n:'Jamba',y:'2024',o:'AI21 Labs',ot:'I',nv:['Arch','Sys'],par:'mamba',
+ pb:'Pure Mamba was weak at exact recall from context; pure attention is costly at long context.',
+ nw:'Blocks of 8 layers with 1 attention layer and 7 Mamba (Mamba-1) layers, and MoE (16 experts, top-2) in every other layer.',
+ why:'KV cache at 256K tokens: 4 GB vs 32 GB for Mixtral; fits 140K context on one 80GB GPU.',
+ dg:[{t:'layers',pat:'MMMMAMMMMMMMAMMMMMMMAMMMMMMMAMMM',att:'A',newc:'M',cap:'Jamba 52B: 4 blocks × 8 layers, attention : Mamba = 1 : 7',legend:'A = attention · M = Mamba (Mamba-1) · MoE replaces the MLP in every 2nd layer',note:'Attention at position 4 within each block is from the config, not the paper.'}],
+ ex:['4 attention layers × 8 KV heads × 128 × 2 (K,V) × 2 bytes = 16 KiB per token → 4 GiB at 262,144 tokens.','The 8× gap to Mixtral is exactly 32 / 4 attention layers (KV head count assumed).'],
+ kept:'Mamba-1 layers and attention; Mixtral-style top-2 MoE.',
+ ch:[['1:7 attention:Mamba hybrid at scale','Long context with recall.'],['RMSNorm inside Mamba layers','Fixed loss spikes at 7B.'],['No positional encoding','Not needed; adding RoPE gave similar results.']],
+ nomath:'No new formula; the contribution is the layer recipe (l = 8, a:m = 1:7, e = 2, n = 16, K = 2).',L:[['Jamba',ax('2403.19887')]]},
+{id:'nemotron',b:'alt',d:'Language',n:'Nemotron-H → Nemotron 3',y:'2025',o:'NVIDIA',ot:'I',nv:['Arch','Sys'],par:'mamba2',
+ pb:'Even hybrids kept a lot of attention; inference throughput at long context was still limited.',
+ nw:'About 8% attention: a few attention layers spread evenly among alternating Mamba-2 and FFN layers. Nemotron 3 swaps dense FFNs for MoE and reaches 1M context.',
+ why:'Up to 3× throughput vs similar-size Transformers at 65K input on H100.',
+ dg:[{t:'counts',cap:'Nemotron-H 8B: 52 layers',parts:[['Attention',4,0,1],['Mamba-2',24,1,0],['FFN',24,0,0]],note:'Attention layers are evenly dispersed; first layer Mamba-2, last FFN. Nano 2: 6 / 62 = 9.7% attention.'}],
+ ex:['Nemotron-H 8B at 100K tokens: attention KV ≈ 16 KiB/token ≈ 1.64 GB plus a constant ≈ 50 MB Mamba state.','A 32-layer GQA-8 Transformer would need ≈ 13.1 GB: about 8× more.'],
+ kept:'Mamba-2, GQA, squared-ReLU FFN, the hybrid idea (Jamba and others).',
+ ch:[['~8% attention','Very small cache.'],['Nemotron 3: MoE + 1M context, attention with 2 KV heads and no RoPE','Long-context reasoning at low cost.']],
+ nomath:'No new core formula; Mamba-2 and attention equations as in their papers.',x:'Nemotron 3 Nano layer counts (52: 23 Mamba-2, 23 MoE, 6 attention) are from memory.',L:[['Nemotron-H',ax('2504.03624')],['Nemotron Nano 2',ax('2508.14444')],['Nemotron 3',ax('2512.20856')]]},
+{id:'falconh1',b:'alt',d:'Language',n:'Falcon-H1',y:'2025',o:'TII',ot:'N',nv:['Arch'],par:'mamba2',
+ pb:'Hybrids alternate whole layers, so each layer gets only one kind of memory.',
+ nw:'Every block runs attention and Mamba-2 side by side on the same normalised input and adds both to the residual, then an MLP; channels split SSM : attention : MLP ≈ 2 : 1 : 5.',
+ why:'Every layer has both exact recall (attention) and compressed memory (SSM).',
+ dg:[{t:'chain',steps:['rₗ|residual','Norm|','Attention ∥ Mamba-2|same input, summed','+ residual → Norm → MLP|','rₗ₊₁|'],hl:[2]}],
+ ex:['34B KV: 72 layers × 4 KV heads × 128 × 2 × 2 bytes = 147 KiB/token ≈ 15 GB at 100K tokens.','That is larger than Nemotron-H-56B’s ~40 KiB/token: a hybrid does not automatically mean a small cache.'],
+ kept:'Mamba-2 and GQA attention; the parallel-hybrid idea (Hymba).',
+ ch:[['Parallel SA_M block, tuned channel split','Both memory types in every layer.']],
+ m:[[R`r'_l=r_l+F^{attn}(N_l(r_l))+F^{SSM}(N_l(r_l)),\qquad r_{l+1}=r'_l+F^{MLP}(N'_l(r'_l))`,'Eq. 4.']],
+ L:[['Falcon-H1',ax('2507.22448')]]},
+{id:'gdn',b:'alt',d:'Language',n:'Gated DeltaNet',y:'2024',o:'MIT, NVIDIA',ot:'X',nv:['Arch','Math'],par:'mamba2',
+ pb:'Linear attention only adds to memory, so stored facts blur; Mamba-2 can decay memory but not overwrite one specific item.',
+ nw:'Combine Mamba-2’s decay gate α with DeltaNet’s delta rule: erase what the current key pointed to, then write the new value.',
+ why:'Targeted overwrite makes recall from a fixed-size state much better.',
+ dg:[{t:'state',rule:'Sₜ = Sₜ₋₁·αₜ(I − βₜkₜkₜᵀ) + βₜvₜkₜᵀ',read:'oₜ = Sₜ qₜ',ssz:'d_v × d_k',note:'α → 0 clears memory; α → 1 is the pure delta rule; β sets write strength.'}],
+ ex:['A unit key k currently stores v_old. With α = β = 1, the update gives Sₜk = v_new: replaced, not added.','Plain linear attention would return v_old + v_new.'],
+ kept:'Mamba-2’s scalar decay gate; DeltaNet’s delta rule; WY representation for chunked computation.',
+ ch:[['Gated delta rule + chunkwise WY kernel','Better recall in a fixed state.']],
+ m:[[R`S_t=S_{t-1}\,\alpha_t\big(I-\beta_tk_tk_t^\top\big)+\beta_tv_tk_t^\top,\qquad o_t=S_tq_t`,'Combined rule (follows from the two checked parts).']],
+ L:[['Gated Delta Networks',ax('2412.06464')]]},
+{id:'qnext',b:'alt',d:'Language',n:'Qwen3-Next → Qwen3.5',y:'2025–26',o:'Alibaba',ot:'I',nv:['Arch','Sys'],par:'gdn',
+ pb:'Long-context serving cost is dominated by attention’s cache.',
+ nw:'Repeat [3 Gated DeltaNet layers → 1 gated-attention layer], each followed by an ultra-sparse MoE (512 experts, 10 routed + 1 shared).',
+ why:'Qwen3-Next 80B has only 3B active parameters, and its KV cache is exactly 1/4 of an all-attention stack.',
+ dg:[{t:'layers',pat:'GGGAGGGAGGGAGGGAGGGAGGGAGGGAGGGAGGGAGGGAGGGAGGGA',att:'A',newc:'G',cap:'Qwen3-Next-80B-A3B: 12 × (3 Gated DeltaNet + 1 gated attention) = 48 layers',legend:'G = Gated DeltaNet · A = gated attention (sigmoid gate on the output) · MoE after every layer',note:'Qwen3.5-397B-A17B: the same unit × 15 = 60 layers.'}],
+ ex:['At 100K tokens: KV for 12 attention layers × 2 KV heads × 256 × 2 × 2 bytes = 24 KiB/token ≈ 2.5 GB.','Gated DeltaNet state: 36 × 32 × 128 × 128 ≈ 18.9M numbers ≈ 38 MB at any length.','All-attention would be 96 KiB/token, so the cache drops to exactly 1/4.'],
+ kept:'Gated delta rule; Qwen’s gated attention.',
+ ch:[['3:1 GDN:attention at scale + 512-expert MoE','Cheap long context.']],
+ nomath:'Gated DeltaNet equation as in its paper; gated attention multiplies the attention output by a sigmoid gate (form from memory).',x:'Context 262,144 native, extensible to ~1M.',L:[['Qwen3-Next model card','https://huggingface.co/Qwen/Qwen3-Next-80B-A3B-Instruct'],['Qwen3.5 model card','https://huggingface.co/Qwen/Qwen3.5-397B-A17B']]},
+{id:'kimilin',b:'alt',d:'Language',n:'Kimi Linear',y:'2025',o:'Moonshot AI',ot:'I',nv:['Arch'],par:'gdn',
+ pb:'Gated DeltaNet forgets every channel at the same rate.',
+ nw:'Kimi Delta Attention: a per-channel decay Diag(αₜ) instead of a scalar, interleaved 3:1 with full MLA attention that uses no positional encoding.',
+ why:'Up to 75% smaller KV cache and 6.3× faster per-token decoding at 1M tokens.',
+ dg:[{t:'layers',pat:'KKKMKKKMKKKMKKKM',att:'M',newc:'K',cap:'Uniform 3 : 1 ratio of KDA to MLA (layer count illustrative)',legend:'K = Kimi Delta Attention · M = full MLA attention, no positional encoding'}],
+ ex:['The 75% cache reduction is the 3:1 ratio: only one layer in four keeps a KV cache.','Time per output token at 1M: 1.84 ms vs 11.48 ms for full MLA.'],
+ kept:'Gated delta rule (made channel-wise); MLA from DeepSeek.',
+ ch:[['Per-channel decay','Finer control of forgetting.']],
+ m:[[R`S_t=\big(I-\beta_tk_tk_t^\top\big)\mathrm{Diag}(\alpha_t)S_{t-1}+\beta_tk_tv_t^\top,\qquad o_t=S_t^\top q_t`,'Eq. 1 (state written d_k × d_v; transposed relative to Gated DeltaNet).']],
+ L:[['Kimi Linear',ax('2510.26692')]]},
+{id:'minimax',b:'alt',d:'Language',n:'MiniMax-01 → M2',y:'2025',o:'MiniMax',ot:'I',nv:['Eval','Arch'],par:'linattn',
+ pb:'Can a frontier model rely mostly on linear attention?',
+ nw:'MiniMax-01/M1: one softmax-attention layer after every seven lightning (linear) attention layers, at 456B / 45.9B. MiniMax-M2 then returned to full attention.',
+ why:'A useful negative result: hybrids matched full attention on standard benchmarks but showed multi-hop reasoning deficits at scale, and inference tooling for linear attention is immature.',
+ dg:[{t:'layers',pat:'LLLLLLLSLLLLLLLSLLLLLLLSLLLLLLLSLLLLLLLSLLLLLLLSLLLLLLLSLLLLLLLSLLLLLLLSLLLLLLLS',att:'S',newc:'L',cap:'MiniMax-01: 80 layers, 7 lightning : 1 softmax',legend:'L = lightning (linear) attention · S = softmax attention',note:'MiniMax-M2 (Oct 2025): every layer is full softmax attention.'}],
+ ex:['10 softmax layers × 8 KV × 128 × 2 × 2 bytes = 40 KiB/token ≈ 4 GB at 100K and ≈ 42 GB at 1M, vs 8× that for all-softmax.','M2’s blog lists open problems: low-precision state storage, prefix caching and speculative decoding on a linear backbone.'],
+ kept:'TransNormer’s NormAttention and Lightning Attention-2 tiling.',
+ ch:[['7:1 hybrid at 456B (01)','Very long context (1M train, 4M inference).'],['Back to full attention (M2)','Reasoning quality and tooling.']],
+ m:[[R`O_1=Q_1\cdot KV_0+\big[(Q_1K_1^\top)\odot M\big]V_1,\qquad KV\leftarrow KV+K_t^\top V_t`,'Eq. 7: lightning attention, inter-block via running KV plus intra-block masked product.']],
+ L:[['MiniMax-01',ax('2501.08313')],['Why M2 went full attention','https://huggingface.co/blog/MiniMax-AI/why-did-m2-end-up-as-a-full-attention-model']]},
+{id:'evo2',b:'alt',d:'Science',n:'Evo 2',y:'2025',o:'Arc Institute, NVIDIA et al.',ot:'X',nv:['Arch','Data'],par:'mamba',
+ pb:'DNA effects can span very long distances; attention at single-nucleotide resolution over 1M bases is too costly.',
+ nw:'StripedHyena 2: three kinds of convolution operators (short, medium and long filters) striped together, with attention in only 8 of 50 layers; trained on 9.3T DNA tokens with up to 1M context.',
+ why:'1.2–2.9× faster training than optimised Transformers at these lengths.',
+ dg:[{t:'layers',pat:'SMLASMLSMLASMLSMLASMLSMLASMLSMLASMLASMLSMLASMLSMLA',att:'A',newc:'SML',cap:'Evo 2 40B: exact layer pattern from the released config (50 layers)',legend:'S = Hyena-SE (short filter 7) · M = Hyena-MR (128) · L = Hyena-LI (sequence-long) · A = attention',note:'Attention at layers 3, 10, 17, 24, 31, 35, 42, 49 (0-indexed): 16%.'}],
+ ex:['Pattern: [SE MR LI ATT] [SE MR LI SE MR LI ATT] … with one short gap between attention layers 31 and 35.'],
+ kept:'Hyena operator and StripedHyena 1.',
+ ch:[['Three Hyena variants specialised by filter length','“Convolutional multi-hybrid”.']],
+ m:[[R`y=\mathrm{gate}(q)\odot\big(G*(k\odot v)\big)`,'Hyena operator (schematic form of Eq. 1).']],
+ L:[['StripedHyena 2',ax('2503.01868')],['Evo 2 (bioRxiv)','https://www.biorxiv.org/content/10.1101/2025.02.18.638918v1']]}
+);
+N.push(
+{id:'graphcast',b:'non',d:'Science',n:'GraphCast',y:'2023',o:'DeepMind',ot:'I',nv:['Arch'],
+ pb:'Numerical weather prediction is slow and expensive.',
+ nw:'A graph neural network: map the 0.25° grid onto a multi-mesh (edges from 7 refinement levels), run 16 message-passing layers, map back, and roll out 6-hour steps.',
+ why:'Beats ECMWF HRES on 90.3% of 1,380 targets; a 10-day forecast takes under 60 s on one TPU.',
+ dg:[{t:'chain',steps:['Grid 721×1440|227 variables','Grid2Mesh encoder|','16 message-passing layers|multi-mesh, 327,660 edges','Mesh2Grid decoder|','Xₜ₊₁ = Xₜ + Δ|6 h step, ×40'],hl:[2]}],
+ ex:['A coarse-level mesh edge spans thousands of km and crosses an ocean in one hop; fine-level edges handle local detail.','The output is fed back 39 more times to reach day 10.'],
+ kept:'Encode-process-decode / interaction networks; ERA5 data.',
+ ch:[['Multi-mesh','Long-range messages in few hops.']],
+ m:[[R`e'_{sr}=\mathrm{MLP}_e(e_{sr},v_s,v_r),\qquad v'_r=\mathrm{MLP}_v\Big(v_r,\sum_s e'_{sr}\Big)`,'Message passing (Eqs. 11–13, with residuals).']],
+ x:'No Transformer: a counterexample. 36.7M parameters.',L:[['GraphCast',ax('2212.12794')]]},
+{id:'convnext',b:'non',d:'Vision',n:'ConvNeXt',y:'2022',o:'Meta, UC Berkeley',ot:'X',nv:['Eval','Arch'],par:'resnet',
+ pb:'Was the Vision Transformer’s advantage really about attention?',
+ nw:'Modernise a ResNet step by step toward Swin’s design choices (training recipe, patchify stem, 7×7 depthwise conv, inverted bottleneck, GELU, LayerNorm, fewer norms and activations) without any attention.',
+ why:'ConvNeXt-T reaches 82.1% vs Swin-T 81.3% at equal size: much of the gap was recipe, not attention.',
+ dg:[{t:'chain',steps:['Input (96 ch)|','7×7 depthwise conv|','LayerNorm|','1×1 conv 96→384|GELU','1×1 conv 384→96|+ residual'],hl:[1,2,3]}],
+ ex:['Roadmap: ResNet-50 76.13% → new recipe 78.82% → … → kernel 7 80.57% → fewer activations 81.27% → BN→LN 81.47% → separate downsampling 81.97%.'],
+ kept:'Convolutions and residual blocks (ResNet); grouped convs (ResNeXt); inverted bottleneck (MobileNetV2).',
+ ch:[['Transformer-era choices inside a pure CNN','Matches Swin.']],
+ nomath:'No new formula; a careful ablation study.',L:[['A ConvNet for the 2020s',ax('2201.03545')]]}
+);
+
+/* Idea-flow edges from the verified report's consolidated table: [#, from, to, what was taken, status] */
+const E=[
+[1,'Bahdanau et al. 2014','tf','attention between decoder and encoder states','[V]'],[2,'resnet','tf','residual connections x + Sublayer(x)','[V]'],[3,'Ba et al. 2016','tf','layer normalization','[V]'],[5,'Press & Wolf 2017','tf','shared embedding / pre-softmax weights','[V]'],
+[6,'Ioffe & Szegedy 2015','resnet','batch normalization after each conv','[V]'],[7,'VGG','resnet','stacked 3×3 plain-network design','[V]'],
+[8,'gpt2','kaplan','decoder-only Transformer (trained on WebText2)','[U]'],[10,'kaplan','chinchilla','problem framing and C ≈ 6ND accounting','[V]'],[11,'Gopher','chinchilla','architecture and training stack','[V]'],
+[12,'tf','rope','frequency base 10000 and geometric schedule','[V]'],[13,'Shaw 2018 / Transformer-XL / T5','rope','relative-position goal','[U]'],
+[15,'Milakov & Gimelshein 2018','flash','online softmax normaliser','[U]'],[16,'Rabe & Staats 2021','flash','attention without storing the N×N matrix','[U]'],[17,'Chen et al. 2016','flash','recomputation (gradient checkpointing)','[U]'],
+[20,'Liu et al. 2018','gpt1','multi-layer Transformer decoder for language modelling','[V]'],[21,'Hendrycks & Gimpel 2016','gpt1','GELU','[V]'],[22,'Sennrich et al. 2016','gpt1','BPE','[V]'],
+[23,'gpt1','gpt2','base decoder architecture','[V]'],[24,'resnet','gpt2','LayerNorm at the sub-block input (Pre-LN), via pre-activation ResNets (He et al. 2016)','[V]'],
+[25,'gpt2','gpt3','architecture, modified init, pre-normalization, tokenizer','[V]'],[26,'Sparse Transformer (Child 2019)','gpt3','alternating dense and locally banded attention','[V]'],
+[27,'gpt3','instructgpt','base models','[V]'],[28,'Christiano / Ziegler / Stiennon','instructgpt','comparisons → reward model → KL-penalised RL recipe','[U]'],[29,'PPO (Schulman 2017)','instructgpt','policy optimiser','[U]'],
+[30,'tf','bert','the encoder','[V]'],[31,'gpt1','bert','pretrain-then-fine-tune setup and BASE sizing','[V]'],[32,'Cloze task (Taylor 1953)','bert','masked-word prediction task','[V]'],[33,'gpt1','bert','GELU','[V]'],[34,'Wu et al. 2016','bert','WordPiece tokenization','[V]'],
+[35,'bert','roberta','BERT-LARGE architecture, unchanged','[V]'],[36,'gpt2','roberta','50K byte-level BPE','[V]'],
+[37,'Shaw 2018 / Huang 2018','deberta','relative position embeddings','[V]'],[38,'bert','deberta','masked-LM pre-training recipe','[V]'],
+[39,'rope','modernbert','RoPE','[V]'],[42,'Gemma 2','modernbert','alternating global/local attention','[V]'],[43,'Longformer','modernbert','sliding-window attention','[V]'],[45,'flash','modernbert','FlashAttention kernels','[V]'],[47,'roberta','modernbert','removal of next-sentence prediction','[V]'],[49,'t5','modernbert','sequence packing','[V]'],
+[51,'bert','sbert','the encoder','[V]'],[53,'InfoNCE (Oord 2018)','sbert','InfoNCE loss (E5)','[V]'],
+[58,'bert','bert4rec','Cloze / masked objective','[V]'],[59,'bert','bert4rec','GELU','[V]'],
+[60,'tf','vit','standard encoder','[V]'],[61,'bert','vit','[class] token','[V]'],[62,'vit','swin','patch tokens and Transformer blocks','[V]'],
+[64,'vit','mae','patching and encoder','[V]'],[65,'bert','mae','mask token; loss only on masked positions','[V]'],
+[66,'vit','dino','ViT backbone','[V]'],[67,'iBOT','dino','patch-level masked loss (DINOv2)','[V]'],[68,'SwAV','dino','Sinkhorn-Knopp centring (DINOv2)','[V]'],[71,'flash','dino','efficient attention (DINOv2)','[V]'],[73,'rope','dino','RoPE (DINOv3)','[V]'],
+[74,'mae','sam','MAE-pretrained ViT-H/16 image encoder','[V]'],[75,'clip','sam','text prompt encoder','[V]'],[76,'detr','sam','Transformer mask-decoder design','[U]'],
+[80,'InfoNCE (Oord 2018)','clip','N-pair / InfoNCE contrastive loss','[V]'],[81,'ConVIRT','clip','contrastive image-text objective','[V]'],[82,'vit','clip','image encoder (ViT; also ResNet)','[V]'],
+[83,'clip','siglip','dual-encoder setup','[V]'],
+[85,'ADM','dit','diffusion hyperparameters and embeddings','[V]'],[87,'LDM','dit','latent diffusion with a frozen VAE','[V]'],[88,'vit','dit','patchify, sin-cos positions, configs, init','[V]'],
+[90,'dit','sd3','patchified latents with adaLN modulation','[V]'],[91,'Rectified Flow / Flow Matching','sd3','straight-path interpolation; CFM loss','[U]'],[93,'clip','sd3','CLIP text encoders','[V]'],[94,'imagen','sd3','frozen T5-XXL as image-generation text encoder','[D]'],
+[96,'sd3','flux','double-stream MM-DiT blocks','[V]'],[97,'sd3','flux','rectified-flow objective, logit-normal t, resolution shift','[V]'],[98,'rope','flux','RoPE, factorised 3D over (t, h, w)','[V]'],
+[101,'dit','sora','diffusion transformer','[V]'],[102,'vit','sora','patches as tokens','[V]'],
+[106,'tf','t5','encoder-decoder','[V]'],[107,'Shaw et al. 2018','t5','relative position, simplified to scalar buckets','[U]'],
+[111,'tf','bart','seq2seq architecture','[V]'],[112,'gpt1','bart','GeLU','[V]'],[113,'bert','bart','bidirectional encoder idea (and AR decoder from GPT)','[V]'],
+[115,'Gemma 2','t5gemma','decoder-only pretrained weights','[V]'],[116,'UL2 / PrefixLM','t5gemma','continued-pretraining objectives','[V]'],[117,'t5','t5gemma','encoder-decoder layout','[U]'],
+[118,'tf','whisper','encoder-decoder','[V]'],[119,'gpt2','whisper','byte-level BPE tokenizer','[V]'],
+[121,'resnet','detr','CNN backbone (ResNet-50)','[U]'],[122,'tf','detr','encoder-decoder','[U]'],[123,'Hungarian algorithm (Kuhn 1955)','detr','bipartite matching','[U]'],
+[128,'mqa','alphacode','multi-query attention','[V]'],[130,'tf','alphacode','encoder-decoder','[U]'],
+[131,'t5','imagen','frozen T5-XXL text encoder (4.6B)','[V]'],[132,'Ho & Salimans','imagen','classifier-free guidance','[V]'],
+[135,'t5','chronos','encoder-decoder (embeddings changed)','[V]'],[136,'gpt2','chronos','decoder-only variant','[V]'],
+[138,'Jacobs / Jordan MoE','shazeer','mixture-of-experts idea','[V]'],[139,'shazeer','gshard','sparsely-gated MoE','[V]'],[140,'shazeer','switch','the router','[V]'],[141,'gshard','switch','expert capacity and every-other-layer placement','[V]'],[142,'t5','switch','encoder-decoder base','[V]'],
+[143,'switch','flanmoe','routers (Switch, GShard, expert-choice, ST-MoE)','[V]'],[144,'gshard','flanmoe','balancing loss (and ST-MoE z-loss)','[V]'],
+[145,'gshard','mixtral','top-2 gating (without the random 2nd expert)','[V]'],[146,'mistral','mixtral','SwiGLU experts and base architecture','[V]'],
+[147,'gshard','dsmoe','top-K softmax MoE and the f·P auxiliary loss','[V]'],[183,'dsmoe','dsv2','MoE FFN (fine-grained + shared experts)','[V]'],[182,'rope','dsv2','RoPE, on a decoupled query/key path','[V]'],
+[148,'dsv2','dsv3','MLA and DeepSeekMoE','[V]'],[149,'Wang et al. 2024','dsv3','auxiliary-loss-free bias balancing','[V]'],
+[150,'dsv3','kimi','MLA + DeepSeekMoE layout and sigmoid router','[V]'],[151,'Muon (Jordan 2024)','kimi','optimiser','[V]'],
+[152,'dsmoe','qwen3','fine-grained expert segmentation','[V]'],[155,'Qwen2.5','qwen3','GQA, SwiGLU, RoPE, pre-norm RMSNorm','[U]'],
+[156,'dsv3','glm','loss-free balance routing, sigmoid gates, MTP','[V]'],[157,'v32','glm','MLA and DeepSeek Sparse Attention','[V]'],
+[158,'dsmoe','llama4','shared + routed experts','[D]'],[159,'switch','llama4','top-1 routing','[D]'],
+[160,'gpt3','gptoss','base design (GPT-2 / GPT-3)','[V]'],[161,'gpt3','gptoss','banded / dense attention alternation','[D]'],[162,'mqa','gptoss','grouped-query attention (64 Q / 8 KV)','[V]'],[163,'StreamingLLM','gptoss','attention sinks','[D]'],[164,'mixtral','gptoss','top-k softmax over selected experts','[D]'],
+[165,'tf','mqa','multi-head attention','[U]'],[168,'Shazeer 2020 (GLU variants)','palm','SwiGLU','[U]'],[169,'GPT-J','palm','parallel attention + MLP','[U]'],[170,'mqa','palm','multi-query attention','[U]'],[171,'rope','palm','RoPE','[U]'],
+[172,'gpt3','llama','pre-normalisation','[U]'],[173,'Zhang & Sennrich 2019','llama','RMSNorm','[U]'],[174,'palm','llama','SwiGLU','[U]'],[175,'rope','llama','RoPE (via GPT-Neo)','[U]'],[177,'mqa','llama','GQA (Llama 2 34B/70B, all Llama 3 sizes)','[U]'],
+[179,'Sparse Transformer / Longformer','mistral','sliding-window attention','[U]'],[180,'mqa','mistral','grouped-query attention','[U]'],[181,'Gemma 2','gemma3','GQA, norms, local/global interleave','[V]'],
+[184,'DeepSeekMath','r1','GRPO','[V]'],[185,'dsv3','r1','base model and architecture','[V]'],[186,'dsv3','v32','MLA, MoE and checkpoint','[V]'],
+[187,'CodeGen','phi','parallel layout and tokenizer (Phi-1)','[U]'],[189,'OLMo 2','olmo','post-norm RMSNorm, QK-norm','[U]'],[190,'mqa','falcon','multi-query attention','[U]'],
+[192,'NFNet-F6','flamingo','frozen vision encoder','[V]'],[193,'chinchilla','flamingo','frozen LM (1.4B / 7B / 70B)','[V]'],[194,'Perceiver','flamingo','latent-query cross-attention (Resampler)','[U]'],
+[195,'clip','llava','ViT-L/14 vision encoder','[V]'],[196,'Vicuna','llava','the LLM','[V]'],[197,'gpt3','codex','architecture and initialisation','[V]'],
+[198,'PaLI-X / PaLM-E','rt2','VLM backbones','[V]'],[199,'RT-1','rt2','robot data and action space','[V]'],[200,'Prismatic-7B (SigLIP + DINOv2 + Llama 2)','openvla','backbone','[V]'],[201,'rt2','openvla','actions as tokens','[V]'],
+[202,'PaliGemma','pi0','VLM backbone (Gemma 2B)','[V]'],[203,'Flow Matching / rectified flow','pi0','conditional flow matching','[U]'],
+[204,'SASRec / Transformer','hstu','causal sequential-recommender skeleton','[U]'],[205,'gpt3','timesfm','decoder-only causal transformer (LLM decoders)','[V]'],[206,'PatchTST','timesfm','patching','[U]'],[207,'gpt3','dt','causal transformer (GPT)','[V]'],
+[208,'AlphaFold 1','af2','MSA inputs and distance prediction','[U]'],[209,'af2','af3','pair representation and triangle machinery','[V]'],[211,'PFN (Müller et al. 2022)','tabpfn','prior-fitted network framework','[V]'],
+[212,'Battaglia / Sanchez-Gonzalez','graphcast','encode-process-decode, interaction networks','[U]'],[214,'swin','convnext','patchify stem, large kernel, LN, GELU, MLP ratio 4, recipe','[V]'],[215,'ResNeXt / MobileNetV2','convnext','depthwise conv; inverted bottleneck','[V]'],
+[216,'bert','esm','masked-LM objective','[V]'],[217,'af2','esm','losses and equivariant structure module (ESMFold)','[V]'],[219,'swin','aurora','3D Swin U-Net backbone','[V]'],
+[220,'Tsai et al. 2019','linattn','kernel view of attention','[U]'],[222,'S4','mamba','SSM equations and discretisation','[V]'],[223,'H3 + gated MLP','mamba','block skeleton','[V]'],
+[225,'mamba','mamba2','selective SSM','[U]'],[226,'linattn','mamba2','masked linear attention (duality)','[U]'],[228,'linattn','rwkv','kernelised attention core (RetNet)','[U]'],
+[230,'mamba','jamba','Mamba (Mamba-1) layer','[V]'],[231,'mixtral','jamba','top-2 MoE (16 experts)','[V]'],
+[232,'mamba2','nemotron','SSM layer','[V]'],[233,'jamba','nemotron','the hybrid idea','[V]'],[235,'mamba2','falconh1','SSM mixer','[V]'],[236,'Hymba','falconh1','parallel-hybrid idea','[U]'],
+[237,'mamba2','gdn','scalar decay gate αₜ','[V]'],[238,'DeltaNet','gdn','delta rule','[V]'],[240,'gdn','qnext','gated delta rule layers','[V]'],
+[243,'gdn','kimilin','gated delta rule (made channel-wise)','[V]'],[244,'dsv2','kimilin','MLA','[V]'],[245,'TransNormer / Lightning Attention-2','minimax','NormAttention and tiled linear attention','[V]'],[247,'Hyena / StripedHyena 1','evo2','Hyena operator; striped hybrid','[V]']
+];
+
+/* Idea flows: ordered edge numbers */
+const F=[
+{id:'moe',t:'Mixture-of-experts',s:'From gating between LSTM layers to the default FFN of open frontier models.',e:[139,140,141,143,145,146,147,183,148,150,156,152,158,159,164,231]},
+{id:'kv',t:'Shrinking the KV cache',s:'Share K/V heads (MQA → GQA), compress them (MLA), then attend to fewer tokens (DSA).',e:[165,170,177,180,190,162,128,183,148,186,157,244]},
+{id:'pos',t:'Rotary positions (RoPE)',s:'Position as rotation inside attention spread to every major lineage.',e:[12,171,175,182,39,73,98]},
+{id:'norm',t:'Residuals and Pre-LN',s:'The skip connection, then LayerNorm moved off the residual path.',e:[2,24,23,25,172,160]},
+{id:'mask',t:'Masked prediction',s:'BERT’s fill-in-the-blank objective spread to images, proteins and recommendations.',e:[30,35,38,47,51,58,61,65,216]},
+{id:'vision',t:'Vision encoders become eyes',s:'ViT patches → contrastive CLIP → the vision input of LLMs and robots.',e:[60,62,64,74,82,75,83,195,201,214,219]},
+{id:'diff',t:'Diffusion transformers',s:'A ViT replaces the U-Net, then text and image share attention.',e:[88,90,131,94,96,98,101]},
+{id:'rec',t:'Recurrence returns',s:'Linear attention and SSMs merge back into hybrids that keep some attention.',e:[226,225,228,230,232,233,235,237,240,243,244]},
+{id:'scale',t:'Scaling and alignment',s:'Predict loss, size the model, then align it with human or rule-based feedback.',e:[8,10,193,25,27,185]}
+];
+
+</script>
+<script>
+const DIMS={Math:'Mathematical',Algo:'Algorithmic',Arch:'Architectural',Sys:'Systems',Data:'Data',Train:'Training method',Eval:'Evaluation',Prod:'Product / deployment'};
+const QUAL={Math:'The core result is a law, theorem or formula you could state without naming a specific model.',
+Algo:'The core result is a new procedure (a loss, search, inference or decoding method) that also works on existing architectures.',
+Arch:'The computational graph changes: a new layer, connection, attention pattern, memory or routing.',
+Sys:'The model computes the same function, but faster, cheaper or at a larger scale.',
+Data:'The key ingredient is what the model learns from: a new dataset, data mixture or quality filter.',
+Train:'The same architecture is trained differently: a new objective, optimiser, RL or alignment recipe.',
+Eval:'The contribution is how we measure: a benchmark, metric, careful ablation or negative result.',
+Prod:'The novelty is how it is released or used: open weights, a real deployment or a new interface.'};
+const OT={I:'Industry lab',A:'Academia',N:'Non-profit or public institute',X:'Collaboration'};
+const STS={V:'checked in the paper',U:'from memory, not re-checked',D:'derived arithmetic'};
+const BR={cut:{t:'Ancestors and cross-cutting papers',s:'Papers every branch relies on. The 2017 Transformer is the root.'},
+enc:{t:'Encoder-only',s:'Each token sees tokens on both sides. Builds representations, not text.'},
+ed:{t:'Encoder-decoder',s:'Encoder reads the input; decoder writes the output and looks back at the encoder.'},
+dec:{t:'Decoder-only',s:'Each token sees only earlier tokens. Generates one token at a time.'},
+sci:{t:'Custom attention in science',s:'Attention redesigned for molecules and tables.'},
+alt:{t:'Challengers and hybrids',s:'Recurrent or linear layers replace most attention.'},
+non:{t:'Where transformers do not dominate',s:'Strong non-transformer counterexamples.'}};
+const doms=['All','Language','Search and RAG','Vision','Multimodal','Image and video gen','Speech','Code','Robotics','Science','Time series','Tabular'];
+const byId=Object.fromEntries(N.map(n=>[n.id,n]));
+const EDGES=E.map(r=>({num:r[0],from:r[1],to:r[2],what:r[3],st:r[4]}));
+const nm=x=>byId[x]?byId[x].n:x;
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const cvar=b=>`var(--c-${b})`;
+let dom='All',nov='All',flow=null,sel='bert';
+try{const h=location.hash.slice(1);if(h&&byId[h])sel=h;}catch(e){}
+
+/* ---------- SVG helpers ---------- */
+const NEW='var(--new)',NEWF='var(--newfill)';
+function wrapT(s,m){const w=String(s).split(' ');const L=[];let c='';w.forEach(x=>{if((c+' '+x).trim().length>m&&c){L.push(c);c=x;}else c=(c+' '+x).trim();});if(c)L.push(c);return L;}
+function txt(x,y,s,o={}){return `<text x="${x}" y="${y}" text-anchor="${o.a||'middle'}" dominant-baseline="central" font-size="${o.fs||12}" font-weight="${o.fw||400}" fill="${o.c||'var(--ink)'}"${o.mono?' font-family="IBM Plex Mono, monospace"':''}>${esc(s)}</text>`;}
+function box(x,y,w,h,lines,o={}){const n=o.n;let r=`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${o.rx||6}" fill="${n?NEWF:(o.fill||'var(--panel)')}" stroke="${n?NEW:(o.st||'var(--line2)')}" stroke-width="${n?2:1}" stroke-dasharray="${o.dash||'0'}"/>`;
+ const L=[];lines.forEach((l,i)=>{if(l===undefined||l===null||l==='')return;const mx=Math.max(6,Math.floor((w-10)/(i?6.6:7.4)));wrapT(l,mx).forEach(p=>L.push([p,i]));});
+ const off=(L.length-1)*8;L.forEach((p,i)=>{r+=txt(x+w/2,y+h/2-off+i*16,p[0],{fs:p[1]?11.5:12.5,fw:p[1]?400:600,c:p[1]?'var(--muted)':'var(--ink)'});});return r;}
+function ar(x1,y1,x2,y2,o={}){return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${o.c||'var(--faint)'}" stroke-width="${o.w||1.3}" stroke-dasharray="${o.dash||'0'}" marker-end="url(#ah2)"/>`;}
+function pth(d,o={}){return `<path d="${d}" fill="none" stroke="${o.c||'var(--faint)'}" stroke-width="${o.w||1.3}" stroke-dasharray="${o.dash||'0'}" ${o.noarrow?'':'marker-end="url(#ah2)"'}/>`;}
+const DEFS=`<defs><marker id="ah2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>`;
+function svg(h,body,label,minw){return `<div class="scroll diag"><svg width="100%" viewBox="0 0 680 ${h}" style="min-width:${minw||460}px" role="img" aria-label="${esc(label)}">${DEFS}${body}</svg></div>`;}
+function grid(x,y,mode,col,cell){cell=cell||7;let r='';for(let i=0;i<6;i++)for(let j=0;j<6;j++){let on;
+ if(mode==='full')on=true;else if(mode==='causal')on=j<=i;else if(mode==='win')on=Math.abs(i-j)<=1;else if(mode==='cwin')on=j<=i&&i-j<=2;else if(mode==='chunk')on=j<=i&&Math.floor(i/3)===Math.floor(j/3);else if(mode==='sparse')on=j<=i&&(j===i||j===0||j===2);else on=j<=i;
+ r+=`<rect x="${x+j*(cell+1)}" y="${y+i*(cell+1)}" width="${cell}" height="${cell}" rx="1" fill="${on?col:'none'}" stroke="${on?col:'var(--line2)'}" stroke-width="0.6"/>`;}return r;}
+const MASKNAME={full:'every token sees every token',causal:'each token sees only earlier tokens',win:'each token sees nearby tokens, both sides',cwin:'each token sees only the last W tokens',chunk:'tokens see only their own chunk',sparse:'each token sees a few selected earlier tokens'};
+
+/* ---------- diagram templates ---------- */
+const T={};
+T.chain=function(s,n){const acc=cvar(n.b==='cut'?'ed':n.b),rows=s.rows||[s.steps],hl=s.hl||[],per=Math.max(...rows.map(r=>r.length));let b='',H=0,idx=0;
+ const bw=(660-(per-1)*28)/per,bh=s.bh||66;
+ rows.forEach((row,ri)=>{const y=18+ri*(bh+40);row.forEach((st,i)=>{const x=10+i*(bw+28);const p=st.split('|');b+=box(x,y,bw,bh,[p[0],p[1]],{n:hl.includes(idx)});
+  if(i<row.length-1){b+=ar(x+bw+2,y+bh/2,x+bw+26,y+bh/2);if(s.lab&&s.lab[idx])b+=txt(x+bw+14,y+bh/2-11,s.lab[idx],{fs:10,c:'var(--faint)'});}idx++;});
+  if(ri<rows.length-1){const lastx=10+(row.length-1)*(bw+28)+bw/2;b+=pth(`M${lastx} ${y+bh+2} L${lastx} ${y+bh+18} L${10+bw/2} ${y+bh+18} L${10+bw/2} ${y+bh+38}`);}
+  H=y+bh;});
+ if(s.skip){const [i,j,lab]=s.skip;const x1=10+i*(bw+28)+bw/2,x2=10+j*(bw+28)+bw/2;b+=pth(`M${x1} 18 C ${x1} -10, ${x2} -10, ${x2} 16`,{c:NEW,w:2});if(lab)b+=txt((x1+x2)/2,4,lab,{fs:11,c:'var(--ink)'});b=`<g transform="translate(0,22)">${b}</g>`;H+=22;}
+ if(s.note){b+=txt(340,H+20,s.note,{fs:11.5,c:'var(--muted)'});H+=22;}
+ return svg(H+14,b,n.n+' pipeline');};
+T.blk=function(s,n){const acc=cvar(n.b),hl=s.hl||[],N=k=>hl.includes(k);let b='';const enc=s.kind==='enc';
+ b+=box(8,92,92,62,[s.inp||'Tokens',s.pos?('pos: '+s.pos):''],{n:N('inp')});b+=ar(102,123,118,123);
+ b+=`<rect x="120" y="18" width="458" height="186" rx="9" fill="none" stroke="${acc}" stroke-width="1.3"/>`;
+ b+=txt(349,34,(enc?'Encoder':'Decoder')+' block × '+(s.L||'N')+(s.norm==='post'?' · Post-LN':s.norm==='par'?' · parallel attention + MLP':' · Pre-LN'),{fs:11.5,c:'var(--muted)'});
+ const nb=(x,lab)=>box(x,96,38,54,[lab],{n:N('norm')});const pl=x=>`<circle cx="${x}" cy="123" r="10" fill="var(--panel)" stroke="var(--line2)"/>`+txt(x,123,'+',{fs:14,fw:600});
+ if(s.norm==='post'){b+=box(132,90,128,66,['Attention',s.attn],{n:N('attn')});b+=ar(262,123,274,123);b+=pl(286);b+=ar(296,123,306,123);b+=nb(308,'Norm');b+=ar(348,123,360,123);
+  b+=box(362,90,120,66,['Feed-forward',s.ffn],{n:N('ffn')});b+=ar(484,123,496,123);b+=pl(508);b+=ar(518,123,528,123);b+=nb(530,'Norm');
+  b+=pth('M126 123 C126 64, 286 64, 286 111',{c:'var(--faint)'});b+=pth('M354 123 C354 70, 508 70, 508 111',{c:'var(--faint)'});
+  b+=txt(206,58,'residual',{fs:10,c:'var(--faint)'});}
+ else if(s.norm==='par'){b+=nb(132,'Norm');b+=pth('M172 116 L190 100',{});b+=pth('M172 130 L190 146',{});
+  b+=box(192,64,160,58,['Attention',s.attn],{n:N('attn')});b+=box(192,128,160,58,['Feed-forward',s.ffn],{n:N('ffn')});
+  b+=pth('M354 93 L470 118',{});b+=pth('M354 157 L470 128',{});b+=pl(482);b+=pth('M126 123 C126 48, 482 48, 482 111',{c:'var(--faint)'});b+=txt(300,44,'residual: y = x + Attn(LN x) + MLP(LN x)',{fs:10,c:'var(--faint)'});}
+ else{b+=nb(132,'Norm');b+=ar(172,123,184,123);b+=box(186,90,118,66,['Attention',s.attn],{n:N('attn')});b+=ar(306,123,318,123);b+=pl(330);
+  b+=ar(340,123,350,123);b+=nb(352,'Norm');b+=ar(392,123,404,123);b+=box(406,90,112,66,['Feed-forward',s.ffn],{n:N('ffn')});b+=ar(520,123,532,123);b+=pl(544);
+  b+=pth('M126 123 C126 66, 330 66, 330 111',{c:N('norm')?NEW:'var(--faint)',w:N('norm')?2:1.3});b+=pth('M342 123 C342 72, 544 72, 544 111',{c:N('norm')?NEW:'var(--faint)',w:N('norm')?2:1.3});
+  b+=txt(236,60,'clean residual path (nothing on it)',{fs:10,c:N('norm')?'var(--ink)':'var(--faint)'});}
+ b+=ar(580,123,592,123);b+=box(594,92,80,62,['Output',s.out||(enc?'vector per token':'next token')],{n:N('out')});
+ const m=s.mask||(enc?'full':'causal');b+=grid(150,170,m,N('attn')?NEW:acc,4);b+=txt(186,197,'',{});b+=txt(366,184,'who sees whom: '+MASKNAME[m],{fs:11,c:'var(--muted)'});
+ b+=box(8,222,326,50,['Training data',s.data||'—'],{n:N('data')});b+=box(348,222,326,50,['Objective',s.obj||(enc?'masked prediction':'next-token prediction')],{n:N('obj')});
+ return svg(282,b,n.n+' block');};
+T.ed=function(s,n){const acc=cvar(n.b==='cut'?'ed':n.b),hl=s.hl||[],N=k=>hl.includes(k);let b='';
+ b+=box(8,70,100,64,[s.inp||'Input tokens',s.pos?('pos: '+s.pos):''],{n:N('inp')});b+=ar(110,102,124,102);
+ b+=`<rect x="126" y="16" width="220" height="176" rx="9" fill="none" stroke="${acc}"/>`;b+=txt(236,32,'Encoder × '+(s.L||'N'),{fs:12,fw:600});
+ b+=box(140,46,192,58,['Self-attention',s.encAttn||'every token sees every input token'],{n:N('enc')});b+=box(140,116,192,58,['Feed-forward',s.ffn||'MLP'],{n:N('ffn')});b+=ar(236,104,236,114);
+ b+=`<rect x="360" y="16" width="214" height="176" rx="9" fill="none" stroke="${acc}"/>`;b+=txt(467,32,'Decoder × '+(s.L||'N'),{fs:12,fw:600});
+ b+=box(372,42,190,42,['Masked self-attention',''],{n:N('dec')});b+=box(372,92,190,44,['Cross-attention','Q from decoder, K/V from encoder'],{n:N('xattn')});b+=box(372,144,190,40,['Feed-forward',s.dffn||''],{n:N('ffn')&&s.dffnNew});
+ b+=ar(467,84,467,90);b+=ar(467,136,467,142);b+=pth('M332 145 C350 145, 352 114, 370 114',{c:N('xattn')?NEW:'var(--faint)',w:N('xattn')?2:1.3});
+ b+=ar(576,102,590,102);b+=box(592,70,82,64,['Output',s.out||'text'],{n:N('out')});
+ b+=grid(240,198,'full',N('enc')?NEW:acc,4);b+=txt(236,236,'encoder: full',{fs:10.5,c:'var(--muted)'});b+=grid(452,198,'causal',N('dec')?NEW:acc,4);b+=txt(470,236,'decoder: causal',{fs:10.5,c:'var(--muted)'});
+ b+=box(8,252,326,50,['Training data',s.data||'—'],{n:N('data')});b+=box(348,252,326,50,['Objective',s.obj||'sequence-to-sequence'],{n:N('obj')});
+ return svg(312,b,n.n+' encoder-decoder');};
+T.moe=function(s,n){const hl=true;let b='';const sc=s.scores,k=s.sel,E=sc.length;const y0=26,rh=27;
+ b+=box(8,y0+E*rh/2-40,86,64,['Token x',s.tok||'“cat”']);b+=ar(96,y0+E*rh/2-8,112,y0+E*rh/2-8);
+ b+=box(114,y0+E*rh/2-48,116,80,['Router',s.fn],{n:s.newRouter});
+ b+=txt(320,12,s.scoreLabel||'router score per expert',{fs:11,c:'var(--muted)'});
+ const mx=Math.max(...sc.map(Math.abs))||1;
+ sc.forEach((v,i)=>{const y=y0+i*rh,on=k.includes(i);const w=Math.max(2,Math.abs(v)/mx*110);
+  b+=pth(`M232 ${y0+E*rh/2-8} L246 ${y+10}`,{c:'var(--line2)',noarrow:1,w:0.8});
+  b+=`<rect x="250" y="${y+3}" width="${w}" height="15" rx="2" fill="${on?NEW:'var(--line2)'}" opacity="${on?1:.7}"/>`;
+  b+=txt(250+w+6,y+11,(s.fmt?s.fmt(v):v.toFixed(3)),{a:'start',fs:11,c:on?'var(--ink)':'var(--faint)',mono:1});
+  b+=`<rect x="432" y="${y}" width="58" height="22" rx="5" fill="${on?NEWF:'var(--panel)'}" stroke="${on?NEW:'var(--line)'}" stroke-width="${on?2:1}" stroke-dasharray="${on?'0':'3 3'}"/>`+txt(461,y+11,'E'+(i+1),{fs:11.5,fw:on?600:400,c:on?'var(--ink)':'var(--faint)'});
+  if(on){b+=pth(`M492 ${y+11} L560 ${y0+E*rh/2-8}`,{c:NEW,w:1.6});const g=s.gates[k.indexOf(i)];if(g!==undefined)b+=txt(522,(y+11+y0+E*rh/2-8)/2-8,g,{fs:10.5,c:'var(--ink)',mono:1});}});
+ if(s.extra)b+=s.extra;
+ b+=`<circle cx="574" cy="${y0+E*rh/2-8}" r="13" fill="var(--panel)" stroke="var(--ink)"/>`+txt(574,y0+E*rh/2-8,'Σ',{fs:13,fw:600});
+ let yy=y0+E*rh/2-8;if(s.shared){b+=box(538,y0+E*rh+2,72,30,['Shared',''],{n:s.newShared});b+=ar(574,y0+E*rh,574,yy+15);}
+ b+=ar(588,yy,608,yy);b+=box(610,yy-22,64,44,['y',''],{});
+ const H=y0+E*rh+(s.shared?40:12);b+=txt(340,H+8,s.formula,{fs:12.5,c:'var(--ink)',mono:1});if(s.note)b+=txt(340,H+28,s.note,{fs:11,c:'var(--muted)'});
+ return svg(H+(s.note?40:22),b,n.n+' mixture-of-experts router');};
+T.flash=function(s,n){let b='';
+ b+=`<rect x="8" y="18" width="250" height="232" rx="9" fill="none" stroke="var(--line2)"/>`+txt(133,34,'GPU HBM (slow, big)',{fs:12.5,fw:600})+txt(133,51,'40–80 GB · 1.5–2.0 TB/s',{fs:11,c:'var(--muted)',mono:1});
+ [['Q','N × d',70],['K','N × d',112],['V','N × d',154],['O','N × d (output)',196]].forEach(r=>{b+=box(30,r[2]-4,96,34,[r[0],r[1]]);for(let i=0;i<4;i++)b+=`<rect x="${140+i*24}" y="${r[2]}" width="20" height="26" rx="2" fill="none" stroke="var(--line2)"/>`;});
+ b+=txt(188,236,'stored in blocks',{fs:10.5,c:'var(--faint)'});
+ b+=`<rect x="370" y="18" width="302" height="232" rx="9" fill="${NEWF}" stroke="${NEW}" stroke-width="2"/>`+txt(521,34,'On-chip SRAM (fast, tiny)',{fs:12.5,fw:600})+txt(521,51,'192 KB per SM × 108 · ~19 TB/s',{fs:11,c:'var(--muted)',mono:1});
+ b+=box(388,66,80,30,['Kⱼ, Vⱼ','']);b+=box(388,106,80,30,['Qᵢ','']);b+=box(484,66,172,70,['Sᵢⱼ = Qᵢ Kⱼᵀ','block of scores, never leaves chip'],{n:1});
+ b+=box(388,150,268,42,['Online softmax','keep running max m and sum ℓ per row'],{n:1});b+=box(388,202,268,36,['Oᵢ ← rescale and add P̃ᵢⱼ Vⱼ',''],{n:1});
+ b+=pth('M164 128 C 280 110, 320 90, 386 82',{c:'var(--c-dec)',w:1.8});b+=txt(300,84,'outer loop: load Kⱼ,Vⱼ',{fs:10.5,c:'var(--c-dec)'});
+ b+=pth('M164 82 C 280 100, 320 120, 386 121',{c:'var(--accent)',w:1.8});b+=txt(298,130,'inner loop: load Qᵢ',{fs:10.5,c:'var(--accent)'});
+ b+=pth('M386 220 C 320 220, 280 210, 238 209',{c:NEW,w:1.8});b+=txt(306,232,'write Oᵢ back',{fs:10.5,c:'var(--ink)'});
+ b+=txt(340,268,'Standard attention writes the full N×N matrix S and P to HBM and reads it back. FlashAttention never does.',{fs:11.5,c:'var(--muted)'});
+ b+=txt(340,288,'Block sizes: B_c = ⌈M/4d⌉, B_r = min(⌈M/4d⌉, d). Same FLOPs; far fewer slow-memory reads.',{fs:11.5,c:'var(--muted)'});
+ return svg(300,b,'FlashAttention memory hierarchy');};
+T.heads=function(s,n){let b='';const cols=[['MHA','every query head has its own K,V',8,'2.5 MiB / token'],['GQA-8','groups of query heads share one K,V',2,'320 KiB / token (8× less)'],['MQA','all query heads share one K,V',1,'40 KiB / token (64× less)']];
+ cols.forEach((c,ci)=>{const x0=12+ci*224;b+=txt(x0+100,16,c[0],{fs:13,fw:600});b+=txt(x0+100,34,c[1],{fs:10.5,c:'var(--muted)'});
+  for(let i=0;i<8;i++){b+=`<rect x="${x0+i*25}" y="52" width="20" height="20" rx="3" fill="var(--panel)" stroke="var(--c-dec)"/>`+txt(x0+i*25+10,62,'q',{fs:10});}
+  const kv=c[2];const kvw=200/kv;for(let j=0;j<kv;j++){const kx=x0+j*kvw+kvw/2-12;const isNew=(ci===1&&s.hl==='gqa')||(ci===2&&s.hl==='mqa');
+   b+=`<rect x="${kx}" y="118" width="24" height="22" rx="3" fill="${isNew?NEWF:'var(--panel)'}" stroke="${isNew?NEW:'var(--line2)'}" stroke-width="${isNew?2:1}"/>`+txt(kx+12,129,'kv',{fs:10});
+   for(let i=0;i<8;i++){if(Math.floor(i/(8/kv))===j)b+=`<line x1="${x0+i*25+10}" y1="72" x2="${kx+12}" y2="118" stroke="var(--line2)" stroke-width="0.8"/>`;}}
+  b+=txt(x0+100,160,c[3],{fs:11.5,c:'var(--ink)',mono:1});});
+ b+=txt(340,186,s.note||'K/V cache per token, Llama 2 70B shape (80 layers, 64 query heads, head dim 128, BF16). Drawn with 8 query heads.',{fs:11,c:'var(--muted)'});
+ return svg(200,b,'MHA, GQA and MQA');};
+T.mla=function(s,n){let b='';
+ b+=box(8,96,70,50,['hₜ','token state']);
+ b+=box(110,24,110,44,['W^DQ → c^Q','query latent 1536']);b+=box(250,24,150,44,['W^UQ → q^C','+ W^QR → RoPE → q^R']);
+ b+=box(110,98,110,48,['W^DKV','down-project'],{n:1});b+=box(250,90,150,64,['cₜ^KV  (512)','CACHED latent'],{n:1});
+ b+=box(430,80,110,36,['W^UK → kᶜ','per head']);b+=box(430,124,110,36,['W^UV → vᶜ','per head']);
+ b+=box(110,172,110,44,['W^KR → RoPE','decoupled'],{n:1});b+=box(250,172,150,44,['kₜ^R  (64)','CACHED, shared by heads'],{n:1});
+ b+=box(570,96,104,50,['Attention','q·k over 128 heads']);
+ b+=ar(80,112,108,48);b+=ar(80,121,108,121);b+=ar(80,130,108,190);b+=ar(222,46,248,46);b+=ar(222,121,248,121);b+=ar(222,194,248,194);
+ b+=ar(402,112,428,98);b+=ar(402,130,428,142);b+=ar(402,46,568,108);b+=ar(542,98,568,114);b+=ar(542,142,568,130);b+=ar(402,194,568,138);
+ b+=txt(340,238,'Cache per token per layer: 512 + 64 = 576 numbers. DeepSeek-V3 (61 layers): ≈ 68.6 KiB/token vs ≈ 4.77 MiB for equivalent MHA (~71×).',{fs:11.5,c:'var(--muted)'});
+ return svg(252,b,'Multi-head latent attention');};
+T.mask=function(s,n){const T0=s.tk,at=s.at,m=s.m;let b='';const W=T0.map(t=>Math.max(42,t.length*8.6+18)),gap=8,extra=(m!=='bi'&&m!=='win')?60:0;
+ const tot=W.reduce((a,c)=>a+c,0)+gap*(T0.length-1)+extra,x0=Math.max(4,(680-tot)/2);const xs=[];let x=x0;W.forEach(w=>{xs.push(x);x+=w+gap;});
+ const see=j=>{if(j===at)return true;if(m==='bi')return true;if(m==='left')return j<at;if(m==='win')return Math.abs(j-at)<=(s.w||2);if(m==='cwin')return j<at&&at-j<(s.w||3);if(m==='chunk')return j<at&&Math.floor(j/(s.w||3))===Math.floor(at/(s.w||3));if(m==='sparse')return (s.pick||[]).includes(j);return false;};
+ b+=txt(340,16,s.cap,{fs:12.5,c:'var(--ink)'});const ty=118,cx=j=>xs[j]+W[j]/2;
+ T0.forEach((t,j)=>{if(j===at)return;const v=see(j);const d=Math.abs(cx(j)-cx(at));const hgt=Math.min(72,20+d*0.17);b+=pth(`M${cx(at)} ${ty} Q${(cx(at)+cx(j))/2} ${ty-hgt*1.55} ${cx(j)} ${ty-2}`,{c:v?NEW:'var(--line2)',w:v?2:1,dash:v?'0':'4 4',noarrow:!v});});
+ T0.forEach((t,j)=>{const v=see(j),isT=j===at;b+=`<rect x="${xs[j]}" y="${ty}" width="${W[j]}" height="32" rx="6" fill="${isT?NEWF:'var(--panel)'}" stroke="${isT?NEW:(v?'var(--line2)':'var(--line)')}" stroke-width="${isT?2:1}" stroke-dasharray="${v?'0':'4 3'}"/>`+txt(xs[j]+W[j]/2,ty+16,t,{fs:12.5,c:v?'var(--ink)':'var(--faint)'});});
+ if(extra){const gx=xs[T0.length-1]+W[T0.length-1]+gap;b+=`<rect x="${gx}" y="${ty}" width="52" height="32" rx="6" fill="none" stroke="var(--line)" stroke-dasharray="4 3"/>`+txt(gx+26,ty+16,'future',{fs:11,c:'var(--faint)'});}
+ if(s.o){b+=ar(cx(at),ty+34,cx(at),ty+58,{c:NEW});const ow=Math.max(150,s.o.length*8+60),ox=Math.min(680-ow-4,Math.max(4,cx(at)-ow/2));b+=`<rect x="${ox}" y="${ty+60}" width="${ow}" height="30" rx="6" fill="${NEWF}" stroke="${NEW}"/>`+txt(ox+ow/2,ty+75,s.o,{fs:12.5});}
+ b+=txt(340,ty+(s.o?110:52),'Amber arcs = tokens it can attend to · dashed = hidden from it'+(s.note?(' · '+s.note):''),{fs:11,c:'var(--muted)'});
+ return svg(ty+(s.o?122:64),b,'Attention pattern example');};
+T.layers=function(s,n){let b='';const pat=s.pat,L=pat.length,gap=L>40?1.5:3,w=Math.min(46,(652-(L-1)*gap)/L),tot=L*w+(L-1)*gap,x0=(680-tot)/2;
+ b+=txt(340,14,s.cap,{fs:12.5,c:'var(--ink)'});
+ [...pat].forEach((c,i)=>{const att=s.att.includes(c);const nw=s.newc.includes(c);b+=`<rect x="${x0+i*(w+gap)}" y="34" width="${w}" height="44" rx="${w>12?4:1.5}" fill="${nw?NEWF:(att?'var(--c-dec)':'var(--panel)')}" stroke="${nw?NEW:(att?'var(--c-dec)':'var(--line2)')}" stroke-width="${nw?1.6:1}" opacity="${att&&!nw?.85:1}"/>`;if(w>=11)b+=txt(x0+i*(w+gap)+w/2,56,c,{fs:w>16?11.5:9.5,c:att&&!nw?'var(--panel)':'var(--ink)'});});
+ b+=txt(x0,94,'layer 1',{a:'start',fs:10.5,c:'var(--faint)'})+txt(x0+tot,94,'layer '+L,{a:'end',fs:10.5,c:'var(--faint)'});
+ b+=txt(340,116,s.legend,{fs:11.5,c:'var(--muted)'});if(s.note)b+=txt(340,136,s.note,{fs:11.5,c:'var(--muted)'});
+ return svg(s.note?150:130,b,'Layer pattern');};
+T.counts=function(s,n){let b='';const tot=s.parts.reduce((a,p)=>a+p[1],0);let x=14;b+=txt(340,14,s.cap,{fs:12.5});
+ s.parts.forEach(p=>{const w=652*p[1]/tot;b+=`<rect x="${x}" y="32" width="${w-2}" height="40" rx="4" fill="${p[2]?NEWF:(p[3]?'var(--c-dec)':'var(--panel)')}" stroke="${p[2]?NEW:(p[3]?'var(--c-dec)':'var(--line2)')}" stroke-width="${p[2]?1.6:1}"/>`+txt(x+w/2,52,p[0]+' × '+p[1],{fs:11.5,c:p[3]&&!p[2]?'var(--panel)':'var(--ink)'});x+=w;});
+ if(s.note)b+=txt(340,92,s.note,{fs:11.5,c:'var(--muted)'});return svg(106,b,'Layer counts');};
+T.state=function(s,n){let b='';
+ b+=box(8,70,96,56,['xₜ','current token']);b+=ar(106,98,126,98);
+ b+=box(128,50,120,96,s.proj||['make k, v, q','+ gates from xₜ'],{n:s.newProj});
+ b+=box(290,30,140,56,['old state Sₜ₋₁',s.ssz||'fixed size']);b+=box(290,110,140,60,['update rule',s.rule],{n:1});
+ b+=ar(250,98,288,138);b+=ar(360,88,360,108);b+=ar(432,140,470,140);b+=box(472,110,90,60,['new state Sₜ','same size']);
+ b+=ar(564,140,584,140);b+=box(586,110,88,60,['output',s.read||'oₜ = Sₜ qₜ']);
+ b+=pth('M517 108 C 517 60, 470 50, 432 56',{c:'var(--faint)',dash:'4 3'});b+=txt(520,52,'next step',{fs:10.5,c:'var(--faint)'});
+ if(s.note)b+=txt(340,196,s.note,{fs:11.5,c:'var(--muted)'});
+ return svg(s.note?210:186,b,'Recurrent state update');};
+T.contrast=function(s,n){let b='';const im=['dog','car','pizza','tree'],tx=['“a dog”','“a car”','“pizza”','“a tree”'];const x0=220,y0=56,c=58;
+ b+=txt(340,14,s.cap,{fs:12.5});
+ tx.forEach((t,j)=>b+=txt(x0+j*c+c/2,y0-12,t,{fs:11.5}));im.forEach((t,i)=>b+=box(108,y0+i*c+8,92,c-16,['image',t]));
+ for(let i=0;i<4;i++)for(let j=0;j<4;j++){const d=i===j;b+=`<rect x="${x0+j*c+3}" y="${y0+i*c+3}" width="${c-6}" height="${c-6}" rx="4" fill="${d?NEWF:'var(--panel)'}" stroke="${d?NEW:'var(--line2)'}" stroke-width="${d?2:1}"/>`+txt(x0+j*c+c/2,y0+i*c+c/2,s.mode==='sig'?(d?'+1':'−1'):(d?'↑':'↓'),{fs:12,c:d?'var(--ink)':'var(--faint)'});}
+ const rx=x0+4*c+16;b+=txt(rx,y0+20,s.mode==='sig'?'each cell: its own sigmoid':'softmax along each row',{a:'start',fs:11.5});b+=txt(rx,y0+40,s.mode==='sig'?'label +1 on the diagonal,':'and along each column',{a:'start',fs:11.5,c:'var(--muted)'});
+ b+=txt(rx,y0+60,s.mode==='sig'?'−1 everywhere else':'(image→text and text→image)',{a:'start',fs:11.5,c:'var(--muted)'});b+=txt(rx,y0+96,s.mode==='sig'?'no batch-wide normalisation,':'needs the whole batch',{a:'start',fs:11.5,c:'var(--muted)'});b+=txt(rx,y0+114,s.mode==='sig'?'so devices work on blocks':'for the denominator',{a:'start',fs:11.5,c:'var(--muted)'});
+ return svg(y0+4*c+14,b,'Contrastive matrix');};
+T.plot=function(s,n){let b='';const X0=70,X1=640,Y0=30,Y1=230;const lx=v=>X0+(Math.log10(v)-s.xr[0])/(s.xr[1]-s.xr[0])*(X1-X0),ly=v=>Y1-(Math.log10(v)-s.yr[0])/(s.yr[1]-s.yr[0])*(Y1-Y0);
+ b+=`<line x1="${X0}" y1="${Y1}" x2="${X1}" y2="${Y1}" stroke="var(--line2)"/><line x1="${X0}" y1="${Y0}" x2="${X0}" y2="${Y1}" stroke="var(--line2)"/>`;
+ for(let e=Math.ceil(s.xr[0]);e<=s.xr[1];e++){b+=`<line x1="${lx(10**e)}" y1="${Y0}" x2="${lx(10**e)}" y2="${Y1}" stroke="var(--line)" stroke-width="0.6"/>`+txt(lx(10**e),Y1+14,'1e'+e,{fs:10.5,c:'var(--faint)',mono:1});}
+ s.yt.forEach(v=>{b+=`<line x1="${X0}" y1="${ly(v)}" x2="${X1}" y2="${ly(v)}" stroke="var(--line)" stroke-width="0.6"/>`+txt(X0-8,ly(v),s.yf?s.yf(v):v,{a:'end',fs:10.5,c:'var(--faint)',mono:1});});
+ s.lines.forEach(L=>{let d='';for(let i=0;i<=60;i++){const xv=10**(s.xr[0]+(s.xr[1]-s.xr[0])*i/60),yv=L.f(xv);if(!(yv>0))continue;const Y=ly(yv);if(Y<Y0-2||Y>Y1+2)continue;d+=(d?'L':'M')+lx(xv).toFixed(1)+' '+Y.toFixed(1);}b+=`<path d="${d}" fill="none" stroke="${L.c}" stroke-width="${L.w||2}" stroke-dasharray="${L.dash||'0'}"/>`;b+=txt(L.lx,L.ly,L.lab,{a:'start',fs:11.5,c:'var(--ink)'});});
+ (s.pts||[]).forEach(p=>{b+=`<circle cx="${lx(p[0])}" cy="${ly(p[1])}" r="4.5" fill="${p[3]||NEW}" stroke="var(--panel)"/>`+txt(lx(p[0])+8,ly(p[1])-9,p[2],{a:'start',fs:11,c:'var(--ink)'});});
+ b+=txt((X0+X1)/2,Y1+32,s.xl,{fs:11.5,c:'var(--muted)'});b+=`<text x="16" y="${(Y0+Y1)/2}" transform="rotate(-90 16 ${(Y0+Y1)/2})" text-anchor="middle" font-size="11.5" fill="var(--muted)">${esc(s.yl)}</text>`;
+ return svg(Y1+46,b,'Scaling plot');};
+T.patch=function(s,n){let b='';const g=6,c=26,x0=14,y0=30;b+=txt(340,12,s.cap,{fs:12.5});
+ const masked=s.mode==='mae'?[0,2,3,5,7,8,9,11,13,14,16,17,19,20,21,23,24,26,27,29,31,32,34,35].reduce((a,v)=>(a[v]=1,a),{}):{};
+ for(let i=0;i<g;i++)for(let j=0;j<g;j++){const k=i*g+j,mk=masked[k];b+=`<rect x="${x0+j*c}" y="${y0+i*c}" width="${c-2}" height="${c-2}" rx="2" fill="${mk?'var(--line)':(s.mode==='dit'?'var(--panel)':NEWF)}" stroke="${mk?'var(--line)':(s.mode==='dit'?'var(--line2)':NEW)}"/>`;if(s.mode==='dit')b+=`<circle cx="${x0+j*c+8+((k*7)%9)}" cy="${y0+i*c+8+((k*5)%9)}" r="1.4" fill="var(--faint)"/>`;}
+ if(s.mode==='swin'){[[0,0],[0,3],[3,0],[3,3]].forEach(p=>b+=`<rect x="${x0+p[1]*c-1}" y="${y0+p[0]*c-1}" width="${3*c}" height="${3*c}" fill="none" stroke="var(--c-enc)" stroke-width="2.2"/>`);[[1.5,1.5]].forEach(p=>b+=`<rect x="${x0+p[1]*c-1}" y="${y0+p[0]*c-1}" width="${3*c}" height="${3*c}" fill="none" stroke="var(--new)" stroke-width="2.2" stroke-dasharray="5 3"/>`);}
+ const tx=200;b+=ar(x0+g*c+6,y0+g*c/2,tx-6,y0+g*c/2);
+ const toks=s.mode==='mae'?12:14;for(let t=0;t<toks;t++){const isCls=s.cls&&t===0;b+=`<rect x="${tx+t*24}" y="${y0+g*c/2-14}" width="20" height="28" rx="3" fill="${isCls?'var(--panel)':NEWF}" stroke="${isCls?'var(--c-enc)':NEW}"/>`+(isCls?txt(tx+t*24+10,y0+g*c/2,'C',{fs:10}):'');}
+ b+=txt(tx+toks*12,y0+g*c/2+30,s.tokcap,{fs:11.5,c:'var(--muted)'});
+ b+=ar(tx+toks*24+4,y0+g*c/2,tx+toks*24+24,y0+g*c/2);b+=box(tx+toks*24+26,y0+g*c/2-30,680-(tx+toks*24+26)-6,60,[s.end,s.endsub]);
+ if(s.note)b+=txt(340,y0+g*c+20,s.note,{fs:11.5,c:'var(--muted)'});
+ return svg(y0+g*c+(s.note?34:14),b,'Image patches as tokens');};
+T.rope=function(s,n){let b='';const cx=120,cy=110,R=80;b+=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="var(--line2)"/>`;
+ const vec=(ang,col,lab)=>{const x=cx+R*Math.cos(-ang),y=cy+R*Math.sin(-ang);return `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="${col}" stroke-width="2.4" marker-end="url(#ah2)"/>`+txt(x+(x>cx?14:-14),y+(y>cy?10:-10),lab,{fs:11.5,c:'var(--ink)'});};
+ b+=vec(0,'var(--line2)','x (pair 1)');b+=vec(1,NEW,'q at m=1');b+=vec(3,'var(--c-ed)','k at n=3');
+ b+=`<path d="M${cx+30} ${cy} A30 30 0 0 0 ${cx+30*Math.cos(-1)} ${cy+30*Math.sin(-1)}" fill="none" stroke="${NEW}"/>`;
+ b+=txt(440,40,'Split each query/key into d/2 pairs.',{fs:12.5});b+=txt(440,64,'Rotate pair i by angle m·θᵢ, θᵢ = 10000^(−2(i−1)/d).',{fs:12});
+ b+=txt(440,96,'q at position 1 → angle 1 rad; k at position 3 → 3 rad.',{fs:12,c:'var(--muted)'});b+=txt(440,120,'Their dot product is cos(3 − 1) = cos 2.',{fs:12,c:'var(--muted)'});
+ b+=txt(440,144,'Positions 11 and 13 give exactly the same score:',{fs:12,c:'var(--muted)'});b+=txt(440,168,'only the distance n − m matters.',{fs:12,c:'var(--ink)'});
+ b+=txt(440,200,'Applied to Q and K inside attention, not added to the input.',{fs:11.5,c:'var(--muted)'});
+ return svg(226,b,'Rotary position embedding');};
+T.two=function(s,n){let b='';
+ b+=box(8,24,120,54,['Text tokens',s.t1||'154 × 4096']);b+=box(8,128,120,54,['Image tokens',s.t2||'4,096 (64×64 patches)']);
+ b+=ar(130,51,150,51);b+=ar(130,155,150,155);b+=box(152,20,140,62,['Text weights','own LN, QKV, MLP'],{n:1});b+=box(152,124,140,62,['Image weights','own LN, QKV, MLP'],{n:1});
+ b+=ar(294,51,330,92);b+=ar(294,155,330,112);b+=box(332,72,150,60,['Concatenate Q,K,V','one joint attention'],{n:1});b+=ar(484,102,510,102);
+ b+=box(512,72,92,60,['Split back','per stream']);b+=ar(606,92,628,60);b+=ar(606,112,628,150);b+=box(630,36,44,40,['→',''],{});b+=box(630,130,44,40,['→',''],{});
+ b+=txt(340,212,s.note||'Timestep + pooled CLIP vector → adaLN scale/shift/gate for both streams. Draw as two columns that meet only in attention.',{fs:11.5,c:'var(--muted)'});
+ return svg(226,b,'Two-stream joint attention');};
+
+/* ---------- page ---------- */
+function vis(n){return (dom==='All'||n.d===dom)&&(nov==='All'||(nov==='star'?n.star:n.nv.includes(nov)));}
+function flowObj(){return flow?F.find(f=>f.id===flow):null;}
+function flowNodes(){const f=flowObj();if(!f)return null;const s=new Set();f.e.forEach(k=>{const e=EDGES.find(x=>x.num===k);if(!e)return;if(byId[e.from])s.add(e.from);if(byId[e.to])s.add(e.to);});return s;}
+function chip(n){const fn=flowNodes();const inF=fn&&fn.has(n.id);const dim=fn?!inF:!vis(n);
+ return `<button class="chip${sel===n.id?' sel':''}${inF?' hl':''}${dim?' dim':''}" data-id="${n.id}" style="--acc:${cvar(n.b)}" aria-pressed="${sel===n.id}">${n.star?'★ ':''}${esc(n.n)}<span class="tg">${n.ot}·${n.nv[0]}</span></button>`;}
+function column(id,flat){const b=BR[id];const g=[...new Set(N.filter(n=>n.b===id).map(n=>n.d))];
+ return `<div class="col" style="--acc:${cvar(id)}"><div class="ct">${b.t}</div><div class="cs">${b.s}</div>`+(flat?`<div class="chips" style="margin-top:8px">${N.filter(n=>n.b===id).map(chip).join('')}</div>`:g.map(x=>`<div class="dg">${x}</div><div class="chips">${N.filter(n=>n.b===id&&n.d===x).map(chip).join('')}</div>`).join(''))+'</div>';}
+function edgeLine(e,dir){const other=dir==='in'?e.from:e.to;const o=byId[other]?`<button class="linkbtn" data-go="${other}">${esc(nm(other))}</button>`:esc(other);
+ return `<div class="e"><span class="num">#${e.num}</span><span>${dir==='in'?`from ${o}: `:`${o} took `}${esc(e.what)}<span class="st" title="${STS[e.st.replace(/[\[\]]/g,'')]||''}">${e.st}</span></span></div>`;}
+function mathHTML(n){if(!n.m||!n.m.length)return `<p class="note">${esc(n.nomath||'No new formula: the contribution is not mathematical.')}</p>`;
+ return `<div class="math">${n.m.map(r=>`<div class="mrow"><div class="f" data-tex="${esc(r[0])}">\\[${esc(r[0])}\\]</div><div class="e">${esc(r[1])}</div></div>`).join('')}</div>`;}
+function detail(){const d=document.getElementById('det');const n=byId[sel];if(!n){d.innerHTML='<p class="note">Pick a paper.</p>';return;}
+ const ein=EDGES.filter(e=>e.to===n.id).sort((a,b)=>a.num-b.num),eout=EDGES.filter(e=>e.from===n.id).sort((a,b)=>a.num-b.num);
+ const par=n.par?byId[n.par]:null;const fl=F.filter(f=>f.e.some(k=>{const e=EDGES.find(x=>x.num===k);return e&&(e.from===n.id||e.to===n.id);}));
+ let h=`<h3>${n.star?'★ ':''}${esc(n.n)}</h3><div class="meta">${n.y} · ${esc(n.o)} · ${OT[n.ot]} · ${BR[n.b].t}${n.status?' · '+esc(n.status):''}</div>
+ <div style="margin-top:10px">${n.nv.map((v,i)=>`<span class="nv${i?'':' p'}" title="${esc(QUAL[v])}">${DIMS[v]}${i?'':' (primary)'}</span>`).join('')}</div>
+ <p class="note" style="margin:2px 0 0">Why ${DIMS[n.nv[0]].toLowerCase()}: ${esc(QUAL[n.nv[0]])}</p>
+ <div class="sec"><span class="eyebrow">The idea in plain words</span>${n.pb?`<p class="lead"><span class="k">Problem</span>${esc(n.pb)}</p>`:''}<p class="lead"><span class="k">New</span>${esc(n.nw)}</p>${n.why?`<p class="lead"><span class="k">Why it helps</span>${esc(n.why)}</p>`:''}</div>
+ <div class="sec"><span class="eyebrow">How it works, drawn from the paper</span><div class="legend" style="margin:0 0 8px"><span><span class="sw" style="background:var(--newfill);border:2px solid var(--new)"></span>new in this paper</span><span><span class="sw" style="border:1px solid var(--line2)"></span>inherited</span></div>
+ ${(n.dg||[]).map(g=>(g.title?`<div class="dgcap" style="font-weight:600;color:var(--ink)">${esc(g.title)}</div>`:'')+T[g.t](g,n)+(g.caption?`<div class="dgcap">${esc(g.caption)}</div>`:'')).join('')}</div>
+ ${n.ex&&n.ex.length?`<div class="sec"><span class="eyebrow">Worked example</span><ol class="steps">${n.ex.map(s=>`<li>${esc(s)}</li>`).join('')}</ol></div>`:''}
+ <div class="sec"><span class="eyebrow">${par?'Compared with '+esc(par.n):'What it changed'}</span>${n.kept?`<p class="note"><b style="color:var(--ink);font-weight:600">Kept:</b> ${esc(n.kept)}</p>`:''}
+ ${n.ch&&n.ch.length?`<div class="scroll"><table class="cmp"><thead><tr><th>Changed</th><th>Why it helps, and when it matters</th></tr></thead><tbody>${n.ch.map(r=>`<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join('')}</tbody></table></div>`:''}
+ ${par?`<p class="note" style="margin-top:8px"><button class="fb" data-go="${par.id}">Open ${esc(par.n)}</button></p>`:''}</div>
+ <div class="sec"><span class="eyebrow">Where its parts came from (numbered idea-flow edges)</span>${ein.length?`<div class="edges">${ein.map(e=>edgeLine(e,'in')).join('')}</div>`:'<p class="note">No earlier paper in this atlas is credited as a parent.</p>'}
+ ${eout.length?`<div class="eyebrow" style="margin:12px 0 6px">What later papers took from it</div><div class="edges">${eout.map(e=>edgeLine(e,'out')).join('')}</div>`:''}
+ ${fl.length?`<div class="frow" style="margin-top:10px"><span class="note">Show on the tree:</span>${fl.map(f=>`<button class="fb" data-flow="${f.id}">${f.t}</button>`).join('')}</div>`:''}</div>
+ <div class="sec"><span class="eyebrow">Math behind it</span>${mathHTML(n)}</div>
+ ${n.x?`<div class="sec"><span class="eyebrow">Accuracy notes</span><p class="note">${esc(n.x)}</p></div>`:''}
+ ${n.L&&n.L.length?`<div class="sec"><span class="eyebrow">Read the paper</span><div class="links">${n.L.map(l=>`<a href="${esc(l[1])}" target="_blank" rel="noopener">${esc(l[0])} ↗</a>`).join('')}</div></div>`:''}`;
+ d.innerHTML=h;typeset(d);}
+function typeset(el){const go=()=>MathJax.typesetPromise([el]).catch(()=>fallback(el));if(window.MathJax&&MathJax.typesetPromise)go();else setTimeout(()=>{if(window.MathJax&&MathJax.typesetPromise)go();else fallback(el);},1600);}
+function fallback(el){el.querySelectorAll('.f[data-tex]').forEach(f=>{if(!f.querySelector('svg')){f.textContent=f.dataset.tex;f.classList.add('tex-fallback');}});}
+function flowbar(){const fb=document.getElementById('flowbar');const f=flowObj();if(!f){fb.innerHTML='<p class="note" style="margin:0">Pick an idea flow to draw numbered arrows on the tree. Each number says exactly which component moved from which paper.</p>';return;}
+ fb.innerHTML=`<p class="note" style="margin:0"><b style="color:var(--ink);font-weight:600">${esc(f.t)}.</b> ${esc(f.s)}</p><div class="flowlist">${f.e.map((k,i)=>{const e=EDGES.find(x=>x.num===k);if(!e)return '';return `<div><span class="n">${i+1}</span><span><b style="color:var(--ink);font-weight:600">${esc(nm(e.to))}</b> took ${esc(e.what)} from <b style="color:var(--ink);font-weight:600">${esc(nm(e.from))}</b> <span class="st">#${e.num} ${e.st}</span></span></div>`;}).join('')}</div>`;}
+function lines(){const g=document.getElementById('ovg');g.innerHTML='';const f=flowObj();if(!f)return;
+ const W=document.getElementById('tree').getBoundingClientRect();const pos=id=>{const el=document.querySelector(`.chip[data-id="${id}"]`);if(!el)return null;const r=el.getBoundingClientRect();return {x:r.left-W.left+r.width/2,y:r.top-W.top+r.height/2,h:r.height/2,w:r.width/2};};
+ let h='';f.e.forEach((k,i)=>{const e=EDGES.find(x=>x.num===k);if(!e||!byId[e.from]||!byId[e.to])return;const a=pos(e.from),b=pos(e.to);if(!a||!b)return;
+  const dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,ux=dx/len,uy=dy/len;const x1=a.x+ux*Math.min(a.w,len/3),y1=a.y+uy*a.h,x2=b.x-ux*Math.min(b.w,len/3),y2=b.y-uy*(b.h+3);
+  const bend=((i%2)?1:-1)*0.18,mx=(x1+x2)/2-dy*bend,my=(y1+y2)/2+dx*bend;
+  h+=`<path d="M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}" fill="none" stroke="var(--flow)" stroke-width="2" marker-end="url(#ah)" opacity=".9"/>`;
+  const tx=0.25*x1+0.5*mx+0.25*x2,ty=0.25*y1+0.5*my+0.25*y2;h+=`<circle cx="${tx}" cy="${ty}" r="9" fill="var(--flow)"/><text x="${tx}" y="${ty}" text-anchor="middle" dominant-baseline="central" font-size="10.5" font-weight="600" fill="var(--panel)">${i+1}</text>`;});
+ g.innerHTML=h;}
+function btns(id,vals,cur,attr){document.getElementById(id).innerHTML=vals.map(v=>`<button class="fb" data-${attr}="${v[0]}" aria-pressed="${v[0]===cur}">${v[1]}</button>`).join('');}
+function drawTree(){
+ document.getElementById('quals').innerHTML=Object.keys(DIMS).map(k=>`<button class="q" data-nov="${nov===k?'All':k}" aria-pressed="${nov===k}"><b>${DIMS[k]}</b>: ${QUAL[k]}</button>`).join('');
+ btns('fn',[['All','All papers'],['star','★ My papers'],...Object.keys(DIMS).map(k=>[k,DIMS[k]])],nov,'nov');
+ btns('fd',doms.map(d=>[d,d]),dom,'dom');btns('ff',[['none','Off'],...F.map(f=>[f.id,f.t])],flow||'none','flow');
+ document.getElementById('cut').innerHTML=column('cut',true);
+ document.getElementById('trunks').innerHTML=['enc','ed','dec'].map(c=>column(c)).join('');
+ document.getElementById('side').innerHTML=['sci','alt','non'].map(c=>column(c)).join('');
+ flowbar();requestAnimationFrame(lines);}
+function draw(withDetail){drawTree();if(withDetail)detail();}
+document.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
+ if(t.dataset.id||t.dataset.go){sel=t.dataset.id||t.dataset.go;try{history.replaceState(null,'','#'+sel);}catch(_){}draw(true);if(window.innerWidth<1150||t.dataset.go)document.getElementById('det').scrollIntoView({behavior:'smooth',block:'start'});else document.getElementById('det').scrollTop=0;return;}
+ if(t.dataset.nov!==undefined){nov=t.dataset.nov;flow=null;draw(false);return;}
+ if(t.dataset.dom!==undefined){dom=t.dataset.dom;flow=null;draw(false);return;}
+ if(t.dataset.flow!==undefined){flow=t.dataset.flow==='none'?null:t.dataset.flow;draw(false);if(flow&&t.closest('#det'))document.getElementById('tree').scrollIntoView({behavior:'smooth',block:'start'});return;}});
+window.addEventListener('resize',()=>requestAnimationFrame(lines));
+draw(true);
+
+</script>
+
+</body></html>

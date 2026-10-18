@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 340" width="820" height="340" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#b8b8b0"/>
+    </marker>
+  </defs>
+  <rect width="820" height="340" fill="#ffffff"/>
+  <text x="20" y="28" font-size="15" font-weight="700" fill="#1f2328">FlashAttention never writes the N×N matrix to HBM</text>
+  <text x="20" y="47" font-size="11.5" fill="#666">Same maths and same output. The difference is which tensors cross the slow link between HBM and the chip.</text>
+
+  <!-- Standard attention -->
+  <text x="20" y="80" font-size="13" font-weight="700" fill="#1f2328">Standard attention</text>
+  <rect x="20" y="90" width="380" height="56" rx="7" fill="#fff" stroke="#c8c8c0"/>
+  <text x="34" y="112" font-size="12.5" font-weight="700" fill="#1f2328">HBM: big and slow (80 GB, ~3.35 TB/s)</text>
+  <text x="34" y="132" font-size="12" fill="#c0392b">holds Q, K, V, O and S, P (N×N each)</text>
+  <line x1="45" y1="146" x2="45" y2="214" stroke="#b8b8b0" stroke-width="1.3" marker-end="url(#ah)"/>
+  <line x1="375" y1="214" x2="375" y2="148" stroke="#b8b8b0" stroke-width="1.3" marker-end="url(#ah)"/>
+  <text x="210" y="172" font-size="12" fill="#c0392b" text-anchor="middle">read Q, K → write S (N×N)</text>
+  <text x="210" y="190" font-size="12" fill="#c0392b" text-anchor="middle">read S → write P (N×N)</text>
+  <text x="210" y="208" font-size="12" fill="#1f2328" text-anchor="middle">read P, V → write O</text>
+  <rect x="20" y="216" width="380" height="104" rx="7" fill="#fff" stroke="#c8c8c0"/>
+  <text x="34" y="238" font-size="12.5" font-weight="700" fill="#1f2328">SRAM: on-chip, fast, tiny</text>
+  <text x="34" y="258" font-size="12" fill="#1f2328">kernel 1: S = Q Kᵀ</text>
+  <text x="34" y="276" font-size="12" fill="#1f2328">kernel 2: P = softmax(S)</text>
+  <text x="34" y="294" font-size="12" fill="#1f2328">kernel 3: O = P V</text>
+  <text x="34" y="311" font-size="11" fill="#555">each kernel starts and ends in HBM</text>
+
+  <!-- FlashAttention -->
+  <text x="420" y="80" font-size="13" font-weight="700" fill="#1f2328">FlashAttention</text>
+  <rect x="420" y="90" width="380" height="56" rx="7" fill="#fff" stroke="#c8c8c0"/>
+  <text x="434" y="112" font-size="12.5" font-weight="700" fill="#1f2328">HBM: big and slow (80 GB, ~3.35 TB/s)</text>
+  <text x="434" y="132" font-size="12" fill="#1f2328">holds Q, K, V, O only</text>
+  <line x1="445" y1="146" x2="445" y2="214" stroke="#b8b8b0" stroke-width="1.3" marker-end="url(#ah)"/>
+  <line x1="775" y1="214" x2="775" y2="148" stroke="#b8b8b0" stroke-width="1.3" marker-end="url(#ah)"/>
+  <text x="610" y="178" font-size="12" fill="#1f2328" text-anchor="middle">read Q, K, V, one tile at a time</text>
+  <text x="610" y="196" font-size="12" fill="#1f2328" text-anchor="middle">write only O (N × d), never S or P</text>
+  <rect x="420" y="216" width="380" height="104" rx="7" fill="#e6eefb" stroke="#2f74d0" stroke-width="1.6"/>
+  <text x="434" y="238" font-size="12.5" font-weight="700" fill="#1f2328">SRAM: one fused kernel, tile by tile</text>
+  <text x="434" y="258" font-size="12" fill="#1f2328">S tile = Q<tspan font-size="9" dy="3">i</tspan><tspan dy="-3"> K</tspan><tspan font-size="9" dy="3">j</tspan><tspan font-size="9" dy="-9">T</tspan><tspan dy="6"> (never leaves the chip)</tspan></text>
+  <text x="434" y="276" font-size="12" fill="#1f2328">online softmax: running max m, sum ℓ</text>
+  <text x="434" y="294" font-size="12" fill="#1f2328">O tile rescaled and updated per block</text>
+  <text x="434" y="311" font-size="11" fill="#555">backward pass recomputes S from Q, K, V</text>
+</svg>
