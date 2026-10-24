@@ -8,21 +8,48 @@ If I just move on without reflecting, I'm no more than a parrot. That's where un
 
 Understanding means you can explain and rebuild a mechanism. Judgment means you can pick a mechanism under constraints and predict the consequence before you see it.
 
+**The goal of this page:** use research the way an engineer uses physics. Before spending a single GPU hour, I want to be able to predict how a model will behave, what it will cost and where it will break, and then design the experiment that checks that prediction.
+
 Anyone who has read these papers, or implemented them, must have noticed a lot of repetition. That got me thinking: maybe the point of this exercise isn't just going through the math. Maybe it's spotting the recurring ideas behind it. The more models I went through, the more they seemed to rely on a handful of ideas and grow from there.
 
-This is good news, because it means I can look at any new model, idea or paper, quickly get a grasp of what it is, and predict how it will behave, how much it will cost and where it will break. Congratulations! That's basically what separates you from a parrot!
+This is good news, because it means I can look at any new model, idea or paper, quickly get a grasp of what it is, and predict how it will behave, how much it will cost and where it will break. 
 
-Ok, let's dig into the technical part. This is what I've seen so far, and every section ends with a question you can ask about any new model.
 
-## 1. Where to put LayerNorm
+## The map: five ideas under nine papers
+
+This is the repetition I kept seeing, boiled down: nine papers, five ideas. Each idea is a problem every model has to solve, and each paper is one answer to it. A new paper is usually a new answer to one of these five problems, so I can read it as a diff against something I already know.
+
+![Nine papers, five ideas](images/five_ideas_map.svg)
+
+The rest of the page is these five ideas used on real engineering decisions. Every section says which idea it applies and ends with the question to ask about any new model.
+
+| Idea | The problem | The question to ask | Used in |
+| --- | --- | --- | --- |
+| 1. Keep the signal alive through depth | Small per-layer changes in scale compound over dozens of layers | What keeps activations and gradients at a sane scale as the model gets deeper? | [§1 LayerNorm](#1-idea-1-in-practice-where-to-put-layernorm) |
+| 2. The objective shapes the model | The architecture decides what a model *can* represent; the loss decides what it learns to do | What exactly does the loss reward, and what behaviour will follow? | [§3 Encoder or decoder](#3-idea-2-in-practice-bidirectional-vs-causal), [§4](#4-ideas-2-to-5-in-production-the-transformers-limits) |
+| 3. Built-in assumptions vs data | Assumptions save data when right, and become a ceiling when data is plentiful | What does this model assume, and do I have enough data to not need it? | [§4](#idea-3-built-in-assumptions-vs-data) |
+| 4. How a model remembers context | How much of the past to keep, and what looking it up costs | How much state does it keep per token of history, and what does reading it cost? | [§4](#idea-4-how-a-model-remembers-context), [§5](#5-idea-5-and-4-in-numbers-back-of-the-envelope-estimates) |
+| 5. Compute is the real currency | Capability is bought with FLOPs and bytes | Is this limited by compute or by memory bandwidth? | [§2 HBM vs SRAM](#2-idea-5-in-practice-hbm-vs-sram), [§5](#5-idea-5-and-4-in-numbers-back-of-the-envelope-estimates) |
+
+Inside those ideas, the same five motifs keep coming back. When a paper looks new, it's often one of these in a new place:
+
+- **Skip connection:** ResNet, the LSTM cell state, Pre-LN, the residual stream.
+- **Gating:** LSTM gates, SwiGLU, Mamba's gate branch, the MoE router.
+- **Store vs recompute:** gradient checkpointing, FlashAttention's backward pass, Mamba's scan.
+- **Conditional computation:** MoE, sparse attention, Mamba's input-dependent selection.
+- **Normalising scale:** BatchNorm, LayerNorm, RMSNorm, QK-norm.
+
+## 1. Idea 1 in practice: where to put LayerNorm
+
+> **Idea 1: keep the signal alive through depth.** A deep net is a long chain of layers. If each layer scales its output by just 1.1×, after 48 layers that's 1.1⁴⁸ ≈ 97×. At 0.9× per layer you get 0.9⁴⁸ ≈ 0.006. Gradients go back through the same chain, so they explode or vanish the same way, and training diverges or stalls. Where you put the norm is the most common engineering decision this idea drives.
 
 LayerNorm takes a token's hidden vector, rescales it to mean 0 and variance 1, then applies a learned scale and bias. The point is to keep activations at a predictable scale while they pass through dozens of layers. RMSNorm (LLaMA and most LLMs now) does the same thing without subtracting the mean, so it's a bit cheaper.
-
-**Why you need it?** A deep net is a long chain of layers. If each layer scales its output by just 1.1×, after 48 layers that's 1.1⁴⁸ ≈ 97×. At 0.9× per layer you get 0.9⁴⁸ ≈ 0.006. Gradients go back through the same chain, so they explode or vanish the same way, and training diverges or stalls.
 
 The other piece is the **skip connection** (also called a residual connection), from ResNet. A Transformer block doesn't overwrite its input, it adds to it: x = x + F(x), where F is attention or the FFN. The input skips over the block and gets added back to its output. That running x, which every block adds to, is called the **residual stream**. Stack three blocks and you get x₃ = x₀ + F₁ + F₂ + F₃: the original input is still in the output, untouched, with each block's work added on top. It matters for training because the gradient flows back along the same routes. Through the skip connections, it isn't multiplied by anything, so it reaches layer 1 at full strength, however deep the model is. Without skip connections, the gradient gets multiplied by every layer's derivative on the way down. With 48 layers at 0.5 each, that's 0.5⁴⁸ ≈ 0, and the early layers stop learning.
 
 So the design question is: where in the block does the norm go? Papers have tried three answers.
+
+![Post-LN vs Pre-LN vs Peri-LN](images/layernorm_placement.svg)
 
 ### Post-LN: normalise after the add (Transformer 2017, BERT)
 
@@ -81,12 +108,21 @@ The thing to look for: does the plain $x_l$ (x at layer $l$) sit outside every L
 
 **Recommendation:** Pre-LN with RMSNorm as the default. If a large run shows loss spikes, try the output norm (Peri-LN) and QK-norm before touching the LR schedule. Post-LN only if I'm reproducing a BERT-era model.
 
+### The same idea in the other papers
+
+Norm placement is one answer to Idea 1. The other papers each found their own:
+
+- **ResNet:** skip connections (x + F(x)), so the gradient always has a direct route back to the early layers.
+- **Transformer:** divides attention scores by √d\_k. A dot product of two d\_k-dimensional vectors has variance around d\_k, so without the scaling softmax saturates to nearly one-hot and its gradients become tiny.
+- **GPT-2:** Pre-LN, plus scaling each residual block's output weights at init by 1/√N, because each of the N blocks adds variance to the residual stream.
+- **Mamba:** the state's decay factor is exp(ΔA) with A negative, so it always stays between 0 and 1 and the recurrence can't blow up.
+
 **The question to ask about any new architecture.** These two questions predict how a model will train before you run anything:
 
 1. **Does x pass through untouched somewhere?** If a norm sits on the skip connection (like Post-LN), expect it to need warmup and to get fragile as it gets deeper.
 2. **What stops the residual stream from growing?** If nothing does (like Pre-LN), expect deep layers to do less and loss spikes at scale.
 
-**How to catch it in your own training.** Log the activation norm and gradient norm per layer. Each failure shows up there before the loss curve looks bad:
+**How to catch it in your own training.** When a run diverges or stalls, check scale first. Log the activation norm and gradient norm per layer. Each failure shows up there before the loss curve looks bad:
 
 | Problem | What you'll see in the per-layer logs |
 | --- | --- |
@@ -107,7 +143,9 @@ for i, block in enumerate(model.blocks):
     )
 ```
 
-## 2. HBM vs SRAM: when memory bandwidth is the bottleneck
+## 2. Idea 5 in practice: HBM vs SRAM
+
+> **Idea 5: compute is the real currency.** Capability is bought with FLOPs and bytes. Since about 2020, most architecture papers are answering one question: how do I get more capability per FLOP, or per byte? The trap is thinking only FLOPs count. On a GPU, the bytes you move are often the real bill.
 
 A GPU has two memories that matter here. HBM is the big off-chip memory (80 GB on an H100) where the weights, activations and KV cache live. SRAM is the small on-chip memory right next to the compute units (shared memory and registers: a few hundred KB per SM, tens of MB across the chip). Anything a kernel computes on has to be read from HBM into SRAM first, and the result written back.
 
@@ -120,6 +158,10 @@ $$\text{arithmetic intensity} = \frac{\text{FLOPs}}{\text{bytes read and written
 $$\text{H100 ridge point} \approx \frac{989\ \text{TFLOP/s}}{3.35\ \text{TB/s}} \approx 295\ \text{FLOPs/byte}$$
 
 If an op does more than about 295 FLOPs per byte, it's compute-bound: the tensor cores are the bottleneck, and only fewer or cheaper FLOPs will speed it up. If it does fewer, it's memory-bound: the GPU sits idle waiting on HBM, and only moving fewer bytes helps. A GPU with more FLOPs but the same bandwidth won't make it faster.
+
+The picture below is called a roofline. Find your op's intensity on the x-axis; the line above it is the fastest it can ever run.
+
+![H100 roofline](images/roofline_h100.svg)
 
 **When to use it.** Arithmetic intensity is a diagnostic: reach for it when something is slower than expected, or before you spend time optimising. It tells you which kind of fix will actually work.
 
@@ -141,7 +183,7 @@ You rarely need an exact number. A rough guess like “each weight is used once 
 **Worked example: decoding Llama-2-7B at batch 1.** The weights are 6.74B × 2 bytes ≈ 13.5 GB. Each new token is one forward pass that reads every weight once, so at 3.35 TB/s the ceiling is about 250 tokens/s, and you'll measure less than that. The compute barely matters: about 13.5 GFLOPs per token is nothing for a 989 TFLOP/s chip. That one calculation explains the standard serving tricks:
 
 - **int4 weights:** 4× fewer bytes, so up to about 4× faster decode.
-- **Batching 32 requests:** read the weights once, produce 32 tokens, so close to 32× the throughput until KV-cache reads or compute take over. This is what continuous batching in servers like vLLM is exploiting.
+- **Batching 32 requests:** read the weights once, produce 32 tokens, so close to 32× the throughput until KV-cache reads or compute take over. This is what continuous batching in servers like vLLM is exploiting. On the roofline, batching slides the decode dot to the right.
 - **FlashAttention:** attention intermediates stay in SRAM instead of round-tripping through HBM.
 
 It also explains why prefill and decode feel so different. Prefill pushes the whole prompt through in parallel, so it's a big matmul and compute-bound; that's your time to first token. Decode generates one token at a time and is memory-bound; that's your tokens per second.
@@ -186,7 +228,7 @@ Online softmax on a small example: one row of scores \[1, 2, 3, 4\], processed a
 
 Only two numbers per row (m and ℓ) travel between blocks, and the final sum is exactly the same as computing the whole row at once.
 
-The output is exactly the same as standard attention (it's not an approximation). Memory grows linearly with N instead of quadratically, and the paper reports up to 7.6× faster attention on GPT-2. HBM accesses drop from Θ(Nd + N²) to Θ(N²d² / M), which is many times fewer for typical head dims (64–128) and SRAM sizes.
+The output is exactly the same as standard attention (it's not an approximation). Memory grows linearly with N instead of quadratically, and the paper reports up to 7.6× faster attention on GPT-2. HBM accesses drop from Θ(Nd + N²) to Θ(N²d² / M), which is many times fewer for typical head dims (64–128) and SRAM sizes. Note what FlashAttention does *not* change: what attention remembers (Idea 4). It only changes how efficiently the same thing is computed.
 
 **Mamba.** Mamba's selective SSM keeps a hidden state of size N for every channel, so the expanded state has shape (batch, length, D, N): N times bigger than the input. Because Δ, B and C depend on the input, Mamba can't use S4's convolution shortcut. It has to run the recurrence as a scan. A naive implementation writes that whole expanded state to HBM: at length 2,048, 4,096 channels and N = 16, that's about 134M numbers (around 268 MB) per layer.
 
@@ -205,7 +247,7 @@ Same pattern as FlashAttention: the naive version spills the N-times-bigger stat
 
 That cuts memory traffic by about a factor of N (16× at N = 16).
 
-Both are the “store vs recompute” and fusion motifs from section 5. For any new layer, the question is: what's the biggest intermediate tensor, and does it ever have to touch HBM?
+Both are the “store vs recompute” motif from the map at the top, plus kernel fusion. For any new layer, the question is: what's the biggest intermediate tensor, and does it ever have to touch HBM?
 
 ### If I want to make something faster the same way
 
@@ -224,11 +266,19 @@ Step 3 is where the real idea is. Fusing and tiling is engineering; finding a wa
 
 In practice, try the cheap options first. torch.compile already fuses simple elementwise chains. For attention variants, PyTorch's built-in scaled\_dot\_product\_attention and FlexAttention (custom masks and score changes, compiled to a fused kernel) cover most cases. If you do need your own kernel, Triton lets you write tiled, fused GPU kernels in Python, and that's where most people start before going to CUDA.
 
+### The same idea in the other papers
+
+- **Scaling laws:** loss falls as a predictable power law in parameters, data and compute. Chinchilla later put the compute-optimal ratio at about 20 training tokens per parameter. This is what lets you predict a big run's loss from small runs (§5).
+- **MoE:** separates total parameters from the ones used per token. Mixtral has 46.7B parameters but uses about 12.9B per token. You pay for the memory of all of them and the compute of a few.
+- **FlashAttention and Mamba:** the hardware-aware kernels above. Same maths, fewer bytes.
+
 **When it matters day to day:** you'll rarely write a CUDA kernel, but you'll keep making decisions this explains: batch size, whether to quantise, which attention backend is running, and why GPU utilisation (MFU) looks low.
 
 **The question to ask:** how many FLOPs does this op do per byte it moves, and is that above or below the ridge point of my GPU?
 
-## 3. Bidirectional vs causal: encoder or decoder?
+## 3. Idea 2 in practice: bidirectional vs causal
+
+> **Idea 2: the objective shapes the model as much as the architecture.** The architecture decides what a model *can* represent. The loss decides what it actually learns to do. BERT and GPT-2 use almost the same block; the objective, and the attention mask that goes with it, is what makes one an encoder and the other a generator.
 
 The attention math is identical in BERT and GPT. What differs is the attention mask, meaning which positions each token is allowed to attend to, plus the training objective that goes with it.
 
@@ -238,9 +288,17 @@ bidirectional = torch.ones(T, T).bool()        # encoder (BERT): every token see
 causal = torch.tril(torch.ones(T, T)).bool()   # decoder (GPT): token i sees tokens 0..i only
 ```
 
+![Bidirectional vs causal mask](images/attention_masks.svg)
+
 The causal mask exists because a decoder generates text left to right. At training time it must not see the token it's predicting, and at inference time the future tokens don't exist yet. An encoder never generates, so it has no reason to hide anything.
 
 What that costs you: take “I sat on the bank of the river”. In a causal model, the hidden state for “bank” is built before “river” is visible, so that representation can't tell a riverbank from a money bank. In an encoder, “bank” attends to “river” directly. A decoder can still classify a whole sentence by reading the last token's hidden state, since that one has seen everything. But every earlier position only ever saw its left context.
+
+How the objective plays out in the papers:
+
+- **BERT:** predicts masked words using context on both sides. That gives great representations for understanding tasks, but only about 15% of tokens produce a training signal, and it isn't a natural text generator.
+- **GPT-2:** predicts the next word. Every token produces a signal, generation comes for free, and zero-shot task behaviour emerges from diverse data.
+- **ResNet and ViT:** trained on labelled images, so they learn features that are useful for the labels they were given.
 
 The practical rule: if the output is a label or an embedding, the full input already exists, so use bidirectional attention. If the output is generated text, you need causal.
 
@@ -254,67 +312,49 @@ The practical rule: if the output is a label or an embedding, the full input alr
 
 **Recommendation:** for classification or retrieval at volume, start with a fine-tuned encoder. Go to an LLM when the task needs reasoning or generation, or when there's no labelled data and zero-shot is the only option. A lot of the strongest embedding models now are adapted from decoder LLMs. They're more accurate, but tens of times more expensive per item, so measure whether you actually need the gain.
 
-**The question to ask:** when the model computes token i, which positions can it attend to, and does my task need the ones it can't see?
+**The objective also predicts behaviour, not just task fit.** Hallucination is exactly what next-token loss predicts: it rewards a plausible continuation, not a true one. It's also why a base model doesn't follow instructions until it's been instruction-tuned. Section 4 has more of these.
 
-## 4. What the Transformer's limits look like in production
+**The question to ask:** when the model computes token i, which positions can it attend to, and does my task need the ones it can't see? And more generally: what exactly does the loss reward, and what behaviour will follow from that?
 
-Most of the “weird” LLM behaviour you hit in production traces back to one design choice. If you know the choice, you can predict the failure before a user files a bug.
+## 4. Ideas 2 to 5 in production: the Transformer's limits
 
-| Symptom | Root cause | Mitigation |
-| --- | --- | --- |
-| Long prompts are slow and expensive; OOM at long context | Prefill attention is O(n²) in sequence length, and the KV cache (the stored K and V vectors for every past token) grows linearly and is read on every decode step | Retrieve less but better (RAG), prefix caching, models with a smaller KV cache (GQA, MLA, hybrids) |
-| Facts in the middle of a long prompt get missed | Models attend most reliably to the start and end of the context ([Lost in the Middle](https://arxiv.org/abs/2307.03172)) | Put key info at the start or end; don't stuff whole documents |
-| Confident hallucinations | The next-token loss rewards a likely continuation, not a correct one | Ground answers in retrieved sources, add verification, run evals on your own data |
-| Can't count letters; shaky arithmetic on long numbers | Subword tokenisation (BPE): the model sees chunks like “straw” + “berry”, not characters or digits | Tool use: let it run code or call a calculator |
-| Fails hard problems when it answers directly | Same compute (one forward pass) per output token, regardless of difficulty | More tokens of reasoning (chain of thought, reasoning models), paid for in latency |
-| Knows “A is B” but not “B is A” | Causal training only ever predicts left to right ([Reversal Curse](https://arxiv.org/abs/2309.12288)) | When fine-tuning, include facts in both directions |
-| Latency floor per output token | Decoding is sequential and memory-bound (section 2) | Batching, quantisation, speculative decoding |
-| Poor results when trained from scratch on small data | Weak inductive bias: almost no built-in assumptions about the data | Fine-tune a pretrained model; for small tabular data, try gradient-boosted trees or TabPFN first |
+Most of the “weird” LLM behaviour you hit in production traces back to one design choice. If you know the choice, you can predict the failure before a user files a bug. The last column says which of the five ideas explains it.
 
-**The question to ask:** which of these will my product hit first, and is the fix in the model choice, the data, or the system around the model?
+| Symptom | Root cause | Mitigation | Idea |
+| --- | --- | --- | --- |
+| Long prompts are slow and expensive; OOM at long context | Prefill attention is O(n²) in sequence length, and the KV cache (the stored K and V vectors for every past token) grows linearly and is read on every decode step | Retrieve less but better (RAG), prefix caching, models with a smaller KV cache (GQA, MLA, hybrids) | 4 |
+| Facts in the middle of a long prompt get missed | Models attend most reliably to the start and end of the context ([Lost in the Middle](https://arxiv.org/abs/2307.03172)) | Put key info at the start or end; don't stuff whole documents | 4 |
+| Confident hallucinations | The next-token loss rewards a likely continuation, not a correct one | Ground answers in retrieved sources, add verification, run evals on your own data | 2 |
+| Can't count letters; shaky arithmetic on long numbers | Subword tokenisation (BPE): the model sees chunks like “straw” + “berry”, not characters or digits | Tool use: let it run code or call a calculator | 3 |
+| Fails hard problems when it answers directly | Same compute (one forward pass) per output token, regardless of difficulty | More tokens of reasoning (chain of thought, reasoning models), paid for in latency | 5 |
+| Knows “A is B” but not “B is A” | Causal training only ever predicts left to right ([Reversal Curse](https://arxiv.org/abs/2309.12288)) | When fine-tuning, include facts in both directions | 2 |
+| Latency floor per output token | Decoding is sequential and memory-bound (section 2) | Batching, quantisation, speculative decoding | 5 |
+| Poor results when trained from scratch on small data | Weak inductive bias: almost no built-in assumptions about the data | Fine-tune a pretrained model; for small tabular data, try gradient-boosted trees or TabPFN first | 3 |
 
-## 5. The five ideas under the nine papers
+Two of the five ideas don't have a section of their own yet, and they explain half of this table. Here they are.
 
-This is the repetition I kept seeing, boiled down: nine papers, five ideas. Each idea is a problem every model has to solve, and each paper is one answer to it. A new paper is usually a new answer to one of these five problems, so I can read it as a diff against something I already know.
+### Idea 4: how a model remembers context
 
-### Idea 1: Keep the signal alive through depth
+To predict the next token, a model needs the past. The real questions are how much of it to keep and what it costs to look it up. The first two rows of the table are this idea.
 
-**The problem.** A deep network passes data through dozens of layers, so small per-layer changes in scale compound: 1.1⁴⁸ ≈ 97, and 0.9⁴⁸ ≈ 0.006. Activations explode or gradients vanish, and training fails.
+![KV cache vs fixed-size state](images/context_memory_kv_vs_state.svg)
 
-**How the papers handle it:**
+- **Attention:** keeps K and V for every past token (the KV cache). Lookup is exact, but prefill costs O(n²), the cache grows with every token, and every decoding step reads all of it.
+- **Mamba:** compresses the whole history into a fixed-size state. Each step costs the same however long the input is, but some detail is lost, so it's weaker at exact copying and recall. Its real contribution is that what gets written into the state depends on the input, so it chooses what to keep.
+- **FlashAttention:** doesn't change what attention remembers, only how efficiently it's computed (section 2).
+- **Hybrids (Jamba):** mostly Mamba layers, plus a few attention layers for exact recall.
 
-- **ResNet:** skip connections (x + F(x)), so the gradient always has a direct route back to the early layers.
-- **Transformer:** divides attention scores by √d\_k. A dot product of two d\_k-dimensional vectors has variance around d\_k, so without the scaling softmax saturates to nearly one-hot and its gradients become tiny.
-- **GPT-2:** Pre-LN, plus scaling each residual block's output weights at init by 1/√N, because each of the N blocks adds variance to the residual stream.
-- **Mamba:** the state's decay factor is exp(ΔA) with A negative, so it always stays between 0 and 1 and the recurrence can't blow up.
+**In practice:** tasks that need exact retrieval (code, RAG, long documents) favour attention. Very long or streaming inputs, where losing some detail is acceptable, favour SSMs or hybrids. To size the cost, use the KV-cache formula in section 5.
 
-**In practice:** when a run diverges or stalls, check scale first: per-layer activation and gradient norms (section 1).
+*Ask: how much state does it keep per token of history, and what does reading it cost?*
 
-*Ask: what keeps activations and gradients at a sane scale as the model gets deeper?*
+### Idea 3: built-in assumptions vs data
 
-### Idea 2: The objective shapes the model as much as the architecture
-
-**The problem.** The architecture decides what a model *can* represent. The loss decides what it actually learns to do.
-
-**How the papers show it:**
-
-- **BERT:** predicts masked words using context on both sides. That gives great representations for understanding tasks, but only about 15% of tokens produce a training signal, and it isn't a natural text generator.
-- **GPT-2:** predicts the next word. Every token produces a signal, generation comes for free, and zero-shot task behaviour emerges from diverse data. BERT and GPT-2 use almost the same block; the objective is what makes them different.
-- **ResNet and ViT:** trained on labelled images, so they learn features that are useful for the labels they were given.
-
-**In practice:** hallucination is exactly what next-token loss predicts. It rewards a plausible continuation, not a true one. It's also why a base model doesn't follow instructions until it's been instruction-tuned.
-
-*Ask: what exactly does the loss reward, and what behaviour will follow from that?*
-
-### Idea 3: Built-in assumptions vs data (inductive bias)
-
-**The problem.** Every architecture assumes something about its data. When the assumption is right, it saves you data. When you have lots of data, it becomes a ceiling.
-
-**How the papers show it:**
+Every architecture assumes something about its data. When the assumption is right, it saves you data. When you have lots of data, it becomes a ceiling. The tokenisation row and the small-data row of the table are this idea.
 
 - **ResNet (CNNs):** assumes nearby pixels belong together (locality) and the same pattern can appear anywhere (weight sharing). Very data-efficient.
 - **ViT:** assumes almost nothing beyond cutting the image into patches. It does worse than ResNet when trained on ImageNet-1k alone, and only overtakes it after pretraining on JFT-300M.
-- **Transformer:** has no sense of word order without a positional encoding, so choosing sinusoidal, learned or RoPE positions is choosing an assumption.
+- **Transformer:** has no sense of word order without a positional encoding, so choosing sinusoidal, learned or RoPE positions is choosing an assumption. Tokenisation is another one: BPE decides the model never sees single characters.
 - **Mamba:** assumes the history can be compressed into a fixed-size state, with recent information easier to keep.
 - **MoE:** assumes inputs fall into groups that different experts can specialise in.
 
@@ -322,47 +362,11 @@ This is the repetition I kept seeing, boiled down: nine papers, five ideas. Each
 
 *Ask: what does this model assume, and do I have enough data to not need it?*
 
-### Idea 4: How a model remembers context
+**The question to ask about the whole table:** which of these will my product hit first, and is the fix in the model choice, the data, or the system around the model?
 
-**The problem.** To predict the next token, a model needs the past. The real questions are how much of it to keep and what it costs to look it up.
+## 5. Idea 5 (and 4) in numbers: back-of-the-envelope estimates
 
-**How the papers handle it:**
-
-- **Attention:** keeps K and V for every past token (the KV cache). Lookup is exact, but prefill costs O(n²), the cache grows with every token, and every decoding step reads all of it.
-- **Mamba:** compresses the whole history into a fixed-size state. Each step costs the same however long the input is, but some detail is lost, so it's weaker at exact copying and recall. Its real contribution is that what gets written into the state depends on the input, so it chooses what to keep.
-- **FlashAttention:** doesn't change what attention remembers, only how efficiently it's computed.
-- **Hybrids (Jamba):** mostly Mamba layers, plus a few attention layers for exact recall.
-
-**In practice:** tasks that need exact retrieval (code, RAG, long documents) favour attention. Very long or streaming inputs, where losing some detail is acceptable, favour SSMs or hybrids.
-
-*Ask: how much state does it keep per token of history, and what does reading it cost?*
-
-### Idea 5: Compute is the real currency
-
-**The problem.** Capability is bought with FLOPs and bytes. Since about 2020, most architecture papers are answering one question: how do I get more capability per FLOP, or per byte?
-
-**How the papers handle it:**
-
-- **Scaling laws:** loss falls as a predictable power law in parameters, data and compute. Chinchilla later put the compute-optimal ratio at about 20 training tokens per parameter.
-- **FlashAttention:** FLOPs aren't wall-clock time. Bytes moved between HBM and SRAM are (section 2).
-- **MoE:** separates total parameters from the ones used per token. Mixtral has 46.7B parameters but uses about 12.9B per token.
-- **Mamba:** a hardware-aware scan that keeps its state in fast on-chip memory.
-
-**In practice:** for any operation, ask whether it's limited by compute or by memory bandwidth, because that tells you which optimisation will help. Use the estimates in section 6 to cost a design before you build it.
-
-*Ask: is this limited by compute or by memory bandwidth?*
-
-Inside those ideas, the same five motifs keep coming back:
-
-- **Skip connection:** ResNet, the LSTM cell state, Pre-LN, the residual stream.
-- **Gating:** LSTM gates, SwiGLU, Mamba's gate branch, the MoE router.
-- **Store vs recompute:** gradient checkpointing, FlashAttention's backward pass, Mamba's scan.
-- **Conditional computation:** MoE, sparse attention, Mamba's input-dependent selection.
-- **Normalising scale:** BatchNorm, LayerNorm, RMSNorm, QK-norm.
-
-## 6. Back-of-the-envelope numbers
-
-Before anyone writes code, someone asks “will it fit, and what will it cost?” These six estimates cover most of those conversations.
+Before anyone writes code, someone asks “will it fit, and what will it cost?” These six estimates turn Idea 5 (compute and bytes) and Idea 4 (the KV cache) into numbers, and cover most of those conversations.
 
 **1. Training compute.** For N parameters trained on D tokens (forward pass ≈ 2ND FLOPs, backward ≈ 4ND):
 
@@ -372,7 +376,7 @@ Sanity check on a real run. Llama-2-7B: 6 × 6.74B × 2T ≈ 8.1 × 10²² FLOPs
 
 **2. Training memory.** With Adam in mixed precision, budget about 16 bytes per parameter before activations: BF16 weights and gradients, plus FP32 master weights and two Adam moments. A 7B model needs about 112 GB, so it won't train on one 80 GB GPU without sharding (FSDP or ZeRO).
 
-**3. KV cache per token.** Each layer stores one K and one V vector per KV head:
+**3. KV cache per token (Idea 4).** Each layer stores one K and one V vector per KV head:
 
 $$\text{KV bytes per token} = 2 \times n_{\text{layers}} \times n_{\text{kv heads}} \times d_{\text{head}} \times \text{bytes per value}$$
 
@@ -385,6 +389,38 @@ $$\text{tokens/s} \lesssim \frac{\text{HBM bandwidth}}{\text{weight bytes} + \te
 **5. MoE: memory vs compute.** Every expert has to be resident in memory, but each token only runs through a few. Mixtral 8×7B has 46.7B total parameters (about 93 GB in BF16, so two 80 GB GPUs) but only 12.9B active per token. It's cheap per token only when the batch is big enough to keep all experts busy; at small batch you pay the memory without the savings.
 
 **6. Tokens per parameter.** Chinchilla puts the compute-optimal point at roughly 20 training tokens per parameter. Models meant for heavy serving train far past that on purpose, because a smaller model trained longer is cheaper on every inference call.
+
+## 6. Putting it together: predict, then measure
+
+This is where the five ideas pay off. Reading a paper stops being “do I understand it?” and becomes “can I predict what it will do, and how would I check?”
+
+![Predict, then measure](images/predict_then_measure_loop.svg)
+
+**Worked example.** Say a hypothetical new paper claims: “Our state-space model matches a Transformer of the same size at 1.3B parameters, and decodes 5× faster at 64K context.” Here's the loop.
+
+1. **Name the idea.** The architecture is an answer to Idea 4 (fixed-size state instead of a KV cache). The speed claim is Idea 5.
+2. **Predict before running anything.**
+   - *Speed (Idea 5, §2 and §5):* decode is memory-bound. At 64K tokens a 1.3B Transformer reads a large KV cache every step, so a fixed state should win big there. At 2K tokens the KV cache is small next to the weights, so expect little speedup.
+   - *Quality (Idea 4):* a fixed state is lossy. Expect similar perplexity, but weaker exact recall: copying, needle-in-a-haystack, multi-hop lookup over long inputs.
+   - *Fairness (Idea 3):* were both models trained on the same data, the same number of tokens and the same recipe? If not, the “match” may be the recipe, not the architecture.
+   - *Stability (Idea 1):* what keeps its state and residual stream bounded at depth? If the answer is unclear, expect a fragile training run when you scale it.
+3. **Design the cheapest test that could prove the prediction wrong.**
+   - Tokens/s against context length from 1K to 64K, against a same-size Transformer using FlashAttention and GQA, on the same GPU.
+   - A recall probe (needle-in-a-haystack or associative recall) at several context lengths.
+   - Perplexity at equal tokens, with an equal training recipe.
+4. **Measure and compare.** If the speedup only appears past roughly 16K and recall drops with length, the five ideas predicted the paper. If recall holds up at long context, that is the genuinely new thing, and the part of the paper worth reading closely.
+
+### The checklist for any new model
+
+The questions from each section, in one place. Run through them in five minutes before reading the experiments section of a paper.
+
+| Idea | Ask | Where |
+| --- | --- | --- |
+| 1. Signal through depth | Does x pass through untouched somewhere, and what stops the residual stream from growing? | §1 |
+| 2. Objective | What does the loss reward, and which positions can each token see? | §3 |
+| 3. Assumptions vs data | What does it assume, and do I have the data to not need that? Were the training recipes equal? | §4 |
+| 4. Memory of context | How much state per token of history, and what does reading it cost? | §4, §5 |
+| 5. Compute | Is each hot op above or below my GPU's ridge point? What do the six estimates say it costs? | §2, §5 |
 
 ## Sources
 

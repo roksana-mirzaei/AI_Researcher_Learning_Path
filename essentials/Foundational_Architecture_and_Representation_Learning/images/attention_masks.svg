@@ -1,0 +1,141 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 390" width="820" height="390" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+<rect width="820" height="390" fill="#ffffff"/>
+<text x="20" y="28" font-size="15" font-weight="700" fill="#1f2328">Same attention, different mask: can "bank" see "river"?</text>
+<text x="20" y="47" font-size="11.5" fill="#666">Each row is a token computing its representation. Blue cells are the tokens it may attend to.</text>
+<text x="40" y="78" font-size="13.5" font-weight="700" fill="#1f2328">Bidirectional (encoder, BERT)</text>
+<text x="127.0" y="124" font-size="11" fill="#555" transform="rotate(-45 127.0 124)">I</text>
+<text x="153.0" y="124" font-size="11" fill="#555" transform="rotate(-45 153.0 124)">sat</text>
+<text x="179.0" y="124" font-size="11" fill="#555" transform="rotate(-45 179.0 124)">on</text>
+<text x="205.0" y="124" font-size="11" fill="#555" transform="rotate(-45 205.0 124)">the</text>
+<text x="231.0" y="124" font-size="11" fill="#555" transform="rotate(-45 231.0 124)">bank</text>
+<text x="257.0" y="124" font-size="11" fill="#555" transform="rotate(-45 257.0 124)">of</text>
+<text x="283.0" y="124" font-size="11" fill="#555" transform="rotate(-45 283.0 124)">river</text>
+<text x="102" y="147.0" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="end">I</text>
+<rect x="111" y="131" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="137" y="131" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="163" y="131" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="189" y="131" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="215" y="131" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="241" y="131" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="267" y="131" width="24" height="24" rx="3" fill="#2f74d0"/>
+<text x="102" y="173.0" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="end">sat</text>
+<rect x="111" y="157" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="137" y="157" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="163" y="157" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="189" y="157" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="215" y="157" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="241" y="157" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="267" y="157" width="24" height="24" rx="3" fill="#2f74d0"/>
+<text x="102" y="199.0" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="end">on</text>
+<rect x="111" y="183" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="137" y="183" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="163" y="183" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="189" y="183" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="215" y="183" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="241" y="183" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="267" y="183" width="24" height="24" rx="3" fill="#2f74d0"/>
+<text x="102" y="225.0" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="end">the</text>
+<rect x="111" y="209" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="137" y="209" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="163" y="209" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="189" y="209" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="215" y="209" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="241" y="209" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="267" y="209" width="24" height="24" rx="3" fill="#2f74d0"/>
+<text x="102" y="251.0" font-size="11.5" font-weight="700" fill="#1f2328" text-anchor="end">bank</text>
+<rect x="111" y="235" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="137" y="235" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="163" y="235" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="189" y="235" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="215" y="235" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="241" y="235" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="267" y="235" width="24" height="24" rx="3" fill="#2f74d0"/>
+<text x="102" y="277.0" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="end">of</text>
+<rect x="111" y="261" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="137" y="261" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="163" y="261" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="189" y="261" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="215" y="261" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="241" y="261" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="267" y="261" width="24" height="24" rx="3" fill="#2f74d0"/>
+<text x="102" y="303.0" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="end">river</text>
+<rect x="111" y="287" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="137" y="287" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="163" y="287" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="189" y="287" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="215" y="287" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="241" y="287" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="267" y="287" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="109" y="233" width="184" height="28" rx="4" fill="none" stroke="#1f2328" stroke-width="1.5"/>
+<text x="279.0" y="252.0" font-size="14" font-weight="700" fill="#ffffff" text-anchor="middle">✓</text>
+<text x="450" y="78" font-size="13.5" font-weight="700" fill="#1f2328">Causal (decoder, GPT)</text>
+<text x="537.0" y="124" font-size="11" fill="#555" transform="rotate(-45 537.0 124)">I</text>
+<text x="563.0" y="124" font-size="11" fill="#555" transform="rotate(-45 563.0 124)">sat</text>
+<text x="589.0" y="124" font-size="11" fill="#555" transform="rotate(-45 589.0 124)">on</text>
+<text x="615.0" y="124" font-size="11" fill="#555" transform="rotate(-45 615.0 124)">the</text>
+<text x="641.0" y="124" font-size="11" fill="#555" transform="rotate(-45 641.0 124)">bank</text>
+<text x="667.0" y="124" font-size="11" fill="#555" transform="rotate(-45 667.0 124)">of</text>
+<text x="693.0" y="124" font-size="11" fill="#555" transform="rotate(-45 693.0 124)">river</text>
+<text x="512" y="147.0" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="end">I</text>
+<rect x="521" y="131" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="547" y="131" width="24" height="24" rx="3" fill="#ececE6"/>
+<rect x="573" y="131" width="24" height="24" rx="3" fill="#ececE6"/>
+<rect x="599" y="131" width="24" height="24" rx="3" fill="#ececE6"/>
+<rect x="625" y="131" width="24" height="24" rx="3" fill="#ececE6"/>
+<rect x="651" y="131" width="24" height="24" rx="3" fill="#ececE6"/>
+<rect x="677" y="131" width="24" height="24" rx="3" fill="#ececE6"/>
+<text x="512" y="173.0" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="end">sat</text>
+<rect x="521" y="157" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="547" y="157" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="573" y="157" width="24" height="24" rx="3" fill="#ececE6"/>
+<rect x="599" y="157" width="24" height="24" rx="3" fill="#ececE6"/>
+<rect x="625" y="157" width="24" height="24" rx="3" fill="#ececE6"/>
+<rect x="651" y="157" width="24" height="24" rx="3" fill="#ececE6"/>
+<rect x="677" y="157" width="24" height="24" rx="3" fill="#ececE6"/>
+<text x="512" y="199.0" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="end">on</text>
+<rect x="521" y="183" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="547" y="183" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="573" y="183" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="599" y="183" width="24" height="24" rx="3" fill="#ececE6"/>
+<rect x="625" y="183" width="24" height="24" rx="3" fill="#ececE6"/>
+<rect x="651" y="183" width="24" height="24" rx="3" fill="#ececE6"/>
+<rect x="677" y="183" width="24" height="24" rx="3" fill="#ececE6"/>
+<text x="512" y="225.0" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="end">the</text>
+<rect x="521" y="209" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="547" y="209" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="573" y="209" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="599" y="209" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="625" y="209" width="24" height="24" rx="3" fill="#ececE6"/>
+<rect x="651" y="209" width="24" height="24" rx="3" fill="#ececE6"/>
+<rect x="677" y="209" width="24" height="24" rx="3" fill="#ececE6"/>
+<text x="512" y="251.0" font-size="11.5" font-weight="700" fill="#1f2328" text-anchor="end">bank</text>
+<rect x="521" y="235" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="547" y="235" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="573" y="235" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="599" y="235" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="625" y="235" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="651" y="235" width="24" height="24" rx="3" fill="#ececE6"/>
+<rect x="677" y="235" width="24" height="24" rx="3" fill="#ececE6"/>
+<text x="512" y="277.0" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="end">of</text>
+<rect x="521" y="261" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="547" y="261" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="573" y="261" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="599" y="261" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="625" y="261" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="651" y="261" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="677" y="261" width="24" height="24" rx="3" fill="#ececE6"/>
+<text x="512" y="303.0" font-size="11.5" font-weight="400" fill="#1f2328" text-anchor="end">river</text>
+<rect x="521" y="287" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="547" y="287" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="573" y="287" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="599" y="287" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="625" y="287" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="651" y="287" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="677" y="287" width="24" height="24" rx="3" fill="#2f74d0"/>
+<rect x="519" y="233" width="184" height="28" rx="4" fill="none" stroke="#1f2328" stroke-width="1.5"/>
+<text x="689.0" y="252.0" font-size="15" font-weight="700" fill="#c0392b" text-anchor="middle">✗</text>
+<text x="40" y="340" font-size="11.5" fill="#1f2328">"bank" attends to "river", so it knows it is a riverbank.</text>
+<text x="40" y="357" font-size="11.5" fill="#666">Use for labels and embeddings: the whole input already exists.</text>
+<text x="450" y="340" font-size="11.5" fill="#1f2328">"bank" is built before "river" exists. Only later tokens can fix it.</text>
+<text x="450" y="357" font-size="11.5" fill="#666">Needed for generation: the future is not written yet.</text>
+</svg>

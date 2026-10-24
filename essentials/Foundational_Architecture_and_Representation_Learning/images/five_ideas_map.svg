@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 410" width="820" height="410" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif">
+<rect width="820" height="410" fill="#ffffff"/>
+<text x="20" y="28" font-size="15" font-weight="700" fill="#1f2328">Nine papers, five ideas: each paper is one answer to a shared problem</text>
+<text x="20" y="47" font-size="11.5" fill="#666">A filled dot means the paper gives its own answer to that problem. The last column says where this page uses the idea.</text>
+<text x="330" y="122" font-size="11.5" fill="#1f2328" transform="rotate(-40 330 122)">Transformer</text>
+<text x="380" y="122" font-size="11.5" fill="#1f2328" transform="rotate(-40 380 122)">BERT</text>
+<text x="430" y="122" font-size="11.5" fill="#1f2328" transform="rotate(-40 430 122)">GPT-2</text>
+<text x="480" y="122" font-size="11.5" fill="#1f2328" transform="rotate(-40 480 122)">ResNet</text>
+<text x="530" y="122" font-size="11.5" fill="#1f2328" transform="rotate(-40 530 122)">ViT</text>
+<text x="580" y="122" font-size="11.5" fill="#1f2328" transform="rotate(-40 580 122)">Scaling laws</text>
+<text x="630" y="122" font-size="11.5" fill="#1f2328" transform="rotate(-40 630 122)">MoE</text>
+<text x="680" y="122" font-size="11.5" fill="#1f2328" transform="rotate(-40 680 122)">FlashAttention</text>
+<text x="730" y="122" font-size="11.5" fill="#1f2328" transform="rotate(-40 730 122)">Mamba</text>
+<text x="785" y="122" font-size="11.5" font-weight="700" fill="#1f2328" text-anchor="middle">Section</text>
+<rect x="14" y="126" width="796" height="40" rx="6" fill="#f6f8fa"/>
+<text x="24" y="150" font-size="12.5" font-weight="700" fill="#2f74d0">Idea 1</text>
+<text x="80" y="150" font-size="12.5" fill="#1f2328">Keep the signal alive through depth</text>
+<circle cx="330" cy="146" r="7" fill="#2f74d0"/>
+<circle cx="380" cy="146" r="2.5" fill="#d0d0c8"/>
+<circle cx="430" cy="146" r="7" fill="#2f74d0"/>
+<circle cx="480" cy="146" r="7" fill="#2f74d0"/>
+<circle cx="530" cy="146" r="2.5" fill="#d0d0c8"/>
+<circle cx="580" cy="146" r="2.5" fill="#d0d0c8"/>
+<circle cx="630" cy="146" r="2.5" fill="#d0d0c8"/>
+<circle cx="680" cy="146" r="2.5" fill="#d0d0c8"/>
+<circle cx="730" cy="146" r="7" fill="#2f74d0"/>
+<text x="785" y="150" font-size="12" fill="#1f2328" text-anchor="middle">§1</text>
+<rect x="14" y="174" width="796" height="40" rx="6" fill="#ffffff"/>
+<text x="24" y="198" font-size="12.5" font-weight="700" fill="#2f74d0">Idea 2</text>
+<text x="80" y="198" font-size="12.5" fill="#1f2328">The objective shapes the model</text>
+<circle cx="330" cy="194" r="2.5" fill="#d0d0c8"/>
+<circle cx="380" cy="194" r="7" fill="#2f74d0"/>
+<circle cx="430" cy="194" r="7" fill="#2f74d0"/>
+<circle cx="480" cy="194" r="7" fill="#2f74d0"/>
+<circle cx="530" cy="194" r="7" fill="#2f74d0"/>
+<circle cx="580" cy="194" r="2.5" fill="#d0d0c8"/>
+<circle cx="630" cy="194" r="2.5" fill="#d0d0c8"/>
+<circle cx="680" cy="194" r="2.5" fill="#d0d0c8"/>
+<circle cx="730" cy="194" r="2.5" fill="#d0d0c8"/>
+<text x="785" y="198" font-size="12" fill="#1f2328" text-anchor="middle">§3</text>
+<rect x="14" y="222" width="796" height="40" rx="6" fill="#f6f8fa"/>
+<text x="24" y="246" font-size="12.5" font-weight="700" fill="#2f74d0">Idea 3</text>
+<text x="80" y="246" font-size="12.5" fill="#1f2328">Built-in assumptions vs data</text>
+<circle cx="330" cy="242" r="7" fill="#2f74d0"/>
+<circle cx="380" cy="242" r="2.5" fill="#d0d0c8"/>
+<circle cx="430" cy="242" r="2.5" fill="#d0d0c8"/>
+<circle cx="480" cy="242" r="7" fill="#2f74d0"/>
+<circle cx="530" cy="242" r="7" fill="#2f74d0"/>
+<circle cx="580" cy="242" r="2.5" fill="#d0d0c8"/>
+<circle cx="630" cy="242" r="7" fill="#2f74d0"/>
+<circle cx="680" cy="242" r="2.5" fill="#d0d0c8"/>
+<circle cx="730" cy="242" r="7" fill="#2f74d0"/>
+<text x="785" y="246" font-size="12" fill="#1f2328" text-anchor="middle">§4</text>
+<rect x="14" y="270" width="796" height="40" rx="6" fill="#ffffff"/>
+<text x="24" y="294" font-size="12.5" font-weight="700" fill="#2f74d0">Idea 4</text>
+<text x="80" y="294" font-size="12.5" fill="#1f2328">How a model remembers context</text>
+<circle cx="330" cy="290" r="7" fill="#2f74d0"/>
+<circle cx="380" cy="290" r="2.5" fill="#d0d0c8"/>
+<circle cx="430" cy="290" r="2.5" fill="#d0d0c8"/>
+<circle cx="480" cy="290" r="2.5" fill="#d0d0c8"/>
+<circle cx="530" cy="290" r="2.5" fill="#d0d0c8"/>
+<circle cx="580" cy="290" r="2.5" fill="#d0d0c8"/>
+<circle cx="630" cy="290" r="2.5" fill="#d0d0c8"/>
+<circle cx="680" cy="290" r="7" fill="#2f74d0"/>
+<circle cx="730" cy="290" r="7" fill="#2f74d0"/>
+<text x="785" y="294" font-size="12" fill="#1f2328" text-anchor="middle">§4</text>
+<rect x="14" y="318" width="796" height="40" rx="6" fill="#f6f8fa"/>
+<text x="24" y="342" font-size="12.5" font-weight="700" fill="#2f74d0">Idea 5</text>
+<text x="80" y="342" font-size="12.5" fill="#1f2328">Compute is the real currency</text>
+<circle cx="330" cy="338" r="2.5" fill="#d0d0c8"/>
+<circle cx="380" cy="338" r="2.5" fill="#d0d0c8"/>
+<circle cx="430" cy="338" r="2.5" fill="#d0d0c8"/>
+<circle cx="480" cy="338" r="2.5" fill="#d0d0c8"/>
+<circle cx="530" cy="338" r="2.5" fill="#d0d0c8"/>
+<circle cx="580" cy="338" r="7" fill="#2f74d0"/>
+<circle cx="630" cy="338" r="7" fill="#2f74d0"/>
+<circle cx="680" cy="338" r="7" fill="#2f74d0"/>
+<circle cx="730" cy="338" r="7" fill="#2f74d0"/>
+<text x="785" y="342" font-size="12" fill="#1f2328" text-anchor="middle">§2, §5</text>
+<text x="20" y="392" font-size="12" fill="#555">Reading a new paper? Find its row, then ask how its answer differs from the dots already there.</text>
+</svg>
