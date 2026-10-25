@@ -41,13 +41,12 @@ Inside those ideas, the same five motifs keep coming back. When a paper looks ne
 
 ## 1. Idea 1 in practice: where to put LayerNorm
 
-> **Idea 1: keep the signal alive through depth.** A deep net is a long chain of layers. If each layer scales its output by just 1.1×, after 48 layers that's 1.1⁴⁸ ≈ 97×. At 0.9× per layer you get 0.9⁴⁸ ≈ 0.006. Gradients go back through the same chain, so they explode or vanish the same way, and training diverges or stalls. Where you put the norm is the most common engineering decision this idea drives.
 
-LayerNorm takes a token's hidden vector, rescales it to mean 0 and variance 1, then applies a learned scale and bias. The point is to keep activations at a predictable scale while they pass through dozens of layers. RMSNorm (LLaMA and most LLMs now) does the same thing without subtracting the mean, so it's a bit cheaper.
+> **Idea 1: keep the signal alive through depth.** A deep net is a long chain of layers. If each layer scales its output by just 1.1×, the effect compounds: after 48 layers the signal is 1.1⁴⁸ ≈ 97× larger. The opposite is just as bad: if each layer scales by 0.9×, only 0.9⁴⁸ ≈ 0.006 (under 1%) of the signal survives. Gradients go back through the same chain, so they explode or vanish the same way, and training diverges or stalls. Where you put the norm is the most common engineering decision this idea drives.
 
-The other piece is the **skip connection** (also called a residual connection), from ResNet. A Transformer block doesn't overwrite its input, it adds to it: x = x + F(x), where F is attention or the FFN. The input skips over the block and gets added back to its output. That running x, which every block adds to, is called the **residual stream**. Stack three blocks and you get x₃ = x₀ + F₁ + F₂ + F₃: the original input is still in the output, untouched, with each block's work added on top. It matters for training because the gradient flows back along the same routes. Through the skip connections, it isn't multiplied by anything, so it reaches layer 1 at full strength, however deep the model is. Without skip connections, the gradient gets multiplied by every layer's derivative on the way down. With 48 layers at 0.5 each, that's 0.5⁴⁸ ≈ 0, and the early layers stop learning.
+LayerNorm rescales each token's hidden vector to mean 0 and variance 1, then applies a learned scale and bias, so activations keep a predictable scale through dozens of layers. RMSNorm (LLaMA and most LLMs now) skips the mean subtraction, so it's slightly cheaper.
 
-So the design question is: where in the block does the norm go? Papers have tried three answers.
+The three designs below differ only in where the norm sits relative to the skip.
 
 ![Post-LN vs Pre-LN vs Peri-LN](images/layernorm_placement.svg)
 
@@ -58,9 +57,9 @@ x = norm(x + attn(x))
 x = norm(x + ffn(x))
 ```
 
-Here the LayerNorm comes after the add, so the x that each skip connection passes to the next layer has already been rescaled by a LayerNorm. The skip itself has no weights; it's the value it carries that keeps getting normalised. The original x gets rescaled again and again, so it never reaches the output untouched. [Xiong et al. (2020)](https://arxiv.org/abs/2002.04745) showed that at initialisation the gradients for parameters near the output are large. In practice, that means you need learning-rate warmup (start with a tiny LR and ramp it up over a few thousand steps). Without it, training often diverges, and it gets worse the deeper the model is.
+The norm sits on the skip path, so x is rescaled after every block and never reaches the output untouched. Gradients pass back through all those norms too, so there's no clean identity path. [Xiong et al. (2020)](https://arxiv.org/abs/2002.04745) showed the result: at init, gradients near the output are large, so at full learning rate the top layers get huge updates and training diverges. Hence LR warmup (ramp up from a tiny LR over a few thousand steps). More layers means more norms on the path, so it gets worse with depth.
 
-**Key takeaway:** This means Post-LN is harder to train. It works fine for shallow models (6 to 24 layers, like the original Transformer and BERT) as long as you use LR warmup, and when it does train, it can end up slightly better than Pre-LN. Use it when you're reproducing or fine-tuning a BERT-era model (keep the architecture its checkpoint was trained with). Avoid it for deep models or high learning rates unless you add a fix like DeepNorm.
+**Key takeaway:** Post-LN is harder to train, but it works well for shallow models (6 to 24 layers, like the original Transformer and BERT) if you use LR warmup. When it does train, it can slightly outperform Pre-LN, because renormalising after every block stops the residual stream from growing, so later layers' contributions stay significant instead of being drowned out. Use it when reproducing or fine-tuning a BERT-era model, keeping the architecture its checkpoint was trained with. Avoid it for deep models or high learning rates unless you add a fix like DeepNorm.
 
 ### Pre-LN: normalise the input of each block (GPT-2 onwards)
 
@@ -70,14 +69,14 @@ x = x + ffn(norm(x))
 x = norm(x)  # final norm before the output head
 ```
 
-GPT-2 moved the norm inside the branch. Each block reads a normalised copy of x, but whatever it returns is added to the raw stream. Now the skip connections carry x untouched from the first layer to the last, gradients are well-behaved at init, and deep models train without the warmup dance. GPT-3, LLaMA and most LLMs since use this, usually with RMSNorm. GPT-2 also added a final norm before the output head, because nothing else normalises the stream.
+The norm moves inside the branch: each block reads a normalised copy of x, but its output is added to the raw stream. The skips carry x untouched, so gradients reach every layer at full strength and deep models train with little or no warmup. GPT-3, LLaMA and most LLMs since use this, usually with RMSNorm. The final norm is there because nothing else normalises the stream before the output head.
 
-The catch is that nothing ever rescales the stream. Every block adds to it, so its norm keeps growing with depth. That has two effects:
+The cost: nothing ever rescales the stream, so it keeps growing with depth.
 
-- **Deep layers do less.** By layer 40 a block's output is small compared with the stream, so it barely changes it. [The Curse of Depth (2025)](https://arxiv.org/abs/2502.05795) blames Pre-LN for many deep layers in LLMs being less useful than expected.
-- **Huge activations stick around.** If one block outputs a very large value, it stays in the stream. In big runs this can show up as loss spikes.
+- **Deep layers do less.** Each block's output stays about the same size while the stream grows (its variance roughly linearly with depth), so by layer 40 a block barely changes it. [The Curse of Depth (2025)](https://arxiv.org/abs/2502.05795) blames this for many underused deep layers in LLMs.
+- **Huge activations stick around.** A very large value from one block is never scaled back down, so every later layer sees it. In big runs this shows up as loss spikes.
 
-**Key takeaway:** Pre-LN is the safe default when you train a Transformer today, especially a deep one. It's stable from step 1, needs little or no warmup and tolerates larger learning rates. Pair it with RMSNorm. The cost only shows up at scale, so in long or large runs watch the per-layer activation norms and look out for loss spikes.
+**Key takeaway:** Use Pre-LN with RMSNorm as your default, especially for deep models. It trains stably from step 1, needs little or no warmup and tolerates higher learning rates. Its weakness is that nothing rescales the residual stream, so in large or long runs the stream grows with depth. Watch for activation norms climbing layer by layer and for sudden loss spikes. If you see them, switch to Peri-LN or add QK-norm before you change the learning-rate schedule.
 
 ### Peri-LN: normalise both sides (Gemma 2/3, OLMo 2)
 
@@ -86,9 +85,9 @@ x = x + norm_out(attn(norm_in(x)))
 x = x + norm_out(ffn(norm_in(x)))
 ```
 
-Keep Pre-LN's input norm, and also normalise each block's output before adding it. The skip connections still carry x untouched, and no single block can dump a huge value into it. Gemma 2 and 3 do exactly this. OLMo 2 keeps only the output norm (x + norm(F(x))) and adds QK-norm, specifically for training stability.
+Pre-LN plus a norm on each block's output. The skips stay clean, and the output norm caps what each block can add, which removes the cause of Pre-LN's loss spikes. Gemma 2 and 3 use both norms. OLMo 2 uses only the output norm (x + norm(F(x))) plus QK-norm, which normalises queries and keys so attention scores can't grow until the softmax saturates.
 
-**Key takeaway:** reach for Peri-LN when Pre-LN gets unstable at scale: loss spikes, huge activations, very deep models or very long runs. The extra norm per sublayer is cheap, which is why recent open models like Gemma 2/3 and OLMo 2 use it by default. For a small model, Pre-LN is usually enough.
+**Key takeaway:** Use Peri-LN for large, deep or long training runs, or switch to it when a Pre-LN run shows loss spikes or activation norms climbing with depth. It keeps Pre-LN’s clean skip path but normalises each block’s output before adding it, so no single block can push a huge value into the stream. The extra norm per sublayer is cheap, which is why Gemma 2/3 use it by default and OLMo 2 adopts its output-norm half. For small models, Pre-LN is enough.
 
 The same three as equations, with F = attention or FFN:
 
@@ -98,7 +97,6 @@ $$\text{Pre-LN:}\quad x_{l+1} = x_l + F\big(\mathrm{LN}(x_l)\big)$$
 
 $$\text{Peri-LN:}\quad x_{l+1} = x_l + \mathrm{LN}\Big(F\big(\mathrm{LN}(x_l)\big)\Big)$$
 
-The thing to look for: does the plain $x_l$ (x at layer $l$) sit outside every LN? In Pre-LN and Peri-LN it does, and that's the clean gradient path. In Post-LN it's wrapped inside the LN.
 
 |  | Post-LN | Pre-LN | Peri-LN |
 | --- | --- | --- | --- |
@@ -106,15 +104,13 @@ The thing to look for: does the plain $x_l$ (x at layer $l$) sit outside every L
 | Good | Stream stays at a fixed scale | Stable at depth, little or no warmup needed | Clean skip connections, and no block output can get too big |
 | Watch out for | Needs warmup; unstable when deep | Stream norm grows; deep layers underused; loss spikes | One extra norm per sublayer |
 
-**Recommendation:** Pre-LN with RMSNorm as the default. If a large run shows loss spikes, try the output norm (Peri-LN) and QK-norm before touching the LR schedule. Post-LN only if I'm reproducing a BERT-era model.
-
 ### The same idea in the other papers
 
 Norm placement is one answer to Idea 1. The other papers each found their own:
 
 - **ResNet:** skip connections (x + F(x)), so the gradient always has a direct route back to the early layers.
 - **Transformer:** divides attention scores by √d\_k. A dot product of two d\_k-dimensional vectors has variance around d\_k, so without the scaling softmax saturates to nearly one-hot and its gradients become tiny.
-- **GPT-2:** Pre-LN, plus scaling each residual block's output weights at init by 1/√N, because each of the N blocks adds variance to the residual stream.
+- **GPT-2:** Pre-LN, plus scaling each residual block's output weights at init by 1/√N, because each of the N blocks adds variance to the residual stream. With that scaling, the stream's total variance at init stays about the same however deep the model is.
 - **Mamba:** the state's decay factor is exp(ΔA) with A negative, so it always stays between 0 and 1 and the recurrence can't blow up.
 
 **The question to ask about any new architecture.** These two questions predict how a model will train before you run anything:
@@ -151,42 +147,52 @@ A GPU has two memories that matter here. HBM is the big off-chip memory (80 GB o
 
 The numbers on an H100: about 989 TFLOP/s of dense BF16 compute, but only about 3.35 TB/s of HBM bandwidth. Divide one by the other and you get roughly 295. In the time it takes to read one byte from HBM, the GPU could have done about 295 FLOPs.
 
-That gives a simple test for any op, called arithmetic intensity:
+That gives a simple test for any operation (one computation the GPU runs on tensors, such as a matrix multiply, a softmax or a LayerNorm), called arithmetic intensity:
 
 $$\text{arithmetic intensity} = \frac{\text{FLOPs}}{\text{bytes read and written to HBM}}$$
 
 $$\text{H100 ridge point} \approx \frac{989\ \text{TFLOP/s}}{3.35\ \text{TB/s}} \approx 295\ \text{FLOPs/byte}$$
 
-If an op does more than about 295 FLOPs per byte, it's compute-bound: the tensor cores are the bottleneck, and only fewer or cheaper FLOPs will speed it up. If it does fewer, it's memory-bound: the GPU sits idle waiting on HBM, and only moving fewer bytes helps. A GPU with more FLOPs but the same bandwidth won't make it faster.
+If an operation does more than about 295 FLOPs per byte, it's compute-bound: the tensor cores are the bottleneck, and only fewer or cheaper FLOPs will speed it up. If it does fewer, it's memory-bound: the GPU sits idle waiting on HBM, and only moving fewer bytes helps. A GPU with more FLOPs but the same bandwidth won't make it faster.
 
-The picture below is called a roofline. Find your op's intensity on the x-axis; the line above it is the fastest it can ever run.
+The picture below is called a roofline. Find your operation's intensity on the x-axis; the line above it is the fastest it can ever run.
 
 ![H100 roofline](images/roofline_h100.svg)
 
 **When to use it.** Arithmetic intensity is a diagnostic: reach for it when something is slower than expected, or before you spend time optimising. It tells you which kind of fix will actually work.
 
-- **Low GPU utilisation (low MFU):** your ops are probably below the line, so the GPU is waiting on memory. Fuse ops, batch more, or move fewer bytes. More FLOPs won't help.
-- **Speeding up inference:** decode is memory-bound, so quantising weights and batching requests help, while a GPU with more FLOPs but the same bandwidth barely does. Prefill is the opposite.
+- **Low GPU utilisation (low MFU):** your operations are probably below the line, so the GPU is waiting on memory. Fuse operations, batch more, or move fewer bytes. More FLOPs won't help.
+- **Speeding up inference:** decode is memory-bound, so quantising weights and batching requests help, while a GPU with more FLOPs but the same bandwidth barely does. Prefill is the opposite: it's compute-bound, so there FLOPs are what count.
 - **Picking a GPU:** for LLM serving, look at bandwidth (TB/s) first. For large-batch training, look at FLOPs.
-- **Deciding if an optimisation is worth it:** if the op is memory-bound, cutting FLOPs is wasted effort. FlashAttention does the same FLOPs as normal attention and wins purely on bytes.
+- **Deciding if an optimisation is worth it:** if the operation is memory-bound, cutting FLOPs is wasted effort. FlashAttention does the same FLOPs as normal attention and wins purely on bytes.
 - **Reading papers:** GQA, MLA, KV-cache quantisation and kernel fusion are all about bytes, not FLOPs. Thinking in intensity tells you when they'll help (decode) and when they won't matter much (training).
 
 You rarely need an exact number. A rough guess like “each weight is used once per token, so about 1 FLOP per byte, so memory-bound” is usually enough. To measure it, use a profiler such as Nsight Compute or the PyTorch profiler.
 
-| Op | FLOPs per byte (rough) | Bound by | What helps |
+| Operation | FLOPs per byte (rough) | Bound by | What helps |
 | --- | --- | --- | --- |
 | Training matmul: 4096 × 4096 weights times 4096 tokens, BF16 | \~1,365 | Compute | FP8, keep the batch large |
 | Decoding at batch size 1 | \~1 (each 2-byte weight does one multiply-add) | Memory | Batching, weight quantisation, smaller KV cache (GQA/MLA), speculative decoding |
-| Elementwise ops: softmax, LayerNorm, GELU, residual add | < 5 | Memory | Kernel fusion (torch.compile or fused kernels) so each tensor is read once |
+| Elementwise operations: softmax, LayerNorm, GELU, residual add | < 5 | Memory | Kernel fusion (torch.compile or fused kernels) so each tensor is read once |
 | Naive attention at N = 8K | Writes the N × N score matrix to HBM and reads it back | Memory | FlashAttention (F.scaled\_dot\_product\_attention): tile Q, K, V into SRAM and never write N × N |
 
-**Worked example: decoding Llama-2-7B at batch 1.** The weights are 6.74B × 2 bytes ≈ 13.5 GB. Each new token is one forward pass that reads every weight once, so at 3.35 TB/s the ceiling is about 250 tokens/s, and you'll measure less than that. The compute barely matters: about 13.5 GFLOPs per token is nothing for a 989 TFLOP/s chip. That one calculation explains the standard serving tricks:
+**Worked example: decoding Llama-2-7B at batch 1.**
 
-- **int4 weights:** 4× fewer bytes, so up to about 4× faster decode.
-- **Batching 32 requests:** read the weights once, produce 32 tokens, so close to 32× the throughput until KV-cache reads or compute take over. This is what continuous batching in servers like vLLM is exploiting. On the roofline, batching slides the decode dot to the right.
-- **FlashAttention:** attention intermediates stay in SRAM instead of round-tripping through HBM.
+To generate one token, the GPU has two jobs: read the weights from HBM, and do the maths with them. The question is which one takes longer.
 
-It also explains why prefill and decode feel so different. Prefill pushes the whole prompt through in parallel, so it's a big matmul and compute-bound; that's your time to first token. Decode generates one token at a time and is memory-bound; that's your tokens per second.
+- Reading: the model has 6.74B weights at 2 bytes each, about 13.5 GB. Every new token is one forward pass that uses every weight once, so all 13.5 GB must be read for every token. At 3.35 TB/s that takes about 4 ms, which caps decode at about 250 tokens/s.
+
+- Maths: each weight does one multiply-add (2 FLOPs), so a token costs about 13.5 GFLOPs. At 989 TFLOP/s that takes about 14 µs.
+
+Reading takes roughly 300× longer than the maths. The compute units finish almost instantly and then wait for the next weights to arrive, so decode is memory-bound: its speed is set by bandwidth, and a chip with more FLOPs but the same bandwidth won’t be any faster. In practice you’ll measure less than 250 tokens/s, because real kernels don’t reach peak bandwidth and the KV cache has to be read as well.
+
+Once you see that bytes are the bottleneck, the standard serving tricks make sense. Each one either moves fewer bytes or gets more tokens out of the same bytes:
+
+- Quantise the weights. int4 weights are 4× smaller than BF16 (about 3.4 GB), so each token needs a quarter of the reading, and decode gets up to about 4× faster.
+- Batch requests. With 32 requests, the GPU reads each weight once and uses it for all 32 next tokens. Reading still takes about 4 ms, but it now produces 32 tokens, so throughput rises close to 32× until the extra work catches up. This is what continuous batching in servers like vLLM exploits. On the roofline, batching moves the decode dot to the right: the same bytes now do more FLOPs.
+- Shrink the KV cache. Each request also reads its own KV cache on every step, and that cache grows with context length. At long context it can rival the weights, and batching doesn’t share it across requests. GQA, MLA and KV-cache quantisation all shrink this second read (§5 shows how to size it).
+
+The same comparison explains why prefill and decode behave so differently. Prefill processes the whole prompt in parallel: each weight is read once but used for every prompt token, so the maths dominates and it’s compute-bound. That sets your time to first token. Decode produces one token at a time: each weight is read for a single token’s worth of maths, so it’s memory-bound. That sets your tokens per second.
 
 ### How FlashAttention and Mamba are built around this
 
@@ -228,7 +234,7 @@ Online softmax on a small example: one row of scores \[1, 2, 3, 4\], processed a
 
 Only two numbers per row (m and ℓ) travel between blocks, and the final sum is exactly the same as computing the whole row at once.
 
-The output is exactly the same as standard attention (it's not an approximation). Memory grows linearly with N instead of quadratically, and the paper reports up to 7.6× faster attention on GPT-2. HBM accesses drop from Θ(Nd + N²) to Θ(N²d² / M), which is many times fewer for typical head dims (64–128) and SRAM sizes. Note what FlashAttention does *not* change: what attention remembers (Idea 4). It only changes how efficiently the same thing is computed.
+The output is exactly the same as standard attention (it's not an approximation). Memory grows linearly with N instead of quadratically, and the paper reports up to 7.6× faster attention on GPT-2. HBM accesses drop from Θ(Nd + N²) to Θ(N²d² / M), with M the SRAM size. In other words, the N² term gets multiplied by d²/M. For typical head dims (64–128), d² is several times smaller than M, so the N² traffic shrinks by that factor. Note what FlashAttention does *not* change: what attention remembers (Idea 4). It only changes how efficiently the same thing is computed.
 
 **Mamba.** Mamba's selective SSM keeps a hidden state of size N for every channel, so the expanded state has shape (batch, length, D, N): N times bigger than the input. Because Δ, B and C depend on the input, Mamba can't use S4's convolution shortcut. It has to run the recurrence as a scan. A naive implementation writes that whole expanded state to HBM: at length 2,048, 4,096 channels and N = 16, that's about 134M numbers (around 268 MB) per layer.
 
@@ -255,7 +261,7 @@ FlashAttention and Mamba followed the same recipe. Here it is as steps, with wha
 
 | Step | What to do | FlashAttention | Mamba |
 | --- | --- | --- | --- |
-| 1. Find the slow op | Profile it and check its arithmetic intensity. If it's far below the GPU's line, bytes are the problem. | Attention at long N is memory-bound | The selective scan is memory-bound |
+| 1. Find the slow operation | Profile it and check its arithmetic intensity. If it's far below the GPU's line, bytes are the problem. | Attention at long N is memory-bound | The selective scan is memory-bound |
 | 2. Find the big intermediate | Which tensor is much bigger than the inputs and outputs, and how often does it cross HBM? | The N × N matrices S and P | The (batch, length, D, N) expanded state |
 | 3. Find a way to compute it in pieces | This is the hard, “math” part: rewrite the computation so partial results can be combined exactly. | Online softmax: a running max and sum let blocks be combined | The recurrence is an associative scan, so it can run in parallel chunks |
 | 4. Fuse and tile | One kernel; pieces sized to fit in SRAM; only the final output goes back to HBM. | Q, K, V tiles; block size set by SRAM size and head dim | Load Δ, A, B, C into SRAM, write only y |
@@ -274,47 +280,42 @@ In practice, try the cheap options first. torch.compile already fuses simple ele
 
 **When it matters day to day:** you'll rarely write a CUDA kernel, but you'll keep making decisions this explains: batch size, whether to quantise, which attention backend is running, and why GPU utilisation (MFU) looks low.
 
-**The question to ask:** how many FLOPs does this op do per byte it moves, and is that above or below the ridge point of my GPU?
+**The question to ask:** how many FLOPs does this operation do per byte it moves, and is that above or below the ridge point of my GPU?
 
 ## 3. Idea 2 in practice: bidirectional vs causal
 
-> **Idea 2: the objective shapes the model as much as the architecture.** The architecture decides what a model *can* represent. The loss decides what it actually learns to do. BERT and GPT-2 use almost the same block; the objective, and the attention mask that goes with it, is what makes one an encoder and the other a generator.
+> **Idea 2: the objective shapes the model as much as the architecture.** The architecture decides what a model *can* represent; the loss decides what it learns to do. BERT and GPT-2 use almost the same Transformer block. What makes one an encoder and the other a generator is the training objective, and the attention mask that objective requires.
 
-The attention math is identical in BERT and GPT. What differs is the attention mask, meaning which positions each token is allowed to attend to, plus the training objective that goes with it.
+GPT-2 is trained to predict the next token, so it must never see the token it's predicting. That forces a causal mask: token i can attend only to tokens 0..i. BERT is trained to fill in masked words using both sides, so every token can see every other token.
 
 ```python
-T = 6  # tokens in the sequence
-bidirectional = torch.ones(T, T).bool()        # encoder (BERT): every token sees every token
-causal = torch.tril(torch.ones(T, T)).bool()   # decoder (GPT): token i sees tokens 0..i only
+T = 6
+bidirectional = torch.ones(T, T).bool()        # BERT: every token sees every token
+causal = torch.tril(torch.ones(T, T)).bool()   # GPT: token i sees tokens 0..i only
 ```
 
 ![Bidirectional vs causal mask](images/attention_masks.svg)
 
-The causal mask exists because a decoder generates text left to right. At training time it must not see the token it's predicting, and at inference time the future tokens don't exist yet. An encoder never generates, so it has no reason to hide anything.
+That one choice of objective decides what each model is good at:
 
-What that costs you: take “I sat on the bank of the river”. In a causal model, the hidden state for “bank” is built before “river” is visible, so that representation can't tell a riverbank from a money bank. In an encoder, “bank” attends to “river” directly. A decoder can still classify a whole sentence by reading the last token's hidden state, since that one has seen everything. But every earlier position only ever saw its left context.
+- **Representation quality.** In "I sat on the bank of the river", a causal model builds the representation of "bank" before it has seen "river", so it can't tell a riverbank from a money bank at that position. BERT's "bank" attends to "river" directly. A decoder can still classify a sentence from its last token, which has seen everything, but every earlier position only ever saw its left context.
+- **Training signal.** Next-token prediction gets a loss from every token. BERT masks about 15% of tokens, so only those produce a signal.
+- **Generation.** A causal model generates text natively, because generating is exactly what it was trained to do. BERT has no natural way to generate.
+- **Behaviour.** The loss also predicts failure modes. Next-token loss rewards a *plausible* continuation, not a true one, which is exactly what hallucination is. It also explains why a base model doesn't follow instructions until it's instruction-tuned: nothing in its objective asked it to. Section 4 has more of these.
 
-How the objective plays out in the papers:
+**The practical rule:** if the output is a label or an embedding, the full input already exists, so use bidirectional attention. If the output is generated text, you need causal.
 
-- **BERT:** predicts masked words using context on both sides. That gives great representations for understanding tasks, but only about 15% of tokens produce a training signal, and it isn't a natural text generator.
-- **GPT-2:** predicts the next word. Every token produces a signal, generation comes for free, and zero-shot task behaviour emerges from diverse data.
-- **ResNet and ViT:** trained on labelled images, so they learn features that are useful for the labels they were given.
+| Use case | Good default | Why |
+| --- | --- | --- |
+| Classification, sentiment, NER | Fine-tuned encoder (ModernBERT, DeBERTa; 100–400M params) | Full context at every token; cheap at millions of items |
+| Retrieval for RAG | Bi-encoder (Sentence-BERT, E5-style) | Documents are embedded once, offline |
+| Reranking top-k results | Cross-encoder: query and doc in one pass | Query and doc tokens attend to each other |
+| Speech-to-text, translation | Encoder-decoder (Whisper, T5) | Encode the input bidirectionally, then decode causally |
+| Chat, code completion | Decoder-only (GPT, LLaMA, Qwen) | Generation is native; one model covers many tasks |
 
-The practical rule: if the output is a label or an embedding, the full input already exists, so use bidirectional attention. If the output is generated text, you need causal.
+**Recommendation:** for classification or retrieval at volume, start with a fine-tuned encoder. Use an LLM when the task needs reasoning or generation, or when you have no labelled data. Many of the strongest embedding models are now adapted from decoder LLMs; they're more accurate but much more expensive per item, so measure whether you need the gain.
 
-| Use case | Output | Good default | Why |
-| --- | --- | --- | --- |
-| Classification, sentiment, NER | Label per text or per token | Fine-tuned encoder (ModernBERT, DeBERTa; 100–400M params) | Full context at every token; cheap at millions of items |
-| Retrieval for RAG | One embedding per text | Bi-encoder (Sentence-BERT, E5-style) | Documents are embedded once, offline |
-| Reranking top-k results | Relevance score per (query, doc) pair | Cross-encoder: query and doc in one encoder pass | Query tokens and doc tokens attend to each other |
-| Speech-to-text, translation | Text from a different input | Encoder-decoder (Whisper, T5) | Encode the input bidirectionally once, then decode causally |
-| Chat, code completion | Generated text | Decoder-only (GPT, LLaMA, Qwen) | Generation is native, and one model covers many tasks |
-
-**Recommendation:** for classification or retrieval at volume, start with a fine-tuned encoder. Go to an LLM when the task needs reasoning or generation, or when there's no labelled data and zero-shot is the only option. A lot of the strongest embedding models now are adapted from decoder LLMs. They're more accurate, but tens of times more expensive per item, so measure whether you actually need the gain.
-
-**The objective also predicts behaviour, not just task fit.** Hallucination is exactly what next-token loss predicts: it rewards a plausible continuation, not a true one. It's also why a base model doesn't follow instructions until it's been instruction-tuned. Section 4 has more of these.
-
-**The question to ask:** when the model computes token i, which positions can it attend to, and does my task need the ones it can't see? And more generally: what exactly does the loss reward, and what behaviour will follow from that?
+**The question to ask:** what exactly does the loss reward, and what behaviour will follow from that?
 
 ## 4. Ideas 2 to 5 in production: the Transformer's limits
 
@@ -420,7 +421,7 @@ The questions from each section, in one place. Run through them in five minutes 
 | 2. Objective | What does the loss reward, and which positions can each token see? | §3 |
 | 3. Assumptions vs data | What does it assume, and do I have the data to not need that? Were the training recipes equal? | §4 |
 | 4. Memory of context | How much state per token of history, and what does reading it cost? | §4, §5 |
-| 5. Compute | Is each hot op above or below my GPU's ridge point? What do the six estimates say it costs? | §2, §5 |
+| 5. Compute | Is each frequently run operation above or below my GPU's ridge point? What do the six estimates say it costs? | §2, §5 |
 
 ## Sources
 
